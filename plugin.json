@@ -1,0 +1,28 @@
+{
+    "id": "nodebb-plugin-calendar",
+    "name": "NodeBB Calendar plugin",
+    "description": "This plugin adds a site-wide calendar and event system.",
+    "url": "https://github.com/pitaj/nodebb-plugin-calendar",
+    "library": "library.js",
+    "staticDirs": {
+        "public": "public"
+    },
+    "hooks": [
+      {
+        "hook": "static:app.load", "method": "init"
+      },
+      {
+			"hook": "static:app.load", "method": "init"
+  		},
+  		{
+  			"hook": "filter:header.build", "method": "addNavigation"
+  		},
+  		{
+  			"hook": "filter:widgets.getAreas", "method": "setWidgetAreas"
+  		},
+  		{
+  			"hook": "filter:templates.get_virtual", "method": "setAvailableTemplates"
+  		}
+    ],
+    "templates": "public/templates"
+}
