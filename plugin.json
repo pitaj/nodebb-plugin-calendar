@@ -11,18 +11,21 @@
       {
         "hook": "static:app.load", "method": "init"
       },
-      {
-			"hook": "static:app.load", "method": "init"
-  		},
   		{
   			"hook": "filter:header.build", "method": "addNavigation"
   		},
+      {
+        "hook": "filter:admin.header.build", "method": "addAdminNavigation"
+      },
   		{
   			"hook": "filter:widgets.getAreas", "method": "setWidgetAreas"
-  		},
-  		{
-  			"hook": "filter:templates.get_virtual", "method": "setAvailableTemplates"
   		}
     ],
-    "templates": "public/templates"
+    "templates": "public/templates",
+    "scripts": [
+      "public/datetimepicker/jquery.datetimepicker.min.js"
+    ],
+    "css": [
+      "public/datetimepicker/jquery.datetimepicker.min.css"
+    ]
 }
