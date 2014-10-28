@@ -1313,7 +1313,10 @@ require(["moment", "marked"], function (moment, marked) {
   // add event
 
     $(".button-add-event").click(function(){
-      newEvent(editEvent);
+      newEvent(function(){
+        editEvent();
+        goToEvent();
+      });
     });
 
   //renderCalendar(new Date());
