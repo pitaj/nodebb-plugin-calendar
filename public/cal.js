@@ -986,7 +986,7 @@ require(["moment", "marked"], function (moment, marked) {
             view: {}
           },
           notificationDates: [],
-
+          sentNotifications: []
 
         };
 

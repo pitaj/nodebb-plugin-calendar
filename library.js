@@ -23,49 +23,50 @@
 
 	function getData(callback){
 		db.get('plugins:calendar', function(err, data) {
-			if(data){
-
-				data = JSON.parse(data);
-
-				data.category = data.category || 3;
-				data.perms = data.perms || {
-					admin: {
-						users: {
-
-						},
-						groups: {
-
-						}
-					},
-					editEvents: {
-						users: {
-
-						},
-						groups: {
-
-						}
-					},
-					createEvents: {
-						users: {
-
-						},
-						groups: {
-
-						}
-					},
-				};
-				data.perms.text = data.perms.text || {
-					admin: "",
-					editEvents: "",
-					createEvents: ""
-				};
-
-				data.notifications = data.notifications || [];
-
-				data.events = data.events || [];
-
-				callback(err, data);
+			if(err){
+				return callback(err);
 			}
+
+			data = JSON.parse(data) || {};
+
+			data.category = data.category || 3;
+			data.perms = data.perms || {
+				admin: {
+					users: {
+
+					},
+					groups: {
+
+					}
+				},
+				editEvents: {
+					users: {
+
+					},
+					groups: {
+
+					}
+				},
+				createEvents: {
+					users: {
+
+					},
+					groups: {
+
+					}
+				},
+			};
+			data.perms.text = data.perms.text || {
+				admin: "",
+				editEvents: "",
+				createEvents: ""
+			};
+
+			data.notifications = data.notifications || [];
+
+			data.events = data.events || [];
+
+			callback(null, data);
 
 		});
 	}
@@ -716,10 +717,9 @@
 
 			//console.log(data.events[eventID].notificationDates[notifIndex]);
 
-			data.events[eventID].notificationDates = data.events[eventID].notificationDates.filter(function(a, b){
+			data.events[eventID].sentNotifications = data.events[eventID].sentNotifications || [];
 
-				return b != notifIndex;
-			});
+			data.events[eventID].sentNotifications.push(data.events[eventID].notificationDates[notifIndex]);
 			setData(data, function(){});
 		});
 	}
@@ -738,6 +738,15 @@
 			async.map(data.events, function(event, callback){
 
 				if(!event){
+					return callback();
+				}
+				if(event.sentNotifications && event.sentNotifications.length){
+					event.notificationDates = event.notificationDates.filter(function(val){
+						return event.sentNotifications.indexOf(val) === -1;
+					});
+				}
+
+				if(!event.notificationDates.length){
 					return callback();
 				}
 
@@ -764,6 +773,9 @@
 
 				async.map(Object.keys(thegroups), function(key, call){
 					groups.get(key, {}, function(err, info){
+						if(err){
+							return call(err);
+						}
 
 						if(thegroups[key] === 1){
 							groupusers = groupusers.concat(info.members);
@@ -798,10 +810,10 @@
 									console.log("Error while notifying", err);
 									return cb(err || "no d");
 								}
-								notifs.push(d, users, function(){ cb(); });
-
-								removeNotification(event.id, b);
-
+								notifs.push(d, users, function(err){
+									removeNotification(event.id, b);
+									cb(err);
+								});
 							});
 
 						} else {
