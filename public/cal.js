@@ -1,3 +1,6 @@
+/* global app */
+/* global socket */
+
 require.config({
   paths: {
     "moment": "//cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.3/moment.min",
@@ -171,7 +174,20 @@ require(["moment", "marked"], function (moment, marked) {
   ];
   */
 
-  window.theEvents = events;
+  //window.theEvents = events;
+
+  function extend(destination, source){
+    for (var property in source) {
+      if (source[property] && source[property].constructor &&
+      source[property].constructor === Object) {
+        destination[property] = destination[property] || {};
+        extend(destination[property], source[property]);
+      } else {
+        destination[property] = source[property];
+      }
+    }
+    return destination;
+  }
 
   /* event / user spec
     fields for events {
@@ -241,7 +257,7 @@ require(["moment", "marked"], function (moment, marked) {
     },
   };
 
-  ///* JSON request
+  //* JSON request
   $.getJSON('api/calendar', function(data){
 
     //console.log(data);
@@ -267,38 +283,6 @@ require(["moment", "marked"], function (moment, marked) {
     renderCalendar(new Date());
     goToDate(new Date());
   });
-  //*/
-
-  function save(callback){
-    callback = callback || function(){};
-
-    $.post('api/plugins/calendar/save', {
-      event: JSON.stringify(currentEvent)
-    }, function(data){
-
-      console.log(data);
-
-      if(data.message) {
-        app.alertSuccess(data.message);
-      }
-      if(data.url) {
-        currentEvent.url = data.url;
-        currentEvent.pid = data.pid;
-        currentEvent.tid = data.tid;
-
-        console.log(data.url);
-      }
-      callback();
-    })
-    .fail(function(xhr){
-      if(+xhr.status === 500){
-        app.alertFailure("Error while saving");
-      } else if(+xhr.status === 401){
-        app.alertFailure("One of more fields entered were invalid, try again");
-      }
-      callback();
-    });
-  }
 
   var templates = {
     day: '<span class="day-number">{{day-number}}</span>',
@@ -504,7 +488,7 @@ require(["moment", "marked"], function (moment, marked) {
         d.setDate(1);
         d.setMonth(0);
 
-        d.setDate(d.getDate()+7-d.getDay());
+        d.setDate(d.getDate()-d.getDay());
         i = new Date(d);
         i.setFullYear(i.getFullYear()+3);
 
@@ -514,6 +498,7 @@ require(["moment", "marked"], function (moment, marked) {
       } else if(d < firstDate()) {
         i = firstDate();
         d.setFullYear(d.getFullYear()-2);
+        d.setDate(d.getDate()-d.getDay());
         i.setDate(i.getDate()-1);
 
         makeDays(d, i, -1);
@@ -523,6 +508,7 @@ require(["moment", "marked"], function (moment, marked) {
         i = new Date(d);
         d = lastDate();
         i.setFullYear(i.getFullYear()+1);
+        i.setDate(i.getDate()-i.getDay());
         d.setDate(d.getDate()+1);
 
         makeDays(d, i, 1);
@@ -959,7 +945,7 @@ require(["moment", "marked"], function (moment, marked) {
       var l = events.length, now = new Date(), anhour = new Date();
       anhour.setHours(anhour.getHours()+1);
 
-      sidebar.find(".event .edit .cancel-edit-button").css("display", "none");
+      sidebar.find(".event .edit .delete-event-button").css("display", "none");
 
       getUserImage(app.userslug, function(imgurl){
         var thenewone = {
@@ -981,12 +967,6 @@ require(["moment", "marked"], function (moment, marked) {
           notifications: "",
           responses: {},
           url: "",
-          perms: {
-            edit: {},
-            view: {}
-          },
-          notificationDates: [],
-          sentNotifications: []
 
         };
 
@@ -1004,8 +984,17 @@ require(["moment", "marked"], function (moment, marked) {
 
       edit.find(".name").val(currentEvent.name);
       edit.find(".allday").prop("checked", currentEvent.allday);
-      edit.find(".start-time").val(moment(currentEvent.startdate).format("M/D/YYYY h:mm A"));
-      edit.find(".end-time").val(moment(currentEvent.enddate).format("M/D/YYYY h:mm A"));
+
+      var checked = currentEvent.allday, form = checked ? "D/M/YYYY" : "D/M/YYYY h:mm a";
+
+      if(checked){
+        sidebar.find(".start-time, .end-time").datetimepicker({ timepicker: false, format: 'd/m/Y' });
+      } else {
+        sidebar.find(".start-time, .end-time").datetimepicker({ timepicker: true, format: 'd/m/Y H:i a'  });
+      }
+      edit.find(".start-time").val(moment(currentEvent.startdate).format(form));
+      edit.find(".end-time").val(moment(currentEvent.enddate).format(form));
+
       edit.find(".place").val(currentEvent.place);
       edit.find(".description").val(currentEvent.description);
 
@@ -1054,11 +1043,13 @@ require(["moment", "marked"], function (moment, marked) {
 
     }
 
-    function updateEvent(olddate){
+    function updateEvent(olddate, event){
 
       function daydiff(first, second) {
         return (second-first)/(1000*60*60*24);
       }
+
+      var currentEvent = event || currentEvent;
 
       var sdate = currentEvent.startdate;
       //console.log(sdate);
@@ -1123,16 +1114,13 @@ require(["moment", "marked"], function (moment, marked) {
 
         }
 
-
-        showEvent(thisEvent, currentEvent);
-        showDay(day, false);
-
       } else {
 
         thisEvent.remove();
-        showDay(day, false);
 
       }
+
+      return [thisEvent, day];
 
     }
 
@@ -1140,10 +1128,15 @@ require(["moment", "marked"], function (moment, marked) {
 
       var oldDate = new Date(currentEvent.startdate);
 
+      var oevent = extend({}, currentEvent);
+
       currentEvent.name = edit.find(".name").val();
       currentEvent.allday = edit.find(".allday").prop("checked");
-      currentEvent.startdate = new Date(edit.find(".start-time").val());
-      currentEvent.enddate = new Date(edit.find(".end-time").val());
+
+      var form = currentEvent.allday ? "DD/MM/YYYY" : "DD/MM/YYYY hh:mm a";
+
+      currentEvent.startdate = moment(edit.find(".start-time").val(), form);
+      currentEvent.enddate = moment(edit.find(".end-time").val(), form);
       currentEvent.place = edit.find(".place").val();
       currentEvent.description = edit.find(".description").val();
       currentEvent.html = marked(currentEvent.description);
@@ -1154,17 +1147,52 @@ require(["moment", "marked"], function (moment, marked) {
 
       currentEvent.notifications = edit.find(".notifications").val();
 
-      sidebar.children(".event").css("overflow", "");
-      edit.fadeOut(function(){
-        sidebar.find(".event .edit .cancel-edit-button").css("display", "");
-      });
+      socket.emit("plugins.calendar.saveEvent", currentEvent, function(data){
 
-      events[currentEvent.id] = currentEvent;
+        //console.log(data);
 
-      save(function(){
-        updateEvent(oldDate);
+        if(data) {
+
+          events[currentEvent.id] = currentEvent;
+
+          extend(currentEvent, data);
+          app.alertSuccess("Event saved successfully");
+          var left = updateEvent(oldDate);
+          showEvent(left[0], currentEvent);
+          showDay(left[1], false);
+
+          //console.log(data.url);
+        } else {
+          events[currentEvent.id] = oevent;
+        }
+
+        sidebar.children(".event").css("overflow", "");
+        edit.fadeOut(function(){
+          sidebar.find(".event .edit .delete-event-button").css("display", "");
+        });
+
       });
     }
+
+    function deleteEvent(){
+
+      var event = extend({}, currentEvent);
+
+      event.oldId = event.id;
+      event.id = -1;
+
+      socket.emit("calendar.deleteEvent", event, function(data){
+        if(data == event.oldId){
+          sidebar.children(".event").css("overflow", "");
+          sidebar.children(".event").children(".view").addClass("unselected").children(".name").html("No Event Selected");
+          edit.fadeOut();
+          currentEvent = event;
+          updateEvent(event.startdate);
+        }
+      });
+
+
+    };
 
     function getUserImage(slug, callback){
       $.getJSON("/api/user/"+slug, function(data){
@@ -1286,16 +1314,7 @@ require(["moment", "marked"], function (moment, marked) {
 
     sidebar.find(".event .view .edit-event-button").click(editEvent);
 
-    sidebar.find(".event .edit .delete-event-button").click(function(){
-      currentEvent.oldId = currentEvent.id;
-      currentEvent.id = -1;
-      sidebar.children(".event").css("overflow", "");
-      sidebar.children(".event").children(".view").addClass("unselected").children(".name").html("No Event Selected");
-      edit.fadeOut();
-
-      updateEvent(currentEvent.startdate);
-      save();
-    });
+    sidebar.find(".event .edit .delete-event-button").click(deleteEvent);
 
     sidebar.find(".event .edit .save-event-button").click(saveEvent);
 
@@ -1307,7 +1326,57 @@ require(["moment", "marked"], function (moment, marked) {
     sidebar.children(".event").children(".edit").children(".start-time, .end-time").datetimepicker();
 
     sidebar.children(".event").children(".edit").children(".allday").change(function(){
-      $(this).siblings(".start-time, .end-time").datetimepicker({timepicker: false});
+
+      var checked = $(this).prop("checked");
+
+      if(checked){
+        sidebar.find(".start-time, .end-time").datetimepicker({ timepicker: false, format: 'd/m/Y' });
+        edit.find(".start-time").val(edit.find(".start-time").val().split(" ")[0]);
+        edit.find(".end-time").val(edit.find(".end-time").val().split(" ")[0]);
+      } else {
+        sidebar.find(".start-time, .end-time").datetimepicker({ timepicker: true, format: 'd/m/Y H:i a'  });
+        edit.find(".start-time").val(edit.find(".start-time").val()+" 12:00 pm");
+        edit.find(".end-time").val(edit.find(".end-time").val()+" 1:00 pm");
+      }
+    });
+
+  function showErrors(errors){
+    var errorText = "";
+    for(var x in errors){
+      if(errors.hasOwnProperty(x)){
+        errorText += errors[x]+"<br>";
+      }
+    }
+    sidebar.find(".event .edit .errors").html(errorText).fadeIn();
+  }
+
+  // handle socket stuff
+
+    socket.on("calendar.error.save", function(data){
+      app.alertError("Save failed");
+    });
+    socket.on("calendar.validation.fail", showErrors);
+    socket.on("calendar.error.save", function(data){
+      app.alertError("Save failed");
+    });
+    socket.on("calendar.event.updated", function(data){
+      var od = events[data.id].startdate;
+      events[data.id] = data;
+      updateEvent(od, events[data.id]);
+      app.alert({
+        title: "Updated",
+        message: "Events were updated",
+        timeout: 2000,
+        type: 'info'
+      });
+    });
+    socket.on("calendar.error.delete", function(data){
+      if(data.error === "calendar.permissions.unauthorized"){
+        app.alertError("Event not deleted: you do not have permissions to do so");
+      } else {
+        app.alertError("Event not deleted: an unknown error occurred");
+      }
+
     });
 
   // add event

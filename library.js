@@ -14,12 +14,27 @@
 			db = realModule.parent.require('./database'),
 			posttools = realModule.parent.require("./postTools"),
 			topics = realModule.parent.require("./topics"),
+			socket = realModule.parent.require("./socket.io/plugins"),
+			websockets = realModule.parent.require("./socket.io"),
 			//permissions = require("nodebb-plugin-permissions").permissions,
 			notifs = realModule.parent.require('./notifications');
 
 			//console.log(permissions);
 
 	//later.date.localTime();
+
+	function extend(destination, source){
+		for (var property in source) {
+			if (source[property] && source[property].constructor &&
+			source[property].constructor === Object) {
+				destination[property] = destination[property] || {};
+				extend(destination[property], source[property]);
+			} else {
+				destination[property] = source[property];
+			}
+		}
+		return destination;
+	}
 
 	function getData(callback){
 		db.get('plugins:calendar', function(err, data) {
@@ -80,8 +95,8 @@
 		app.get('/api/calendar', renderPage);
 		app.get('/templates/calendar.tpl', renderPage);
 
-		app.get("/api/plugins/calendar", renderAPI);
-		app.post('/api/plugins/calendar/save', save);
+		//app.get("/api/plugins/calendar", renderAPI);
+		//app.post('/api/plugins/calendar/save', save);
 
 		app.get('/admin/plugins/calendar', middleware.admin.buildHeader, renderAdmin);
 		app.get('/api/admin/plugins/calendar', renderAdmin);
@@ -244,38 +259,114 @@
 		render("plugins/calendar", res, next, req);
 	}
 
-	function save (req, res, next) {
+	socket.calendar = {
 
-		var data = req.body;
+		saveEvent: function(socket, event, callback){
 
-		getData(function(err, oData){
-
-			if(err){
-				return console.error(err);
-			}
-
-			data = JSON.parse(data.event);
-
-			console.log("recieved new data: ", data);
-
-			merge((req.user ? req.user.uid : 0), oData.events, data, function(err, ndata, thisuser, newd){
+			getData(function(err, oData){
 
 				if(err){
-					return res.json(401, ndata);
+					socket.emit('calendar.error.save', {
+						error: "calendar.database.fail",
+						data: err
+					});
+					return callback();
 				}
 
-				console.log("saving new data: \n", data);
+				console.log("recieved new data: ", event);
 
-				oData.events = ndata;
+				merge(socket.uid, oData.events, event, function(err, ndata, thisuser, newd){
 
-				setData( oData, function(err) {
-					err ? res.json(500, { message: 'Error while saving', url: url }) : res.json({ message: 'Successfully saved', url: newd.url, tid: newd.tid, pid: newd.pid });
+					if(err){
+						return socket.emit('calendar.error.save', {
+							error: err,
+							data: ndata
+						});
+						//return callback();
+					}
+
+					console.log("saving new data: \n", newd);
+
+					oData.events = ndata;
+
+					setData( oData, function(err) {
+						if(err){
+							socket.emit('calendar.error.save', {
+								error: "calendar.database.fail",
+								data: err
+							});
+						} else {
+							websockets.server.sockets.in("calendar").emit('calendar.event.updated', newd);
+						}
+						callback(newd);
+					});
 				});
+
 			});
 
-		});
+		},
 
-	}
+		deleteEvent: function(socket, event, callback){
+
+			getData(function(err, oData){
+
+				if(err){
+					socket.emit('calendar.error.delete', {
+						error: "calendar.database.fail",
+						data: err
+					});
+					return callback();
+				}
+
+				var oevents = oData.events;
+
+				getUser(socket.uid, function(thisuser){
+
+					if((event.oldId || event.oldId === 0) &&
+						event.id === -1 &&
+						(thisuser.perms.admin ||
+							thisuser.admin ||
+							oevents[event.oldId].user.cid == socket.uid)){
+
+						posttools.delete(oevents[event.oldId].user.cid, oevents[event.oldId].pid, function(){ });
+
+						console.log("deleting event: " + event.name );
+
+						oevents[event.oldId] = undefined;
+
+						oData.events = oevents;
+
+						setData(oData, function(err){
+
+							if(err){
+								socket.emit('calendar.error.delete', {
+									error: "calendar.database.fail",
+									data: err
+								});
+								return callback();
+							}
+
+							websockets.server.sockets.in("calendar").emit("calendar.event.deleted", event.oldId);
+							return callback(event.oldId);
+						});
+
+					} else if(!(thisuser.perms.admin ||
+						thisuser.admin ||
+						oevents[event.oldId].user.cid == socket.uid)){
+						socket.emit("calendar.error.delete", {
+							error: "calendar.permissions.unauthorized"
+						});
+					} else {
+						socket.emit("calendar.error.delete", {
+							error: "calendar.error.unknown"
+						});
+					}
+
+				});
+
+			});
+		}
+	};
 
 	function niceDate(event){
 		var start = {utc: moment.utc(event.startdate), yours: moment(event.startdate)},
@@ -360,8 +451,12 @@
 
 			var response = validate(nevent);
 			if(!response.passed){
-				return callback(new Error("Invalid"), response.errors);
+				return callback("calendar.validation.fail", response.errors);
+			} else {
+				nevent = response.event;
 			}
+
+			nevent.perms = nevent.perms || {};
 
 			if(thisuser.perms.admin || thisuser.admin || oevents[i].user.cid == cid){
 				parsePerms(nevent.editors, function(d){
@@ -373,25 +468,13 @@
 				});
 
 			} else {
-				nevent.perms.edit = oevents[i].perms.edit;
-				nevent.perms.view = oevents[i].perms.view;
+				nevent.perms = oevents[i].perms;
 				everythingElse();
 			}
+
 			function everythingElse(){
 
-				console.log("nevent: ", nevent);
-
-				if((nevent.oldId || nevent.oldId === 0) && i === -1 && (thisuser.perms.admin ||
-						thisuser.admin ||
-						oevents[nevent.oldId].user.cid == cid)){
-
-					posttools.delete(oevents[nevent.oldId].user.cid, oevents[nevent.oldId].pid, function(){ });
-
-					console.log("deleting event: " + nevent.name );
-
-					oevents[nevent.oldId] = undefined;
-					callback(null, oevents, thisuser, {});
-				}
+				// console.log("nevent: ", nevent);
 
 				nevent.html = marked(nevent.description);
 				nevent.name = sanitize(nevent.name);
@@ -400,28 +483,36 @@
 				var nots = nevent.notifications.split(",");
 				for(var a = 0; a<nots.length; a++){
 					nots[a] = nots[a].trim();
-					var l = nots[a].replace(/[^a-zA-Z]/, ''),
-							d = new Date(nevent.startdate),
-							n = nots[a].replace(/[^0-9]/g, '');
-					switch(l){
-						case 'd':
-							d.setDate(d.getDate()-n);
-							break;
-						case 'm':
-							d.setMinutes(d.getMinutes()-n);
-							break;
-						case 'h':
-							d.setHours(d.getHours()-n);
-							break;
+					if(nots[a].length < 5){
+						nots[a] = null;
+					} else {
+						var l = nots[a].replace(/[^a-zA-Z]/, ''),
+								d = new Date(nevent.startdate),
+								n = nots[a].replace(/[^0-9]/g, '');
+						switch(l){
+							case 'd':
+								d.setDate(d.getDate()-n);
+								break;
+							case 'm':
+								d.setMinutes(d.getMinutes()-n);
+								break;
+							case 'h':
+								d.setHours(d.getHours()-n);
+								break;
+						}
+
+						// console.log("l and n\n" + l + "  "+ n);
+
+						nots[a] = d;
 					}
-
-					console.log("l and n\n" + l + "  "+ n);
-
-					nots[a] = d;
 
 				}
 
-				nevent.notificationDates = nots;
+				nots = nots.filter(function(val){
+					return !!val;
+				});
+
+				nevent.notificationDates = nots || [];
 
 				if(thisuser.perms.admin ||
 						thisuser.admin ||
@@ -431,7 +522,7 @@
 
 					var bool = !oevents[i] || !oevents[i].pid || !oevents[i].url;
 
-					oevents[i] = nevent;
+					oevents[i] = extend(oevents[i] || {}, nevent);
 
 					if(bool){
 						//callback(null, oevents, thisuser, "/topics");
@@ -442,19 +533,19 @@
 							oevents[i].pid = pid;
 							oevents[i].url = url;
 							oevents[i].tid = tid;
-							callback(null, oevents, thisuser, {url: url, pid:pid, tid:tid});
+							callback(null, oevents, thisuser, oevents[i]);
 						});
 					} else {
 						//callback(null, oevents, thisuser, "/topics");
 						updatePost(nevent, oevents[i].pid, function(){
-							callback(null, oevents, thisuser, oevents[i].url);
+							callback(null, oevents, thisuser, oevents[i]);
 						});
 					}
 
 				} else if(oevents[i] && thisuser.can("view", oevents[i])){
 					if(nevent.responses[cid] && nevent.responses[cid].value){
 						oevents[i].responses[cid].value = nevent.responses[cid].value;
-						callback(null, oevents, thisuser, oevents[i].url);
+						callback(null, oevents, thisuser, oevents[i]);
 					}
 				}
 			}
@@ -518,21 +609,21 @@
 			},
 		};
 
-		var passed = true, errors = [];
+		var passed = true, errors = {};
 
 		for(var x in tests){
 			if(tests.hasOwnProperty(x)){
 				var result = tests[x]();
 				if(!result[0]){
 					passed = false;
-					errors.push(result[1]);
+					errors[x] = result[1];
 				}
 			}
 		}
 
 		return { passed: passed, errors: errors };
 
-		*/ return { passed: true };
+		*/ return { passed: true, event: event };
 
 	}
 
@@ -793,6 +884,7 @@
 					users = users.filter(function(key){
 						return removeusers.indexOf(key) === -1;
 					});
+					users.push(event.user.cid);
 
 					async.map(Object.keys(event.notificationDates), function(b, cb){
 						console.log("date comparison: ", +new Date(event.notificationDates[b]), today, event.notificationDates[b], new Date());

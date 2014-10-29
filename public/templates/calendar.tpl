@@ -170,6 +170,9 @@
           <button class="delete-event-button btn btn-danger"><i class="fa fa-trash-o"></i> Delete</button>
 
           <span class="title">Edit Event</span>
+
+          <div class="errors"></div>
+
           <span>Name: </span>
           <input class="name form-control" placeholder="Event name" />
           <input type="checkbox" class="allday" /> All day<br>
@@ -792,7 +795,6 @@
     float:left;
     margin-right:10px;
   }
-
 
 </style>
 
