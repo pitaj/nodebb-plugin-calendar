@@ -349,12 +349,18 @@
     font-weight: 300;
     height: 17px;
     margin-bottom: 6px;
-    opacity: 0.3;
+    /* opacity: 0.3; */
   }
 
-	#cal td.this-month .day-number {
+	/*
+  #cal td.this-month .day-number {
 		opacity: 1;
 	}
+  */
+
+  #cal td.dark-month {
+    background-color: rgb(228, 228, 228);
+  }
 
   #cal-toolbar {
     margin-bottom: 1em;
@@ -798,5 +804,10 @@
 
 </style>
 
-
+<script>
+  window.calendar = {
+    events: {events},
+    canCreate: {canCreate}
+  };
+</script>
 <script src="/plugins/nodebb-plugin-calendar/public/cal.js"></script>

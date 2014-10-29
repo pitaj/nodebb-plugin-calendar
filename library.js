@@ -21,8 +21,6 @@
 
 			//console.log(permissions);
 
-	//later.date.localTime();
-
 	function extend(destination, source){
 		for (var property in source) {
 			if (source[property] && source[property].constructor &&
@@ -270,7 +268,7 @@
 						error: "calendar.database.fail",
 						data: err
 					});
-					return callback();
+					return; callback();
 				}
 
 				console.log("recieved new data: ", event);
@@ -282,7 +280,7 @@
 							error: err,
 							data: ndata
 						});
-						//return callback();
+						return; callback();
 					}
 
 					console.log("saving new data: \n", newd);
@@ -297,8 +295,8 @@
 							});
 						} else {
 							websockets.server.sockets.in("calendar").emit('calendar.event.updated', newd);
+							callback(null, newd);
 						}
-						callback(newd);
 					});
 				});
 
@@ -347,7 +345,7 @@
 							}
 
 							websockets.server.sockets.in("calendar").emit("calendar.event.deleted", event.oldId);
-							return callback(event.oldId);
+							return callback(null, event.oldId);
 						});
 
 					} else if(!(thisuser.perms.admin ||
@@ -447,28 +445,25 @@
 	function merge(cid, oevents, nevent, callback){
 
 		getUser(cid, function(thisuser){
-			var i = nevent.id;
-
-			var response = validate(nevent);
+			var i = nevent.id, event, response = validate(nevent);
 			if(!response.passed){
 				return callback("calendar.validation.fail", response.errors);
 			} else {
-				nevent = response.event;
+				event = response.event;
 			}
 
-			nevent.perms = nevent.perms || {};
+			event.perms = {};
 
 			if(thisuser.perms.admin || thisuser.admin || oevents[i].user.cid == cid){
 				parsePerms(nevent.editors, function(d){
-					nevent.perms.edit = d;
+					event.perms.edit = d;
 					parsePerms(nevent.viewers, function(f){
-						nevent.perms.view = f;
+						event.perms.view = f;
 						everythingElse();
 					});
 				});
 
 			} else {
-				nevent.perms = oevents[i].perms;
 				everythingElse();
 			}
 
@@ -476,18 +471,14 @@
 
 				// console.log("nevent: ", nevent);
 
-				nevent.html = marked(nevent.description);
-				nevent.name = sanitize(nevent.name);
-				nevent.htmlPlace = marked(nevent.place);
-
-				var nots = nevent.notifications.split(",");
+				var nots = event.notifications.split(",");
 				for(var a = 0; a<nots.length; a++){
 					nots[a] = nots[a].trim();
 					if(nots[a].length < 5){
 						nots[a] = null;
 					} else {
 						var l = nots[a].replace(/[^a-zA-Z]/, ''),
-								d = new Date(nevent.startdate),
+								d = new Date(event.startdate),
 								n = nots[a].replace(/[^0-9]/g, '');
 						switch(l){
 							case 'd':
@@ -512,13 +503,15 @@
 					return !!val;
 				});
 
-				nevent.notificationDates = nots || [];
+				event.notificationDates = nots || [];
+				event.user = nevent.user;
 
 				if(thisuser.perms.admin ||
 						thisuser.admin ||
 						thisuser.perms.editEvents ||
 						(!oevents[i] && thisuser.perms.createEvents) ||
-						(oevents[i] && (thisuser.can("edit", oevents[i]) || oevents[i].user.cid == cid))){
+						(oevents[i] && (thisuser.can("edit", oevents[i]) ||
+						oevents[i].user.cid == cid))){
 
 					var bool = !oevents[i] || !oevents[i].pid || !oevents[i].url;
 
@@ -526,7 +519,7 @@
 
 					if(bool){
 						//callback(null, oevents, thisuser, "/topics");
-						makePost(nevent, function(url, pid, tid){
+						makePost(event, function(url, pid, tid){
 
 							//console.log(url);
 
@@ -577,53 +570,104 @@
 
 	}
 
-	function validate(event){
+	function validate(oevent, uid){
 
-		/*
+		var fieldsToCopy = [
+			"startdate",			// parsable by Date
+			"enddate",				// ^
+			"name",						// clean of all html and styling
+			"place",					// parsed by marked
+			"description",		// ^
+			"allday",					// must be true of false
+			"notifications",	// must be a list of number-letter pairs
+												// 	separated by commas
+												//	where the letters are only d, h, m
+			"responses",			// only the one from the current user
+			"editors",				// comma-separated list of names, with
+												//  prefixes of (-) dashes and (@) at symbols
+			"viewers"					// ^
+		];
+
 		var tests = {
 			name: function(val){
-				return [val.length >= 3, "Name must be three characters or longer."];
+				return [val.length >= 3, sanitize(val), "Name must be three characters or longer."];
 			},
 			startdate: function(val){
-				return [!isNaN((new Date(val)).valueOf()), "The start date is in an unrecognizable format."];
+				return [!isNaN((new Date(val)).valueOf()), val, "The start date is in an unrecognizable format."];
 			},
 			enddate: function(val){
-				return [!isNaN((new Date(val)).valueOf()), "The end date is in an unrecognizable format."];
+				return [!isNaN((new Date(val)).valueOf()), val, "The end date is in an unrecognizable format."];
+			},
+			place: function(val){
+				event.htmlPlace = marked(val);
+				return [true, val, ""];
 			},
 			notifications: function(val){
-				val = val.replace(/\s/g, '');
-				val = val.split(",");
+				var aval = val.split(",");
 				var bool = true;
-				for(var i=0; i<val.length; i++){
-					if(!isFinite(+val[i])){
+				for(var i=0; i<aval.length; i++){
+					if(!(/(\s?[0-9]+[mhd]\s?)/).test(aval[i])){
 						bool = false;
 					}
 				}
-				return [bool, "Notifications must be numbers separated by commas"];
+				return [bool || !val, val, "Notifications must be numbers separated by commas and suffixed by 'm,' 'h,' or 'd'"];
 			},
 			viewers: function(val){
-				return [true, "Viewer groups and users must be separated by commas"];
+				var aval = val.split(",");
+				var bool = true;
+				for(var i=0; i<aval.length; i++){
+					if(!(/(\s?-?@?\w+\s?)/).test(aval[i])){
+						bool = false;
+					}
+				}
+				return [bool || !val, val, "Viewer groups and users must be separated by commas and prefixed by (-) and/or (@) in that order"];
 			},
 			editors: function(val){
-				return [true, "Editor groups and users must be separated by commas"];
+				var aval = val.split(",");
+				var bool = true;
+				for(var i=0; i<aval.length; i++){
+					if(!(/(\s?-?@?\w+\s?)/).test(aval[i])){
+						bool = false;
+					}
+				}
+				return [bool || !val, val, "Editor groups and users must be separated by commas and prefixed by (-) and/or (@) in that order"];
 			},
+			responses: function(val){
+
+				var bool = true;
+				for(var x in val){
+					if(val.hasOwnProperty(x)){
+						if(!(val[x].value === "invited" ||
+								val[x].value === "not-attending" ||
+								val[x].value === "maybe" ||
+								val[x].value === "attending")){
+							bool = false;
+						}
+					}
+				}
+				return [bool, val, "The value of your response was corrupted. Try again"];
+			},
+			description: function(val){
+				event.html = marked(val);
+				return [true, val, ""];
+			}
 		};
 
-		var passed = true, errors = {};
+		var passed = true, errors = {}, event = {};
 
 		for(var x in tests){
 			if(tests.hasOwnProperty(x)){
-				var result = tests[x]();
+				var result = tests[x](oevent[x]);
 				if(!result[0]){
 					passed = false;
-					errors[x] = result[1];
+					errors[x] = result[2];
 				}
+				event[x] = result[1];
+
 			}
 		}
 
-		return { passed: passed, errors: errors };
-
-		*/ return { passed: true, event: event };
+		return { passed: passed, event: event, errors: errors };
 
 	}
 
@@ -837,7 +881,7 @@
 					});
 				}
 
-				if(!event.notificationDates.length){
+				if(!event.notificationDates || !event.notificationDates.length){
 					return callback();
 				}
 
