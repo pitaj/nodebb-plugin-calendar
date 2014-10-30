@@ -333,9 +333,7 @@
 
 					if((event.oldId || event.oldId === 0) &&
 						event.id === -1 &&
-						(thisuser.perms.admin ||
-							thisuser.admin ||
-							+oevents[event.oldId].user.cid === +socket.uid)){
+						thisuser.can("admin")){
 
 						posttools.delete(oevents[event.oldId].user.cid, oevents[event.oldId].pid, function(){ });
 
@@ -359,9 +357,7 @@
 							return callback(null, event.oldId);
 						});
 
-					} else if(!(thisuser.perms.admin ||
-						thisuser.admin ||
-						+oevents[event.oldId].user.cid === +socket.uid)){
+					} else if(!(thisuser.can("admin"))){
 						socket.emit("event:calendar.error.delete", {
 							error: "calendar.permissions.unauthorized"
 						});
@@ -410,9 +406,7 @@
 	}
 
 	function makePost(event, callback){
-		var url;
-
-		var nice = niceDate(event);
+		var url, nice = niceDate(event);
 
 		var content = "### When: \n#### "+nice.utc+" utc \n#### "+nice.yours+" your time" + "\n\n" +
 									"### Where: \n"+event.place+" \n\n"+
@@ -465,6 +459,8 @@
 				event = response.event;
 			}
 
+			event.id = nevent.id;
+
 			event.perms = {};
 
 			if(thisuser.can("admin", oevents[i])){
@@ -477,6 +473,7 @@
 				});
 
 			} else {
+				event.perms = oevents[i] ? oevents[i].perms : {};
 				everythingElse();
 			}
 

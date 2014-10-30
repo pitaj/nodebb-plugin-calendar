@@ -1,6 +1,6 @@
 {
   "name": "nodebb-plugin-calendar",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "This plugin adds a site-wide calendar and event system.",
   "main": "library.js",
   "scripts": {

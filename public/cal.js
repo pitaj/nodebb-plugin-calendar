@@ -261,7 +261,7 @@ require(["moment", "marked"], function (moment, marked) {
     day: '<span class="day-number">{{day-number}}</span>',
     event: '<div class="event {{event-width}}"><span class="time">{{event-time}}</span> {{event-name}}</div>',
     response: '<div><small class="username" title="{{thisuser.fullname}}"><a href="/user/{{thisuser.name}}">{{thisuser.fullname}}</a></small><span class="{{value}}">{{nicevalue}}</span></div>',
-    iframestyle: '<style>.post-bar.col-xs-12.hide.bottom-post-bar { display: block!important; } .topic .topic-footer .row { padding: 0 10px 0 20px; } .topic ul li { margin-bottom: 5px; } .btn-sm { line-height: 1; } .topic .topic-footer .pull-right { line-height: 14px; } .topic .post-bar { padding: 6px; } .btn.btn-primary.post_reply { float: right; } .topic-main-buttons.pull-right.inline-block { display: block; width: 100%; } #header-menu, .overlay-container, .alert-window,  #post-container li.post-row:first-child,  #post-container li.post-bar,  .upvote,  .downvote,  .votes,  .share-dropdown,  .move,  .breadcrumb,  .post-bar.bottom-post-bar div:first-child,  .post-bar.bottom-post-bar .thread-tools,  #footer,  .topic-footer small.pull-right i,  .post-tools .quote,  .post-tools .post_reply { display: none!important; } body { padding-top: 10px!important; } .container { width:100%!important; }</style>',
+    iframestyle: '<style>div[widget-area] { display: none; } .post-bar.col-xs-12.hide.bottom-post-bar { display: block!important; } .topic .topic-footer .row { padding: 0 10px 0 20px; } .topic ul li { margin-bottom: 5px; } .btn-sm { line-height: 1; } .topic .topic-footer .pull-right { line-height: 14px; } .topic .post-bar { padding: 6px; } .btn.btn-primary.post_reply { float: right; } .topic-main-buttons.pull-right.inline-block { display: block; width: 100%; } #header-menu, .overlay-container, .alert-window,  #post-container li.post-row:first-child,  #post-container li.post-bar,  .upvote,  .downvote,  .votes,  .share-dropdown,  .move,  .breadcrumb,  .post-bar.bottom-post-bar div:first-child,  .post-bar.bottom-post-bar .thread-tools,  #footer,  .topic-footer small.pull-right i,  .post-tools .quote,  .post-tools .post_reply { display: none!important; } body { padding-top: 10px!important; } .container { width:100%!important; }</style>',
     profilepic: '<a href="/user/{{user.name}}"><img src="{{user.imgsrc}}" alt="{{user.fullname}}" class="profile-image user-img" title="" data-original-title="{{user.fullname}}"></a><small class="username" title="{{user.fullname}}"><a href="/user/{{user.name}}">{{user.fullname}}</a></small>',
 
   };
@@ -555,7 +555,7 @@ require(["moment", "marked"], function (moment, marked) {
 
       for(var i=0; i<events.length; i++){
 
-        if(events[i]){
+        if(events[i] && events[i].id !== -1){
 
           var sdate = events[i].startdate;
           var edate = events[i].enddate;
@@ -854,14 +854,20 @@ require(["moment", "marked"], function (moment, marked) {
     }
 
     function showEvent(obj, event){
-
+      console.log("event: ", event);
       event = event || obj.data("event");
+      console.log("event2: ", event);
+      event = events[event.id];
+      console.log("event3: ", event);
 
       currentEvent = event;
 
       //console.log("showing event: ", event);
 
-      var e = sidebar.children(".event").children(".view"), c = e.children(".responses"), nice = niceDate(event), iframe = e.children(".comments");
+      var e = sidebar.children(".event").children(".view"),
+          c = e.children(".responses"),
+          nice = niceDate(event),
+          iframe = e.children(".comments");
 
       if(iframe.contents()[0]){
         observe(iframe.contents()[0], false);
@@ -1110,29 +1116,15 @@ require(["moment", "marked"], function (moment, marked) {
           hours = hours + minutes + "a";
         }
 
-        if(oldday === day && thisEvent.length){
+        thisEvent.remove();
 
-          thisEvent = $(templates
-            .event
-              .replace("{{event-width}}", eventWidth)
-              .replace("{{event-time}}", hours)
-              .replace("{{event-name}}", event.name))
-            .data("event", event)
-            .replaceAll(thisEvent);
-
-        } else {
-
-          thisEvent.remove();
-
-          thisEvent = $(templates
-            .event
-              .replace("{{event-width}}", eventWidth)
-              .replace("{{event-time}}", hours)
-              .replace("{{event-name}}", event.name))
-            .data("event", event)
-            .appendTo(day);
-
-        }
+        thisEvent = $(templates
+          .event
+            .replace("{{event-width}}", eventWidth)
+            .replace("{{event-time}}", hours)
+            .replace("{{event-name}}", event.name))
+          .data("event", event)
+          .appendTo(day);
 
       }
 
@@ -1490,9 +1482,12 @@ require(["moment", "marked"], function (moment, marked) {
 
       console.log("new event recieved: ", data);
 
+      data.startdate = new Date(data.startdate);
+      data.enddate = new Date(data.enddate);
+      data.allday = data.allday === "false" ? false : true;
+
       var od = events[data.id] ? events[data.id].startdate : data.startdate;
       events[data.id] = data;
-      currentEvent = data;
       updateEvent(od, data);
       app.alert({
         title: "Updated",
@@ -1513,10 +1508,22 @@ require(["moment", "marked"], function (moment, marked) {
         return false;
       }
 
-      var od = events[data].startdate;
-      events[data].oldId = events[data].id;
-      events[data].id = -1;
-      updateEvent(od, events[data]);
+      data = events[data];
+
+      sidebar.children(".event").css("overflow", "");
+      sidebar.children(".event").children(".view").addClass("unselected").children(".name").html("No Event Selected");
+      edit.fadeOut();
+      var sdate = data.startdate, day = dayArray[sdate.getFullYear()][sdate.getMonth()][sdate.getDate()-1];
+      day.children(".event").filter(function(){
+        return ($(this).data("event").id == data.id);
+      }).remove();
+
+      sidebar.find(".day .event").filter(function(){
+        return ($(this).data("event").id == data.id);
+      }).remove();
+
+      data.id = -1;
+
       app.alert({
         title: "Updated",
         message: "Events were updated",
