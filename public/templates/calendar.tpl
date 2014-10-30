@@ -185,6 +185,7 @@
           <span>Editors: </span>
           <small>Comma separated list. Prefix users with (@). To exclude users or groups, prefix with a minus sign (-)</small>
           <input class="editors form-control" placeholder="Groups & users that can edit" />
+          <input type="checkbox" class="public" /> Public<br>
           <span>Viewers: </span>
           <small>Comma separated list. Prefix users with (@). To exclude users or groups, prefix with a minus sign (-)</small>
           <input class="viewers form-control" placeholder="Groups & users that can view and get notifications" />
@@ -399,7 +400,7 @@
 
 	#cal-year-select {
 		border: none;
-		width: 70px;
+		width: 80px;
 		padding-left: 4px;
 		background: #FAFAFA;
 	}
@@ -805,9 +806,9 @@
 </style>
 
 <script>
-  window.calendar = {
-    events: {events},
-    canCreate: {canCreate}
-  };
+  window.calendar = {};
+  calendar.events = {events};
+  calendar.canCreate = {canCreate};
 </script>
+
 <script src="/plugins/nodebb-plugin-calendar/public/cal.js"></script>

@@ -83,8 +83,10 @@
 
 		});
 	}
+
+
 	function setData(data, callback){
-		db.set('plugins:calendar', JSON.stringify(data), callback);
+	  db.set('plugins:calendar', JSON.stringify(data), callback);
 	}
 
 	module.init = function (app, middleware, controllers, callback) {
@@ -232,15 +234,23 @@
 
 			//console.log(req);
 
-			reduce(req.user ? req.user.uid : 0, data.events, function(ndata, thisuser){
+			reduce(req.user ? req.user.uid : 0, data.events, function(ndata, thisuser, err){
+
+				if(err){
+					console.error(err);
+					return next(err);
+				}
+
 				ndata = {
-					events: JSON.stringify(ndata)
+					events: JSON.stringify(ndata),
+					canCreate: false
 				};
-				if(thisuser.perms.createEvents || thisuser.admin || thisuser.perms.admin){
+				
+				if(thisuser.perms.createEvents || thisuser.perms.editEvents || thisuser.admin || thisuser.perms.admin){
 					ndata.canCreate = true;
 				}
 
-				//console.log(data);
+				//console.log(ndata);
 
 				res.render(route, ndata);
 
@@ -550,18 +560,25 @@
 
 		var retEvents = [];
 
-		getUser(cid, function(thisuser){
+		//console.log("in reduce");
+
+		getUser(cid, function(thisuser, err){
+
+			//console.log("thisuser: ", thisuser, "err: ", err);
+
+			if(err){
+				return callback(null, null, err);
+			}
 
 			if(thisuser.perms.admin ||
 					thisuser.admin ||
 					thisuser.perms.editEvents ){
-
 				callback(oevents, thisuser);
 			} else {
-				for(var i=0; i < oevents.length; ){
+				for(var i=0; i < oevents.length; i++){
 					if(thisuser.can("view", oevents[i])){
 						retEvents[i] = oevents[i];
-						retEvents[i].editable = thisuser.can("edit", oevents[i]) || retEvents[i].user.cid == cid;
+						retEvents[i].editable = thisuser.can("edit", oevents[i]) || +retEvents[i].user.cid === +cid;
 					}
 				}
 				callback(retEvents, thisuser);
@@ -650,6 +667,12 @@
 			description: function(val){
 				event.html = marked(val);
 				return [true, val, ""];
+			},
+			public: function(val){
+				return [true, val, ""];
+			},
+			allday: function(val){
+				return [true, val, ""];
 			}
 		};
 
@@ -673,9 +696,23 @@
 
 	function getUser(cid, callback){
 		groups.getUserGroups(cid, function(err, userGroups){
+
+			if(err){
+				return callback(null, err);
+			}
+
 			user.isAdministrator(cid, function(err, bool){
+
+				if(err){
+					return callback(null, err);
+				}
+
 				getData(function(err, data){
 					//var userGroups = [];
+
+					if(err){
+						return callback(null, err);
+					}
 
 					var admin = false, edit=false, create=false;
 					for(var i=0; i<userGroups.length; i++){
@@ -708,6 +745,14 @@
 							createEvents: data.perms.editEvents.users[cid] > -1 && (data.perms.createEvents.users[cid] === 1 || create)
 						},
 						can: function(action, event){
+							if(!event || !event.perms || !event.perms[action]){
+								return false;
+							}
+
+							if(action === "view" && event.public){
+								return true;
+							}
+
 							var yes = false;
 							for(i=0; i<userGroups.length; i++){
 								if(event.perms[action].groups[userGroups[i]] === 1){
@@ -717,7 +762,7 @@
 									break;
 								}
 							}
-							return event.perms.edit.users[cid] > -1 && (event.perms.edit.users[cid] === 1 || yes);
+							return event.perms[action].users[cid] > -1 && (event.perms[action].users[cid] === 1 || yes);
 						},
 						admin: bool
 					};

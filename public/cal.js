@@ -996,8 +996,18 @@ require(["moment", "marked"], function (moment, marked) {
       } else {
         sidebar.find(".start-time, .end-time").datetimepicker({ timepicker: true, format: 'd/m/Y H:i a'  });
       }
+
       edit.find(".start-time").val(moment(currentEvent.startdate).format(form));
       edit.find(".end-time").val(moment(currentEvent.enddate).format(form));
+
+
+      edit.find(".public").prop("checked", currentEvent.public || false);
+
+      if(currentEvent.public){
+        sidebar.find(".viewers").css("display", "none");
+      } else {
+        sidebar.find(".viewers").css("display", "");
+      }
 
       edit.find(".place").val(currentEvent.place);
       edit.find(".description").val(currentEvent.description);
@@ -1141,7 +1151,7 @@ require(["moment", "marked"], function (moment, marked) {
       currentEvent.description = edit.find(".description").val();
       currentEvent.html = marked(currentEvent.description);
       currentEvent.htmlPlace = marked(currentEvent.place);
-
+      currentEvent.public = edit.find(".public").prop("checked");
       currentEvent.editors = edit.find(".editors").val();
       currentEvent.viewers = edit.find(".viewers").val();
 
@@ -1349,6 +1359,16 @@ require(["moment", "marked"], function (moment, marked) {
         sidebar.find(".start-time, .end-time").datetimepicker({ timepicker: true, format: 'd/m/Y H:i a'  });
         edit.find(".start-time").val(edit.find(".start-time").val()+" 12:00 pm");
         edit.find(".end-time").val(edit.find(".end-time").val()+" 1:00 pm");
+      }
+    });
+    sidebar.children(".event").children(".edit").children(".public").change(function(){
+
+      var checked = $(this).prop("checked");
+
+      if(checked){
+        sidebar.find(".viewers").css("display", "none");
+      } else {
+        sidebar.find(".viewers").css("display", "");
       }
     });
 
