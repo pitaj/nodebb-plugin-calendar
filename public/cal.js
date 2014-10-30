@@ -896,11 +896,20 @@ require(["moment", "marked"], function (moment, marked) {
 
         e.children(".description").html(event.html);
 
-        c.children(".my-response")
-          .children(".username")
-            .children("a")
-            .attr("href", "/user/"+app.userslug)
-            .html(app.username);
+        if(+app.uid !== 0){
+          c.children(".my-response")
+            .css("display", "")
+            .children(".username")
+              .children("a")
+              .attr("href", "/user/"+app.userslug)
+              .html(app.username);
+
+          c.children(".my-response")
+            .children("."+( event.responses[app.uid] ? event.responses[app.uid].value : "invited" ))
+            .addClass("selected");
+        } else {
+          c.children(".my-response").css("display", "none");
+        }
 
         c.children(".my-response").children(".selected").removeClass("selected");
 
@@ -909,9 +918,9 @@ require(["moment", "marked"], function (moment, marked) {
 
           if(event.responses.hasOwnProperty(x)){
 
-            console.log(x == app.uid);
+            //console.log(x == app.uid);
 
-            if(event.responses.hasOwnProperty(x) && x != app.uid){
+            if(event.responses.hasOwnProperty(x) && +x !== +app.uid){
 
                 c.append(templates.response
                           .replace(/\{\{thisuser\.fullname\}\}/g, event.responses[x].user.fullname)
@@ -923,9 +932,6 @@ require(["moment", "marked"], function (moment, marked) {
 
           }
         }
-
-        c.children(".my-response").children("."+( event.responses[app.uid] ? event.responses[app.uid].value : "invited" ))
-          .addClass("selected");
 
         iframe
           .attr("src", event.url)
@@ -1004,9 +1010,9 @@ require(["moment", "marked"], function (moment, marked) {
       edit.find(".public").prop("checked", currentEvent.public || false);
 
       if(currentEvent.public){
-        sidebar.find(".viewers").css("display", "none");
+        sidebar.find(".viewers").css("display", "none").prev().css("display", "none").prev().css("display", "none");
       } else {
-        sidebar.find(".viewers").css("display", "");
+        sidebar.find(".viewers").css("display", "").prev().css("display", "").prev().css("display", "");
       }
 
       edit.find(".place").val(currentEvent.place);
@@ -1157,6 +1163,16 @@ require(["moment", "marked"], function (moment, marked) {
 
       currentEvent.notifications = edit.find(".notifications").val();
 
+      var result = validate(currentEvent);
+
+      console.log("validate: ", result);
+
+      if(!result.passed){
+        return showErrors(null, result.errors);
+      } else {
+        sidebar.find(".event .edit .errors").slideUp();
+      }
+
       waiting = true;
       socket.emit("plugins.calendar.saveEvent", currentEvent, function(err, data){
 
@@ -1221,6 +1237,64 @@ require(["moment", "marked"], function (moment, marked) {
         //data = data.match(/<img src=".*" class="user-profile-picture/g)[0].match(/".*?"/)[0].replace(/"/g, "");
         callback(data.gravatarpicture || data.uploadedpicture || data.picture);
       });
+    }
+
+    function validate(oevent){
+
+      var tests = {
+        startdate: function(val){
+          return [!isNaN((new Date(val)).valueOf()), val, "The start date is in an unrecognizable format."];
+        },
+        enddate: function(val){
+          return [!isNaN((new Date(val)).valueOf()), val, "The end date is in an unrecognizable format."];
+        },
+        notifications: function(val){
+          var aval = val.split(",");
+          var bool = true;
+          for(var i=0; i<aval.length; i++){
+            if(!(/(\s?[0-9]+[mhd]\s?)/).test(aval[i])){
+              bool = false;
+            }
+          }
+          return [bool || !val, "Notifications must be numbers separated by commas and suffixed by 'm,' 'h,' or 'd'"];
+        },
+        viewers: function(val){
+          var aval = val.split(",");
+          var bool = true;
+          for(var i=0; i<aval.length; i++){
+            if(!(/(\s?-?@?\w+\s?)/).test(aval[i])){
+              bool = false;
+            }
+          }
+          return [bool || !val, "Viewer groups and users must be separated by commas and prefixed by (-) and/or (@) in that order"];
+        },
+        editors: function(val){
+          var aval = val.split(",");
+          var bool = true;
+          for(var i=0; i<aval.length; i++){
+            if(!(/(\s?-?@?\w+\s?)/).test(aval[i])){
+              bool = false;
+            }
+          }
+          return [bool || !val, "Editor groups and users must be separated by commas and prefixed by (-) and/or (@) in that order"];
+        }
+      };
+
+      var passed = true, errors = {};
+
+      for(var x in tests){
+        if(tests.hasOwnProperty(x)){
+          var result = tests[x](oevent[x]);
+          if(!result[0]){
+            passed = false;
+            errors[x] = result[1];
+          }
+
+        }
+      }
+
+      return { passed: passed, errors: errors };
+
     }
 
     //window.getImg = getUserImage;
@@ -1366,9 +1440,9 @@ require(["moment", "marked"], function (moment, marked) {
       var checked = $(this).prop("checked");
 
       if(checked){
-        sidebar.find(".viewers").css("display", "none");
+        sidebar.find(".viewers").css("display", "none").prev().css("display", "none").prev().css("display", "none");
       } else {
-        sidebar.find(".viewers").css("display", "");
+        sidebar.find(".viewers").css("display", "").prev().css("display", "").prev().css("display", "");
       }
     });
 
@@ -1381,37 +1455,21 @@ require(["moment", "marked"], function (moment, marked) {
         errorText += errors[x]+"<br>";
       }
     }
-    sidebar.find(".event .edit .errors").html(errorText).fadeIn();
+    sidebar.find(".event .edit .errors").html(errorText).slideDown();
   }
 
   // handle socket stuff
 
-    socket.on("calendar.error.save", function(err, data){
+    socket.on("event:calendar.error.save", function(data){
 
       app.alertError("Save failed");
     });
-    socket.on("calendar.validation.fail", showErrors);
-    socket.on("calendar.error.save", function(err, data){
+    socket.on("event:calendar.validation.fail", showErrors);
+    socket.on("event:calendar.error.save", function(data){
 
       app.alertError("Save failed");
     });
-    socket.on("calendar.event.updated", function(err, data){
-
-      if(waiting){
-        return false;
-      }
-
-      var od = events[data.id].startdate;
-      events[data.id] = data;
-      updateEvent(od, events[data.id]);
-      app.alert({
-        title: "Updated",
-        message: "Events were updated",
-        timeout: 2000,
-        type: 'info'
-      });
-    });
-    socket.on("calendar.error.delete", function(err, data){
+    socket.on("event:calendar.error.delete", function(data){
 
       if(waiting){
         return false;
@@ -1424,7 +1482,48 @@ require(["moment", "marked"], function (moment, marked) {
       }
 
     });
+    socket.on("event:calendar.event.updated", function(data){
 
+      if(waiting){
+        return false;
+      }
+
+      console.log("new event recieved: ", data);
+
+      var od = events[data.id] ? events[data.id].startdate : data.startdate;
+      events[data.id] = data;
+      currentEvent = data;
+      updateEvent(od, data);
+      app.alert({
+        title: "Updated",
+        message: "Events were updated",
+        timeout: 2000,
+        type: 'info'
+      });
+    });
+    socket.on("event:calendar.event.deleted", function(data){
+
+      if(waiting){
+        return false;
+      }
+
+      console.log("deleted event recieved: ", data);
+
+      if(!events[data]){
+        return false;
+      }
+
+      var od = events[data].startdate;
+      events[data].oldId = events[data].id;
+      events[data].id = -1;
+      updateEvent(od, events[data]);
+      app.alert({
+        title: "Updated",
+        message: "Events were updated",
+        timeout: 2000,
+        type: 'info'
+      });
+    });
   // add event
 
     $(".button-add-event").click(function(){
@@ -1475,6 +1574,9 @@ require(["moment", "marked"], function (moment, marked) {
       if(!calendar.canCreate){
         $(".button-add-event").css("display", "none");
       }
+
+      app.enterRoom("calendar");
+
       renderCalendar(new Date());
       goToDate(new Date());
     });

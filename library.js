@@ -14,8 +14,9 @@
 			db = realModule.parent.require('./database'),
 			posttools = realModule.parent.require("./postTools"),
 			topics = realModule.parent.require("./topics"),
-			socket = realModule.parent.require("./socket.io/plugins"),
-			websockets = realModule.parent.require("./socket.io"),
+			socketthing = realModule.parent.require("./socket.io/plugins"),
+			websockets = realModule.parent.require("./socket.io/index"),
+			utils = require("../../public/src/utils"),
 			//permissions = require("nodebb-plugin-permissions").permissions,
 			notifs = realModule.parent.require('./notifications');
 
@@ -245,8 +246,8 @@
 					events: JSON.stringify(ndata),
 					canCreate: false
 				};
-				
-				if(thisuser.perms.createEvents || thisuser.perms.editEvents || thisuser.admin || thisuser.perms.admin){
+
+				if(thisuser.can("create")){
 					ndata.canCreate = true;
 				}
 
@@ -267,18 +268,18 @@
 		render("plugins/calendar", res, next, req);
 	}
 
-	socket.calendar = {
+	socketthing.calendar = {
 
 		saveEvent: function(socket, event, callback){
 
 			getData(function(err, oData){
 
 				if(err){
-					socket.emit('calendar.error.save', {
+					socket.emit('event:calendar.error.save', {
 						error: "calendar.database.fail",
 						data: err
 					});
-					return; callback();
+					return; //callback();
 				}
 
 				console.log("recieved new data: ", event);
@@ -290,7 +291,7 @@
 							error: err,
 							data: ndata
 						});
-						return; callback();
+						//return; //callback();
 					}
 
 					console.log("saving new data: \n", newd);
@@ -299,12 +300,12 @@
 
 					setData( oData, function(err) {
 						if(err){
-							socket.emit('calendar.error.save', {
+							socket.emit('event:calendar.error.save', {
 								error: "calendar.database.fail",
 								data: err
 							});
-						} else {
-							websockets.server.sockets.in("calendar").emit('calendar.event.updated', newd);
+						} else { // .in("/calendar")
+							websockets.server.sockets.in("calendar").emit('event:calendar.event.updated', newd || {});
 							callback(null, newd);
 						}
 					});
@@ -319,11 +320,11 @@
 			getData(function(err, oData){
 
 				if(err){
-					socket.emit('calendar.error.delete', {
+					socket.emit('event:calendar.error.delete', {
 						error: "calendar.database.fail",
 						data: err
 					});
-					return callback();
+					return; //callback();
 				}
 
 				var oevents = oData.events;
@@ -334,7 +335,7 @@
 						event.id === -1 &&
 						(thisuser.perms.admin ||
 							thisuser.admin ||
-							oevents[event.oldId].user.cid == socket.uid)){
+							+oevents[event.oldId].user.cid === +socket.uid)){
 
 						posttools.delete(oevents[event.oldId].user.cid, oevents[event.oldId].pid, function(){ });
 
@@ -347,25 +348,25 @@
 						setData(oData, function(err){
 
 							if(err){
-								socket.emit('calendar.error.delete', {
+								socket.emit('event:calendar.error.delete', {
 									error: "calendar.database.fail",
 									data: err
 								});
-								return callback();
+								return;
 							}
-
-							websockets.server.sockets.in("calendar").emit("calendar.event.deleted", event.oldId);
+							 // .in("calendar")
+							websockets.server.sockets.in("calendar").emit("event:calendar.event.deleted", event.oldId);
 							return callback(null, event.oldId);
 						});
 
 					} else if(!(thisuser.perms.admin ||
 						thisuser.admin ||
-						oevents[event.oldId].user.cid == socket.uid)){
-						socket.emit("calendar.error.delete", {
+						+oevents[event.oldId].user.cid === +socket.uid)){
+						socket.emit("event:calendar.error.delete", {
 							error: "calendar.permissions.unauthorized"
 						});
 					} else {
-						socket.emit("calendar.error.delete", {
+						socket.emit("event:calendar.error.delete", {
 							error: "calendar.error.unknown"
 						});
 					}
@@ -449,7 +450,9 @@
 									"### Description: \n"+event.description + "\n\n"
 									;
 
-		posttools.edit(event.user.cid, pid, event.name, content, {}, callback);
+		posttools.edit(event.user.cid, pid, event.name, content, {}, function(err, results){
+			callback("/topic/"+results.topic.tid+"/"+utils.slugify(results.topic.title));
+		});
 	}
 
 	function merge(cid, oevents, nevent, callback){
@@ -464,10 +467,10 @@
 
 			event.perms = {};
 
-			if(thisuser.perms.admin || thisuser.admin || oevents[i].user.cid == cid){
-				parsePerms(nevent.editors, function(d){
+			if(thisuser.can("admin", oevents[i])){
+				parsePerms(event.editors, function(d){
 					event.perms.edit = d;
-					parsePerms(nevent.viewers, function(f){
+					parsePerms(event.viewers, function(f){
 						event.perms.view = f;
 						everythingElse();
 					});
@@ -514,18 +517,15 @@
 				});
 
 				event.notificationDates = nots || [];
-				event.user = nevent.user;
+				event.user = oevents[i] ? oevents[i].user : nevent.user;
+				event.sentNotifications = oevents[i] ? oevents[i].sentNotifications : [];
 
-				if(thisuser.perms.admin ||
-						thisuser.admin ||
-						thisuser.perms.editEvents ||
-						(!oevents[i] && thisuser.perms.createEvents) ||
-						(oevents[i] && (thisuser.can("edit", oevents[i]) ||
-						oevents[i].user.cid == cid))){
+				if((!oevents[i] && thisuser.can("create")) ||
+						(oevents[i] && thisuser.can("edit", oevents[i]))){
 
 					var bool = !oevents[i] || !oevents[i].pid || !oevents[i].url;
 
-					oevents[i] = extend(oevents[i] || {}, nevent);
+					oevents[i] = extend(oevents[i] || {}, event);
 
 					if(bool){
 						//callback(null, oevents, thisuser, "/topics");
@@ -540,14 +540,15 @@
 						});
 					} else {
 						//callback(null, oevents, thisuser, "/topics");
-						updatePost(nevent, oevents[i].pid, function(){
+						updatePost(nevent, oevents[i].pid, function(url){
+							oevents[i].url = url;
 							callback(null, oevents, thisuser, oevents[i]);
 						});
 					}
 
 				} else if(oevents[i] && thisuser.can("view", oevents[i])){
-					if(nevent.responses[cid] && nevent.responses[cid].value){
-						oevents[i].responses[cid].value = nevent.responses[cid].value;
+					if(event.responses[cid] && event.responses[cid].value){
+						oevents[i].responses[cid].value = event.responses[cid].value;
 						callback(null, oevents, thisuser, oevents[i]);
 					}
 				}
@@ -570,15 +571,13 @@
 				return callback(null, null, err);
 			}
 
-			if(thisuser.perms.admin ||
-					thisuser.admin ||
-					thisuser.perms.editEvents ){
+			if(thisuser.can("edit")){
 				callback(oevents, thisuser);
 			} else {
 				for(var i=0; i < oevents.length; i++){
 					if(thisuser.can("view", oevents[i])){
 						retEvents[i] = oevents[i];
-						retEvents[i].editable = thisuser.can("edit", oevents[i]) || +retEvents[i].user.cid === +cid;
+						retEvents[i].editable = thisuser.can("edit", oevents[i]);
 					}
 				}
 				callback(retEvents, thisuser);
@@ -695,6 +694,24 @@
 	}
 
 	function getUser(cid, callback){
+
+		if(+cid === 0){
+			return callback({
+				can: function(action, event){
+					if(!event){
+						return false;
+					}
+
+					if(action === "view"){
+						return event.public;
+					}
+
+					return false;
+
+				},
+			});
+		}
+
 		groups.getUserGroups(cid, function(err, userGroups){
 
 			if(err){
@@ -738,35 +755,60 @@
 						}
 					}
 
+
+					admin =  bool || (data.perms.admin.users[cid] > -1) && (data.perms.admin.users[cid] === 1 || admin);
+					edit = data.perms.editEvents.users[cid] > -1 && (data.perms.editEvents.users[cid] === 1 || edit);
+					create = data.perms.createEvents.users[cid] > -1 && (data.perms.createEvents.users[cid] === 1 || create);
+
+					//console.log("admin: ", admin, "edit: ", edit, "create: ", create);
+
 					var u = {
-						perms: {
-							admin: (data.perms.admin.users[cid] > -1) && (data.perms.admin.users[cid] === 1 || admin),
-							editEvents: data.perms.editEvents.users[cid] > -1 && (data.perms.editEvents.users[cid] === 1 || edit),
-							createEvents: data.perms.editEvents.users[cid] > -1 && (data.perms.createEvents.users[cid] === 1 || create)
-						},
 						can: function(action, event){
-							if(!event || !event.perms || !event.perms[action]){
-								return false;
+
+							if(admin){
+								return true;
 							}
 
 							if(action === "view" && event.public){
 								return true;
 							}
 
-							var yes = false;
-							for(i=0; i<userGroups.length; i++){
-								if(event.perms[action].groups[userGroups[i]] === 1){
-									yes = true;
-								} else if(event.perms[action].groups[userGroups[i]] === -1){
-									yes = false;
-									break;
+							if(!event){
+								if(action === "edit"){
+									return edit || admin;
+								} else if(action === "create"){
+									return create || admin || edit;
 								}
+								return false;
 							}
-							return event.perms[action].users[cid] > -1 && (event.perms[action].users[cid] === 1 || yes);
-						},
-						admin: bool
+
+							if(+event.user.cid === +cid){
+								return true;
+							}
+
+							var yes = false;
+
+							if(event.perms && event.perms[action]){
+								for(i=0; i<userGroups.length; i++){
+									if(event.perms[action].groups[userGroups[i]] === 1){
+										yes = true;
+									} else if(event.perms[action].groups[userGroups[i]] === -1){
+										yes = false;
+										break;
+									}
+								}
+
+								return (event.perms[action].users[cid] !== -1) &&
+									(event.perms[action].users[cid] === 1 || yes ||
+									admin || edit);
+
+							} else {
+								return admin || edit;
+							}
+
+						}
 					};
-					//console.log(cid, u);
+					//console.log("cid: ", cid,"u: ", u);
 
 					callback(u);
 				});
