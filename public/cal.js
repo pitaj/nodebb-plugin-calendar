@@ -585,11 +585,13 @@ require(["moment", "marked"], function (moment, marked) {
             hours = hours + minutes + "a";
           }
 
+          console.log("allday: ", events[i].allday);
+
           var day = dayArray[sdate.getFullYear()][sdate.getMonth()][sdate.getDate()-1];
           var event = $(templates
                           .event
                             .replace("{{event-width}}", eventWidth)
-                            .replace("{{event-time}}", hours)
+                            .replace("{{event-time}}", events[i].allday ? "" : hours)
                             .replace("{{event-name}}", events[i].name));
 
           if(day.children(".event").filter(event).length === 0){
@@ -628,17 +630,22 @@ require(["moment", "marked"], function (moment, marked) {
 
     var whenScrollEnabled = true;
 
-    function goToDate(date){
+    function goToDate(date, instant){
 
       function scrollIn($obj, cb){
-        var o = $obj.parent().parent().parent().parent()[0].scrollTop;
+        var o = $obj.parent().parent().parent().parent().scrollTop();
         $obj[0].scrollIntoView();
-        var x = $obj.parent().parent().parent().parent()[0].scrollTop;
-        $obj.parent().parent().parent().parent()[0].scrollTop = o;
 
-        $obj.parent().parent().parent().parent().animate({
-          scrollTop: x
-        }, 1000, cb);
+        if(!instant){
+          var x = $obj.parent().parent().parent().parent().scrollTop();
+          $obj.parent().parent().parent().parent()[0].scrollTop(o);
+          $obj.parent().parent().parent().parent().animate({
+            scrollTop: x
+          }, 1000, cb);
+        } else {
+          cb();
+        }
+
       }
 
       var obj, firstOfMonth;
@@ -854,11 +861,11 @@ require(["moment", "marked"], function (moment, marked) {
     }
 
     function showEvent(obj, event){
-      console.log("event: ", event);
+      //console.log("event: ", event);
       event = event || obj.data("event");
-      console.log("event2: ", event);
+      //console.log("event2: ", event);
       event = events[event.id];
-      console.log("event3: ", event);
+      //console.log("event3: ", event);
 
       currentEvent = event;
 
@@ -917,24 +924,20 @@ require(["moment", "marked"], function (moment, marked) {
           c.children(".my-response").css("display", "none");
         }
 
+        console.log("my response: ", event.responses[app.uid] ? event.responses[app.uid].value : "invited");
+
         c.children(".my-response").children(".selected").removeClass("selected");
 
         var x;
         for(x in event.responses){
 
-          if(event.responses.hasOwnProperty(x)){
+          if(event.responses.hasOwnProperty(x) && +x !== +app.uid){
 
-            //console.log(x == app.uid);
-
-            if(event.responses.hasOwnProperty(x) && +x !== +app.uid){
-
-                c.append(templates.response
-                          .replace(/\{\{thisuser\.fullname\}\}/g, event.responses[x].user.fullname)
-                          .replace(/\{\{thisuser\.name\}\}/g, event.responses[x].user.name)
-                          .replace(/\{\{value\}\}/g, event.responses[x].value)
-                          .replace(/\{\{nicevalue\}\}/g, nicevalue[event.responses[x].value]));
-
-            }
+            c.append(templates.response
+                      .replace(/\{\{thisuser\.fullname\}\}/g, event.responses[x].user.fullname)
+                      .replace(/\{\{thisuser\.name\}\}/g, event.responses[x].user.name)
+                      .replace(/\{\{value\}\}/g, event.responses[x].value)
+                      .replace(/\{\{nicevalue\}\}/g, nicevalue[event.responses[x].value]));
 
           }
         }
@@ -958,7 +961,7 @@ require(["moment", "marked"], function (moment, marked) {
     }
 
     function newEvent(callback){
-      var l = events.length, now = new Date(), anhour = new Date();
+      var l = events.length, now = $("#cal-day-selected").data("date") || new Date(), anhour = new Date(now);
       anhour.setHours(anhour.getHours()+1);
 
       sidebar.find(".event .edit .delete-event-button").css("display", "none");
@@ -1121,7 +1124,7 @@ require(["moment", "marked"], function (moment, marked) {
         thisEvent = $(templates
           .event
             .replace("{{event-width}}", eventWidth)
-            .replace("{{event-time}}", hours)
+            .replace("{{event-time}}", event.allday ? "" : hours)
             .replace("{{event-name}}", event.name))
           .data("event", event)
           .appendTo(day);
@@ -1318,13 +1321,28 @@ require(["moment", "marked"], function (moment, marked) {
 
     }
 
-  // taskbar functionality events
+  function showErrors(err, errors){
+    var errorText = "";
+    for(var x in errors){
+      if(errors.hasOwnProperty(x)){
+        errorText += errors[x]+"<br>";
+      }
+    }
+    sidebar.find(".event .edit .errors").html(errorText).slideDown();
+  }
+
+  var waiting = false;
+
+  function handleEvents(){
+
+    // taskbar functionality events
 
     $(".button-today").click(function(){
       goToDate(new Date());
     });
 
-    $("#cal-month").click(function(ev){
+
+    /*$("#cal-month").click(function(ev){
       ev.preventDefault();
 
       var elem = $("#cal-month-select")[0];
@@ -1336,7 +1354,7 @@ require(["moment", "marked"], function (moment, marked) {
       } else if (elem.fireEvent) {
           elem.fireEvent("onmousedown");
       }
-    });
+    });*/
     $("#cal-month-select").change(function(){
       var date = new Date($("#cal-year-select").val(), $("#cal-month-select").val(), 1);
       goToDate(date);
@@ -1347,7 +1365,7 @@ require(["moment", "marked"], function (moment, marked) {
       goToDate(date);
     });
 
-  // day selection event
+    // day selection event
 
     tbody.on("click", "td", function(e){
 
@@ -1381,11 +1399,11 @@ require(["moment", "marked"], function (moment, marked) {
       showDay(it);
     });
 
-  // figure out what month it is
+    // figure out what month it is
 
     $("#cal-days-container").scroll(whenScroll);
 
-  // sidebar functionality events
+    // sidebar functionality events
 
     sidebar.find(".day .events").on("click", ".event", function(e){
       var it = $(e.target);
@@ -1438,19 +1456,7 @@ require(["moment", "marked"], function (moment, marked) {
       }
     });
 
-  var waiting = false;
-
-  function showErrors(err, errors){
-    var errorText = "";
-    for(var x in errors){
-      if(errors.hasOwnProperty(x)){
-        errorText += errors[x]+"<br>";
-      }
-    }
-    sidebar.find(".event .edit .errors").html(errorText).slideDown();
-  }
-
-  // handle socket stuff
+    // handle socket stuff
 
     socket.on("event:calendar.error.save", function(data){
 
@@ -1484,7 +1490,7 @@ require(["moment", "marked"], function (moment, marked) {
 
       data.startdate = new Date(data.startdate);
       data.enddate = new Date(data.enddate);
-      data.allday = data.allday === "false" ? false : true;
+      data.allday = data.allday === "true" ? true : false;
 
       var od = events[data.id] ? events[data.id].startdate : data.startdate;
       events[data.id] = data;
@@ -1531,7 +1537,7 @@ require(["moment", "marked"], function (moment, marked) {
         type: 'info'
       });
     });
-  // add event
+    // add event
 
     $(".button-add-event").click(function(){
       newEvent(function(){
@@ -1540,10 +1546,7 @@ require(["moment", "marked"], function (moment, marked) {
       });
     });
 
-  //renderCalendar(new Date());
-  //goToDate(new Date());
-
-  // figure out size sidebar should be
+    // figure out size sidebar should be
     function onresize(){
       // check if the sidebar should be side-by-side or not
       // then set it as so
@@ -1566,26 +1569,30 @@ require(["moment", "marked"], function (moment, marked) {
     }
     onresize();
 
-    $(document).ready(function(){
-      if(calendar.events){
-        var x;
-        for(x in calendar.events){
-          if(calendar.events.hasOwnProperty(x) && calendar.events[x] && calendar.events[x].name){
-            events[x] = calendar.events[x];
-            events[x].startdate = new Date(events[x].startdate);
-            events[x].enddate = new Date(events[x].enddate);
-            events[x].allday = events[x].allday === "false" ? false : true;
-          }
+  }
+
+  $(document).ready(function(){
+    if(calendar.events){
+      var x;
+      for(x in calendar.events){
+        if(calendar.events.hasOwnProperty(x) && calendar.events[x] && calendar.events[x].name){
+          events[x] = calendar.events[x];
+          events[x].startdate = new Date(events[x].startdate);
+          events[x].enddate = new Date(events[x].enddate);
+          events[x].allday = events[x].allday ? true : false;
         }
       }
-      if(!calendar.canCreate){
-        $(".button-add-event").css("display", "none");
-      }
+    }
+    if(!calendar.canCreate){
+      $(".button-add-event").css("display", "none");
+    }
 
-      app.enterRoom("calendar");
+    app.enterRoom("calendar");
 
-      renderCalendar(new Date());
-      goToDate(new Date());
-    });
+    renderCalendar(new Date());
+    goToDate(new Date(), true);
+
+    handleEvents();
+  });
 
 });

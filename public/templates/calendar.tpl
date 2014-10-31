@@ -12,45 +12,45 @@
       <button class="button-add-event btn btn-primary" type="button">add event</button>
     </div>
     <div class="center">
-      <span id="cal-month">January</span>
-			<select id="cal-month-select">
-				<option value="0">
-					January
-				</option>
-				<option value="1">
-					February
-				</option>
-				<option value="2">
-					March
-				</option>
-				<option value="3">
-					April
-				</option>
-				<option value="4">
-					May
-				</option>
-				<option value="5">
-					June
-				</option>
-				<option value="6">
-					July
-				</option>
-				<option value="7">
-					August
-				</option>
-				<option value="8">
-					September
-				</option>
-				<option value="9">
-					October
-				</option>
-				<option value="10">
-					November
-				</option>
-				<option value="11">
-					December
-				</option>
-			</select>
+      <!--<span id="cal-month">January</span>-->
+      <select id="cal-month-select">
+        <option value="0">
+          January
+        </option>
+        <option value="1">
+          February
+        </option>
+        <option value="2">
+          March
+        </option>
+        <option value="3">
+          April
+        </option>
+        <option value="4">
+          May
+        </option>
+        <option value="5">
+          June
+        </option>
+        <option value="6">
+          July
+        </option>
+        <option value="7">
+          August
+        </option>
+        <option value="8">
+          September
+        </option>
+        <option value="9">
+          October
+        </option>
+        <option value="10">
+          November
+        </option>
+        <option value="11">
+          December
+        </option>
+      </select>
 			<input id="cal-year-select" type="number" value="2014"/>
     </div>
 
@@ -360,7 +360,8 @@
   */
 
   #cal td.dark-month {
-    background-color: rgb(228, 228, 228);
+    background-color: rgb(239, 239, 239);
+    background-clip: padding-box;
   }
 
   #cal-toolbar {
@@ -385,24 +386,28 @@
   }
 
 	#cal-month-select {
-		position: absolute;
-		left: 1px;
-		width: 76px;
-		height: 21px;
-		z-index: -1;
-		top: 10px;
+		border: none;
+    border-radius: 4px;
+    background: #FAFAFA;
+    cursor: pointer;
+    height:33px;
 	}
 
-  #cal-month:hover {
+  #cal-month-select:hover {
+    background-color: rgb(240, 240, 240);
+  }
+
+  /*#cal-month:hover {
       background-color: rgb(240, 240, 240); border-radius: 4px;
       cursor: pointer;
-  }
+  }*/
 
 	#cal-year-select {
 		border: none;
-		width: 80px;
-		padding-left: 4px;
-		background: #FAFAFA;
+    width: 80px;
+    padding-left: 5px;
+    background: #FAFAFA;
+    padding-right: 2px;
 	}
 
 	#cal-year-select:hover {
@@ -410,11 +415,11 @@
 		border-radius: 4px;
 	}
 
-	#cal-month {
+	/*#cal-month {
 		width: 108px;
 		background: #FAFAFA;
 		display:inline-block;
-	}
+	}*/
 
 	#cal #cal-day-selected {
 		background: #CFFFCA;
@@ -633,6 +638,7 @@
   }
   #cal-sidebar .content .event .view .date {
     margin-bottom: 5px;
+    margin-left:10px;
   }
   #cal-sidebar .content .event .view .date::before {
     content: "when: ";
@@ -640,6 +646,10 @@
   }
   #cal-sidebar .content .event .view .date span {
     display:block;
+  }
+
+  #cal-sidebar .content .event .view .place {
+    margin-left:10px;
   }
 
   #cal-sidebar .content .event .view .place::before {
