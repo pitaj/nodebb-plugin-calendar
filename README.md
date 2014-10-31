@@ -5,8 +5,9 @@ This plugin adds a site-wide calendar to NodeBB.
 ##Installation
 
 Two options:
-1. Install the plugin through the ACP (if it ever gets added to the list *cough cough*)
-2. Run `npm install nodebb-plugin-calendar` in the root directory of the NodeBB install
+
+ 1.  Install the plugin through the ACP (if it ever gets added to the list *cough cough*)
+ 2.  Run `npm install nodebb-plugin-calendar` in the root directory of the NodeBB install
 
 Don't forget to restart after installing the plugin. After installing, a calendar icon should appear next to the rest in the header menu
 
