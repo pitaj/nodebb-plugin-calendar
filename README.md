@@ -1,5 +1,7 @@
 #nodebb-plugin-calendar
 
+![Imgur](http://i.imgur.com/qMzeqoV.png)
+
 This plugin adds a site-wide calendar to NodeBB.
 
 ##Installation
