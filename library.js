@@ -13,10 +13,13 @@
 			user = realModule.parent.require("./user"),
 			db = realModule.parent.require('./database'),
 			posttools = realModule.parent.require("./postTools"),
+			posts = realModule.parent.require("./posts"),
 			topics = realModule.parent.require("./topics"),
 			socketthing = realModule.parent.require("./socket.io/plugins"),
 			websockets = realModule.parent.require("./socket.io/index"),
 			utils = require("../../public/src/utils"),
+			threadtools = realModule.parent.require("./threadTools"),
+			plugins = realModule.parent.require('./plugins'),
 			//permissions = require("nodebb-plugin-permissions").permissions,
 			notifs = realModule.parent.require('./notifications');
 
@@ -84,7 +87,6 @@
 
 		});
 	}
-
 
 	function setData(data, callback){
 	  db.set('plugins:calendar', JSON.stringify(data), callback);
@@ -366,7 +368,7 @@
 						event.id === -1 &&
 						thisuser.can("admin")){
 
-						posttools.delete(oevents[event.oldId].user.cid, oevents[event.oldId].pid, function(){ });
+						threadtools.delete(oevents[event.oldId].tid, oevents[event.oldId].user.cid, function(){ });
 
 						//console.log("deleting event: " + event.name );
 
@@ -401,7 +403,63 @@
 				});
 
 			});
-		}
+		},
+
+		saveResponse: function(socket, event, callback){
+			getData(function(err, data){
+
+				if(err){
+					/*socket.emit('event:calendar.error.save', {
+						error: "calendar.database.fail",
+						data: err
+					});
+					*/
+					return callback(err);
+				}
+
+				getUser(socket.uid, function(er, thisuser){
+					if(er){
+						/*
+						socket.emit('event:calendar.error.save', {
+							error: "calendar.database.fail",
+							data: er
+						});
+						*/
+						return callback(er);
+					}
+
+					if(thisuser.can("view", data.events[event.id])){
+						data.events[event.id].responses[socket.uid] = event.responses[socket.uid];
+
+						setData(data, function(err){
+							if(err){
+								callback(err);
+							} else {
+								callback(null, true);
+							}
+						});
+
+
+
+					} else {
+
+						/*socket.emit('event:calendar.error.save', {
+							error: "calendar.permissions.unauthorized",
+							data: er
+						});
+						*/
+
+						callback(new Error("fail"));
+
+					}
+
+				});
+			});
+
+
+
+		},
+
 	};
 
 	function niceDate(event){
@@ -467,6 +525,96 @@
 	}
 
 	function updatePost(event, pid, callback){
+
+		var edit = function(uid, pid, title, content, options, callback) {
+			options = options || {};
+
+			async.waterfall([
+				function (next) {
+					privileges.posts.canEdit(pid, uid, next);
+				},
+				function(canEdit, next) {
+					if (!canEdit) {
+						return next(new Error('[[error:no-privileges]]'));
+					}
+					posts.getPostData(pid, next);
+				},
+				function(postData, next) {
+					postData.content = content;
+					plugins.fireHook('filter:post.save', postData, next);
+				}
+			], function(err, postData) {
+				if (err) {
+					return callback(err);
+				}
+
+				async.parallel({
+					post: function(next) {
+						posts.setPostFields(pid, {
+							edited: Date.now(),
+							editor: uid,
+							content: postData.content
+						}, next);
+					},
+					topic: function(next) {
+						var tid = postData.tid;
+						posts.isMain(pid, function(err, isMainPost) {
+							if (err) {
+								return next(err);
+							}
+
+							options.tags = options.tags || [];
+
+							if (!isMainPost) {
+								return next(null, {
+									tid: tid,
+									isMainPost: false
+								});
+							}
+
+							title = title.trim();
+
+							var topicData = {
+								title: title,
+								slug: tid + '/' + utils.slugify(title)
+							};
+							if (options.topic_thumb) {
+								topicData.thumb = options.topic_thumb;
+							}
+
+							db.setObject('topic:' + tid, topicData, function(err) {
+								plugins.fireHook('action:topic.edit', tid);
+							});
+
+							topics.updateTags(tid, options.tags, function(err) {
+								if (err) {
+									return next(err);
+								}
+								topics.getTopicTagsObjects(tid, function(err, tags) {
+									next(err, {
+										tid: tid,
+										title: validator.escape(title),
+										isMainPost: isMainPost,
+										tags: tags
+									});
+								});
+							});
+						});
+					},
+					content: function(next) {
+						posttools.parse(postData.content, next);
+					}
+				}, function(err, results) {
+					if (err) {
+						return callback(err);
+					}
+
+					//events.logPostEdit(uid, pid);
+					plugins.fireHook('action:post.edit', postData);
+					callback(null, results);
+				});
+			});
+		};
 
 		var nice = niceDate(event);
 

@@ -45,7 +45,6 @@ require(["moment", "marked"], function (moment, marked) {
 
   var events = [];
 
-
   /*
   var events = [
     {
@@ -177,7 +176,7 @@ require(["moment", "marked"], function (moment, marked) {
   ];
   */
 
-  //window.theEvents = events;
+  // window.theEvents = events;
 
   function extend(destination, source){
     for (var property in source) {
@@ -553,6 +552,8 @@ require(["moment", "marked"], function (moment, marked) {
         return (second-first)/(1000*60*60*24);
       }
 
+      var days = [];
+
       for(var i=0; i<events.length; i++){
 
         if(events[i] && events[i].id !== -1){
@@ -582,12 +583,13 @@ require(["moment", "marked"], function (moment, marked) {
           if(hours > 12){
             hours = hours - 12 + minutes + "p";
           } else {
-            hours = hours + minutes + "a";
+            hours = (hours || 12) + minutes + (hours === 12 ? "p" : "a");
           }
 
-          console.log("allday: ", events[i].allday);
+          //console.log("allday: ", events[i].allday);
 
           var day = dayArray[sdate.getFullYear()][sdate.getMonth()][sdate.getDate()-1];
+          days.push(day);
           var event = $(templates
                           .event
                             .replace("{{event-width}}", eventWidth)
@@ -603,6 +605,18 @@ require(["moment", "marked"], function (moment, marked) {
 
         }
 
+      }
+
+      console.log("days before: ", days);
+
+      days = days.filter(function(it, index){
+        return days.indexOf(it) >= index;
+      });
+
+      console.log("days after: ", days);
+
+      for(var a=0; a<days.length; a++){
+        sortEvents(days[a]);
       }
 
     }
@@ -638,7 +652,7 @@ require(["moment", "marked"], function (moment, marked) {
 
         if(!instant){
           var x = $obj.parent().parent().parent().parent().scrollTop();
-          $obj.parent().parent().parent().parent()[0].scrollTop(o);
+          $obj.parent().parent().parent().parent().scrollTop(o);
           $obj.parent().parent().parent().parent().animate({
             scrollTop: x
           }, 1000, cb);
@@ -800,6 +814,34 @@ require(["moment", "marked"], function (moment, marked) {
 
     }
 
+  function sortEvents(parent){
+
+    //console.log(arguments.callee.caller.name);
+
+    console.log("parent: ",parent);
+
+    var evs = parent.children(".event").detach();
+
+    console.log("evs before: ", evs);
+
+    evs.sort(function(a,b){
+      var an = $(a).data('event').startdate,
+      bn = $(b).data('event').startdate;
+
+      if(an > bn) {
+        return 1;
+      }
+      if(an < bn) {
+        return -1;
+      }
+      return 0;
+    });
+
+    console.log("evs after: ", evs);
+
+    evs.appendTo(parent);
+  }
+
   // sidebar stuff
 
     var sidebar = $("#cal-sidebar").children(".content");
@@ -909,6 +951,10 @@ require(["moment", "marked"], function (moment, marked) {
 
         e.children(".description").html(event.html);
 
+        var myresponse = "."+( event.responses[app.uid] ? event.responses[app.uid].value : "invited" );
+
+        c.children(".my-response").children(".selected").removeClass("selected");
+
         if(+app.uid !== 0){
           c.children(".my-response")
             .css("display", "")
@@ -918,15 +964,13 @@ require(["moment", "marked"], function (moment, marked) {
               .html(app.username);
 
           c.children(".my-response")
-            .children("."+( event.responses[app.uid] ? event.responses[app.uid].value : "invited" ))
+            .children(myresponse)
             .addClass("selected");
         } else {
           c.children(".my-response").css("display", "none");
         }
 
-        console.log("my response: ", event.responses[app.uid] ? event.responses[app.uid].value : "invited");
-
-        c.children(".my-response").children(".selected").removeClass("selected");
+        //console.log("my response: ", myresponse);
 
         var x;
         for(x in event.responses){
@@ -1116,7 +1160,7 @@ require(["moment", "marked"], function (moment, marked) {
         if(hours > 12){
           hours = hours - 12 + minutes + "p";
         } else {
-          hours = hours + minutes + "a";
+          hours = (hours || 12) + minutes + (hours === 12 ? "p" : "a");
         }
 
         thisEvent.remove();
@@ -1128,6 +1172,8 @@ require(["moment", "marked"], function (moment, marked) {
             .replace("{{event-name}}", event.name))
           .data("event", event)
           .appendTo(day);
+
+        sortEvents(day);
 
       }
 
@@ -1300,8 +1346,6 @@ require(["moment", "marked"], function (moment, marked) {
       //console.log(obj);
       //console.log(currentEvent);
 
-      obj.siblings(".selected").removeClass("selected");
-
       if(!currentEvent.responses[app.uid]){
         currentEvent.responses[app.uid] = {
           user: {
@@ -1312,12 +1356,32 @@ require(["moment", "marked"], function (moment, marked) {
         };
       }
 
-      currentEvent.responses[app.uid].value = obj.attr("class");
-      obj.addClass("selected");
+      var response = obj.attr("class");
+
+      var oldResponse = currentEvent.responses[app.uid].value || null;
+
+      currentEvent.responses[app.uid].value = response;
 
       //console.log(currentEvent);
 
-      save();
+      socket.emit("plugins.calendar.saveResponse", currentEvent, function(err, data){
+
+        //console.log("err: ", err, "  data: ", data);
+
+        if(data) {
+
+          obj.siblings(".selected").removeClass("selected");
+          obj.addClass("selected");
+          app.alertSuccess("Response saved.");
+
+          //console.log(data.url);
+        } else {
+
+          currentEvent.responses[app.uid].value = oldResponse;
+          app.alertFailure("You don't have permission to do that.");
+        }
+
+      });
 
     }
 
@@ -1341,20 +1405,18 @@ require(["moment", "marked"], function (moment, marked) {
       goToDate(new Date());
     });
 
-
     /*$("#cal-month").click(function(ev){
-      ev.preventDefault();
-
-      var elem = $("#cal-month-select")[0];
-
-      if (document.createEvent) {
-          var e = document.createEvent("MouseEvents");
-          e.initMouseEvent("mousedown", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
-          elem.dispatchEvent(e);
-      } else if (elem.fireEvent) {
-          elem.fireEvent("onmousedown");
-      }
+        ev.preventDefault();
+        var elem = $("#cal-month-select")[0];
+        if (document.createEvent) {
+            var e = document.createEvent("MouseEvents");
+            e.initMouseEvent("mousedown", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+            elem.dispatchEvent(e);
+        } else if (elem.fireEvent) {
+            elem.fireEvent("onmousedown");
+        }
     });*/
+
     $("#cal-month-select").change(function(){
       var date = new Date($("#cal-year-select").val(), $("#cal-month-select").val(), 1);
       goToDate(date);
@@ -1377,14 +1439,17 @@ require(["moment", "marked"], function (moment, marked) {
       }
 
 
-      if(it.is(".event:nth-child(5)")){
+      if(it.is(".event:nth-child(6)")){
+
+        //console.log("fifth event");
+
         it = it.parents("td");
         $("#cal-day-selected").removeAttr("id");
         it.attr("id", "cal-day-selected");
         return showDay(it);
       }
 
-      if(it.is(".event")){
+      if(it.is(".event")){ // :not(:nth-child(5))
         return showEvent(it);
       }
 
@@ -1429,7 +1494,7 @@ require(["moment", "marked"], function (moment, marked) {
       edit.fadeOut();
     });
 
-    sidebar.children(".event").children(".edit").children(".start-time, .end-time").datetimepicker();
+    sidebar.children(".event").children(".edit").children(".start-time, .end-time").datetimepicker({ format: 'd/m/Y h:i a' });
 
     sidebar.children(".event").children(".edit").children(".allday").change(function(){
 
@@ -1440,10 +1505,11 @@ require(["moment", "marked"], function (moment, marked) {
         edit.find(".start-time").val(edit.find(".start-time").val().split(" ")[0]);
         edit.find(".end-time").val(edit.find(".end-time").val().split(" ")[0]);
       } else {
-        sidebar.find(".start-time, .end-time").datetimepicker({ timepicker: true, format: 'd/m/Y H:i a'  });
+        sidebar.find(".start-time, .end-time").datetimepicker({ timepicker: true, format: 'd/m/Y h:i a' });
         edit.find(".start-time").val(edit.find(".start-time").val()+" 12:00 pm");
         edit.find(".end-time").val(edit.find(".end-time").val()+" 1:00 pm");
       }
+
     });
     sidebar.children(".event").children(".edit").children(".public").change(function(){
 
@@ -1465,7 +1531,12 @@ require(["moment", "marked"], function (moment, marked) {
     socket.on("event:calendar.validation.fail", showErrors);
     socket.on("event:calendar.error.save", function(data){
 
-      app.alertError("Save failed");
+      if(data.error === "calendar.permissions.unauthorized"){
+        app.alertError("Event not saved: you do not have permissions to do so");
+      } else {
+        app.alertError("Event not saved: an unknown error occurred");
+      }
+
     });
     socket.on("event:calendar.error.delete", function(data){
 

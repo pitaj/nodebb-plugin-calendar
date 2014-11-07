@@ -352,6 +352,9 @@
     margin-bottom: 6px;
     /* opacity: 0.3; */
   }
+  #cal td .day-number.today {
+    color: red;
+  }
 
 	/*
   #cal td.this-month .day-number {
@@ -552,7 +555,7 @@
   #cal-sidebar .content {
       font-family: Arial, Sans-serif;
       width:200%;
-      height:100%;
+      height:696px;
   }
 
   #cal-sidebar .content > .event {
