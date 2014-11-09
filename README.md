@@ -38,7 +38,6 @@ Note: If you don't know the id# of the category you want the events to be posted
 
 ####In The Works
 
-* Sort events by time
 * Automate category permissions
 * Mobile device support
 * iCal export
