@@ -43,7 +43,7 @@ require(["moment", "marked"], function (moment, marked) {
 
   }
 
-  var events = [];
+  var events = [], whoisin;
 
   /*
   var events = [
@@ -607,13 +607,13 @@ require(["moment", "marked"], function (moment, marked) {
 
       }
 
-      console.log("days before: ", days);
+      //console.log("days before: ", days);
 
       days = days.filter(function(it, index){
         return days.indexOf(it) >= index;
       });
 
-      console.log("days after: ", days);
+      //console.log("days after: ", days);
 
       for(var a=0; a<days.length; a++){
         sortEvents(days[a]);
@@ -644,7 +644,7 @@ require(["moment", "marked"], function (moment, marked) {
 
     var whenScrollEnabled = true;
 
-    function goToDate(date, instant){
+    function goToDate(date, instant, month){
 
       function scrollIn($obj, cb){
         var o = $obj.parent().parent().parent().parent().scrollTop();
@@ -662,7 +662,7 @@ require(["moment", "marked"], function (moment, marked) {
 
       }
 
-      var obj, firstOfMonth;
+      var obj, firstOfMonth, obj2;
 
       try {
         obj = dayArray[date.getFullYear()][date.getMonth()][date.getDate()-1];
@@ -676,11 +676,22 @@ require(["moment", "marked"], function (moment, marked) {
       //console.log(obj);
 
       if(!visible(obj)){
+        
         whenScrollEnabled = false;
         scrollIn(firstOfMonth, function(){
           whenScrollEnabled = true;
           setTimeout(whenScroll, 100);
         });
+      }
+      
+      if(month){
+        obj2 = dayArray[date.getFullYear()][date.getMonth()][d.numOfDays[date.getMonth()-1]];
+        if(!visible(obj2)){
+          scrollIn(firstOfMonth, function(){
+            whenScrollEnabled = true;
+            setTimeout(whenScroll, 100);
+          });
+        }
       }
 
       $("#cal-day-selected").removeAttr("id");
@@ -688,7 +699,7 @@ require(["moment", "marked"], function (moment, marked) {
 
       showDay(obj);
 
-      cleanCache();
+      //cleanCache();
     }
 
     //window.whenSc = whenScroll;
@@ -698,7 +709,7 @@ require(["moment", "marked"], function (moment, marked) {
       //console.log(e);
 
       if(!whenScrollEnabled){
-        return false;
+        return;
       }
 
       var x;
@@ -715,8 +726,9 @@ require(["moment", "marked"], function (moment, marked) {
               dayArray[x][i] &&
               dayArray[nextYear] &&
               dayArray[nextYear][nextMonth] &&
-              visible(dayArray[x][i][0]) &&
+              visible(dayArray[x][i][0], true) &&
               visible(dayArray[nextYear][nextMonth][0], true)){
+              
               $("#cal-month").html(d.month[i]);
               $("#cal-month-select").val(i);
               $("#cal-year-select").val(x);
@@ -725,7 +737,7 @@ require(["moment", "marked"], function (moment, marked) {
               //$(".this-month").removeClass("this-month");
 
               //$($.map(dayArray[x][i], toDo)).addClass("this-month");
-
+              
               nextMonth+=6;
               if(nextMonth - 12 >= 0){
                 nextMonth -= 12;
@@ -747,6 +759,7 @@ require(["moment", "marked"], function (moment, marked) {
               if(!Array.isArray(dayArray[prevYear]) || !Array.isArray(dayArray[prevYear][prevMonth])){
                 //console.log("got there");
                 renderCalendar(new Date(prevYear, prevMonth, 0));
+                dayArray[x][i][0][0].scrollIntoView();
               }
 
               break;
@@ -755,9 +768,11 @@ require(["moment", "marked"], function (moment, marked) {
         }
       }
 
-      cleanCache();
+      //cleanCache();
 
     }
+  
+  /*
 
     var cleaning = false;
 
@@ -813,16 +828,18 @@ require(["moment", "marked"], function (moment, marked) {
       cleaning = false;
 
     }
+    
+    */
 
   function sortEvents(parent){
 
     //console.log(arguments.callee.caller.name);
 
-    console.log("parent: ",parent);
+    //console.log("parent: ", parent);
 
     var evs = parent.children(".event").detach();
 
-    console.log("evs before: ", evs);
+    //console.log("evs before: ", evs);
 
     evs.sort(function(a,b){
       var an = $(a).data('event').startdate,
@@ -836,8 +853,19 @@ require(["moment", "marked"], function (moment, marked) {
       }
       return 0;
     });
-
-    console.log("evs after: ", evs);
+    
+    //console.log("evs middle: ", evs);
+    
+    evs = evs.filter(function(index){
+      for(var i=0; i<index; i++){
+        if(evs.eq(i).data("event").id === $(this).data("event").id){
+          return false;
+        }
+      }
+      return true;
+    });
+    
+    //console.log("evs after: ", evs);
 
     evs.appendTo(parent);
   }
@@ -950,40 +978,55 @@ require(["moment", "marked"], function (moment, marked) {
         e.children(".place").html(event.htmlPlace);
 
         e.children(".description").html(event.html);
-
-        var myresponse = "."+( event.responses[app.uid] ? event.responses[app.uid].value : "invited" );
-
-        c.children(".my-response").children(".selected").removeClass("selected");
-
-        if(+app.uid !== 0){
-          c.children(".my-response")
-            .css("display", "")
-            .children(".username")
-              .children("a")
-              .attr("href", "/user/"+app.userslug)
-              .html(app.username);
-
-          c.children(".my-response")
-            .children(myresponse)
-            .addClass("selected");
+        
+        if(whoisin && event.whoisin){
+          
+          e.children(".cal-whoisin").html(event.whoisin).css({ display: "initial" });
+          c.css({ display: "none" });
+          WhoisinPlugin.setup();
+          
         } else {
-          c.children(".my-response").css("display", "none");
-        }
+          
+          c.css({ display: "initial" });
+          e.children(".cal-whoisin").css({ display: "none" });
 
-        //console.log("my response: ", myresponse);
+          var myresponse = "."+( event.responses[app.uid] ? event.responses[app.uid].value : "invited" );
 
-        var x;
-        for(x in event.responses){
+          c.children(".my-response").children(".selected").removeClass("selected");
 
-          if(event.responses.hasOwnProperty(x) && +x !== +app.uid){
+          if(+app.uid !== 0){
+            c.children(".my-response")
+              .css("display", "")
+              .children(".username")
+                .children("a")
+                .attr("href", "/user/"+app.userslug)
+                .html(app.username);
 
-            c.append(templates.response
-                      .replace(/\{\{thisuser\.fullname\}\}/g, event.responses[x].user.fullname)
-                      .replace(/\{\{thisuser\.name\}\}/g, event.responses[x].user.name)
-                      .replace(/\{\{value\}\}/g, event.responses[x].value)
-                      .replace(/\{\{nicevalue\}\}/g, nicevalue[event.responses[x].value]));
-
+            c.children(".my-response")
+              .children(myresponse)
+              .addClass("selected");
+          } else {
+            c.children(".my-response").css("display", "none");
           }
+
+          //console.log("my response: ", myresponse);
+
+          c.children().not(".my-response").remove();
+
+          var x;
+          for(x in event.responses){
+
+            if(event.responses.hasOwnProperty(x) && +x !== +app.uid){
+
+              c.append(templates.response
+                        .replace(/\{\{thisuser\.fullname\}\}/g, event.responses[x].user.fullname)
+                        .replace(/\{\{thisuser\.name\}\}/g, event.responses[x].user.name)
+                        .replace(/\{\{value\}\}/g, event.responses[x].value)
+                        .replace(/\{\{nicevalue\}\}/g, nicevalue[event.responses[x].value]));
+
+            }
+          }
+          
         }
 
         iframe
@@ -1006,7 +1049,8 @@ require(["moment", "marked"], function (moment, marked) {
 
     function newEvent(callback){
       var l = events.length, now = $("#cal-day-selected").data("date") || new Date(), anhour = new Date(now);
-      anhour.setHours(anhour.getHours()+1);
+      now.setHours(12);
+      anhour.setHours(13);
 
       sidebar.find(".event .edit .delete-event-button").css("display", "none");
 
@@ -1048,12 +1092,12 @@ require(["moment", "marked"], function (moment, marked) {
       edit.find(".name").val(currentEvent.name);
       edit.find(".allday").prop("checked", currentEvent.allday);
 
-      var checked = currentEvent.allday, form = checked ? "D/M/YYYY" : "D/M/YYYY h:mm a";
+      var checked = currentEvent.allday, form = checked ? "D/M/YYYY" : "D/M/YYYY H:mm";
 
       if(checked){
         sidebar.find(".start-time, .end-time").datetimepicker({ timepicker: false, format: 'd/m/Y' });
       } else {
-        sidebar.find(".start-time, .end-time").datetimepicker({ timepicker: true, format: 'd/m/Y H:i a'  });
+        sidebar.find(".start-time, .end-time").datetimepicker({ timepicker: true, format: 'd/m/Y H:i'  });
       }
 
       edit.find(".start-time").val(moment(currentEvent.startdate).format(form));
@@ -1419,12 +1463,12 @@ require(["moment", "marked"], function (moment, marked) {
 
     $("#cal-month-select").change(function(){
       var date = new Date($("#cal-year-select").val(), $("#cal-month-select").val(), 1);
-      goToDate(date);
+      goToDate(date, false, true);
     });
 
     $("#cal-year-select").change(function(){
       var date = new Date($("#cal-year-select").val(), $("#cal-month-select").val(), 1);
-      goToDate(date);
+      goToDate(date, false, true);
     });
 
     // day selection event
@@ -1494,7 +1538,7 @@ require(["moment", "marked"], function (moment, marked) {
       edit.fadeOut();
     });
 
-    sidebar.children(".event").children(".edit").children(".start-time, .end-time").datetimepicker({ format: 'd/m/Y h:i a' });
+    sidebar.children(".event").children(".edit").children(".start-time, .end-time").datetimepicker({ format: 'd/m/Y h:i' });
 
     sidebar.children(".event").children(".edit").children(".allday").change(function(){
 
@@ -1505,9 +1549,9 @@ require(["moment", "marked"], function (moment, marked) {
         edit.find(".start-time").val(edit.find(".start-time").val().split(" ")[0]);
         edit.find(".end-time").val(edit.find(".end-time").val().split(" ")[0]);
       } else {
-        sidebar.find(".start-time, .end-time").datetimepicker({ timepicker: true, format: 'd/m/Y h:i a' });
-        edit.find(".start-time").val(edit.find(".start-time").val()+" 12:00 pm");
-        edit.find(".end-time").val(edit.find(".end-time").val()+" 1:00 pm");
+        sidebar.find(".start-time, .end-time").datetimepicker({ timepicker: true, format: 'd/m/Y h:i' });
+        edit.find(".start-time").val(edit.find(".start-time").val()+" 12:00");
+        edit.find(".end-time").val(edit.find(".end-time").val()+" 13:00");
       }
 
     });
@@ -1657,6 +1701,8 @@ require(["moment", "marked"], function (moment, marked) {
     if(!calendar.canCreate){
       $(".button-add-event").css("display", "none");
     }
+    
+    whoisin = calendar.whoisin;
 
     app.enterRoom("calendar");
 
