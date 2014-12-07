@@ -5,7 +5,7 @@
 require.config({
   paths: {
     "moment": "//cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.3/moment.min",
-    "marked": "//cdnjs.cloudflare.com/ajax/libs/marked/0.3.2/marked.min"
+    "remarkable": "//cdn.jsdelivr.net/remarkable/1.4.2/remarkable.min"
   },
   config: {
     moment: {
@@ -14,9 +14,11 @@ require.config({
   }
 });
 
-require(["moment", "marked"], function (moment, marked) {
+require(["moment", "remarkable"], function (moment, marked) {
 
   "use strict";
+  
+  marked = (new marked()).render;
 
   function observe(elem, callback){
 

@@ -6,7 +6,7 @@
       //path = require("path"),
       //later = require("later"),
       moment = require('moment'),
-      marked = require("marked"),
+      marked = (new require("remarkable")).render,
       sanitize = require('google-caja').sanitize,
       groups = realModule.parent.require("./groups"),
       user = realModule.parent.require("./user"),
@@ -23,7 +23,6 @@
       notifs = realModule.parent.require('./notifications'),
       privileges = realModule.parent.require('./privileges'),
       validator = realModule.parent.require('validator'),
-      semver = realModule.parent.require("semver"),
       whoisin;
 
     //console.log(permissions);
