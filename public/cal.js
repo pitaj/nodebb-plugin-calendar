@@ -14,11 +14,15 @@ require.config({
   }
 });
 
-require(["moment", "remarkable"], function (moment, marked) {
+require(["moment", "remarkable"], function (moment, remarkable) {
 
   "use strict";
   
-  marked = (new marked()).render;
+  remarkable = new remarkable();
+  
+  var marked = function(input){
+    return remarkable.render(input);
+  }
 
   function observe(elem, callback){
 
