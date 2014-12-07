@@ -912,6 +912,8 @@ require(["moment", "marked"], function (moment, marked) {
       // go to the day part of the sidebar, if necessary
 
       //console.log("switching to day");
+      
+      toggleSidebar(1);
 
       sidebar.children(".day").animate({ marginLeft: "0%" });
 
@@ -923,6 +925,8 @@ require(["moment", "marked"], function (moment, marked) {
       // go to the event part of the sidebar, if necessary
 
       //console.log("switching to event");
+      
+      toggleSidebar(1);
 
       sidebar.children(".day").animate({ marginLeft: "-100%" });
 
@@ -1439,9 +1443,33 @@ require(["moment", "marked"], function (moment, marked) {
     sidebar.find(".event .edit .errors").html(errorText).slideDown();
   }
 
+  function toggleSidebar(value){
+    
+    if(isNaN(value)){ value = false; }
+    
+    var it = $("#cal-sidebar");
+    if(it.css("top") != "85px" && (!value || value == 1)){
+      it.animate({
+        top: "85px"
+      }, 200, function(){
+        it.children(".toggle").children(".fa").removeClass("fa-chevron-up").addClass("fa-chevron-down");
+      });
+    } else if(!value || value == -1) {
+      it.animate({
+        top: "100%"
+      }, 200, function(){
+        it.children(".toggle").children(".fa").removeClass("fa-chevron-down").addClass("fa-chevron-up");
+      });
+    }
+  }
+  
   var waiting = false;
 
   function handleEvents(){
+    
+    $("#cal-toolbar").children(".button-today").children("i").html((new Date()).getDate());
+    
+    $("#cal-sidebar").children(".toggle").click(toggleSidebar);
 
     // taskbar functionality events
 
@@ -1662,7 +1690,8 @@ require(["moment", "marked"], function (moment, marked) {
     });
 
     // figure out size sidebar should be
-    function onresize(){
+    
+    /*function onresize(){
       // check if the sidebar should be side-by-side or not
       // then set it as so
       $(window).off("resize");
@@ -1682,7 +1711,7 @@ require(["moment", "marked"], function (moment, marked) {
       }, 500);
 
     }
-    onresize();
+    onresize();*/
 
   }
 
