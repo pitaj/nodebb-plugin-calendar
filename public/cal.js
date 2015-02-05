@@ -1,6 +1,7 @@
 /* global app */
 /* global socket */
 /* global calendar */
+/* global WhoisinPlugin */
 
 require.config({
   paths: {
@@ -17,12 +18,12 @@ require.config({
 require(["moment", "remarkable"], function (moment, remarkable) {
 
   "use strict";
-  
+
   remarkable = new remarkable();
-  
+
   var marked = function(input){
     return remarkable.render(input);
-  }
+  };
 
   function observe(elem, callback){
 
@@ -33,7 +34,7 @@ require(["moment", "remarkable"], function (moment, remarkable) {
 
       }
     } else {
-      MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+      window.MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
 
       if(MutationObserver){
         var observer = new MutationObserver(callback);
@@ -50,137 +51,6 @@ require(["moment", "remarkable"], function (moment, remarkable) {
   }
 
   var events = [], whoisin;
-
-  /*
-  var events = [
-    {
-      id: 0,
-      startdate: new Date("2014-10-12T09:13:55.054Z"),
-      enddate: new Date("2014-10-12T10:13:55.054Z"),
-      user: {
-        imgsrc: "https://secure.gravatar.com/avatar/b73e2fff665c33621c8a4347cf8074be?size=128&default=identicon&rating=pg",
-        name: "pitaj",
-        fullname: "PitaJ"
-      },
-      name: "Testy event",
-      place: "Muhammad's ass",
-      description: "bladibla",
-      usergroups: [],
-      allday: false,
-      notifications: [],
-      responses: [],
-      url: "/topic/1/bla"
-    },
-    {
-      id: 1,
-      startdate: new Date("2014-10-12T09:13:55.054Z"),
-      enddate: new Date("2014-10-12T10:13:55.054Z"),
-      user: {
-        imgsrc: "https://secure.gravatar.com/avatar/b73e2fff665c33621c8a4347cf8074be?size=128&default=identicon&rating=pg",
-        name: "pitaj",
-        fullname: "PitaJ"
-      },
-      name: "Testy event",
-      place: "Muhammad's ass",
-      description: "bladibla",
-      usergroups: [],
-      allday: false,
-      notifications: [],
-      responses: [],
-      url: "/topic/1/bla"
-    },
-    {
-      id: 2,
-      startdate: new Date("2014-10-12T09:13:55.054Z"),
-      enddate: new Date("2014-10-12T10:13:55.054Z"),
-      user: {
-        imgsrc: "https://secure.gravatar.com/avatar/b73e2fff665c33621c8a4347cf8074be?size=128&default=identicon&rating=pg",
-        name: "pitaj",
-        fullname: "PitaJ"
-      },
-      name: "Testy event",
-      place: "Muhammad's ass",
-      description: "bladibla",
-      usergroups: [],
-      allday: false,
-      notifications: [],
-      responses: [],
-      url: "/topic/1/bla"
-    },
-    {
-      id: 3,
-      startdate: new Date("2014-10-12T09:13:55.054Z"),
-      enddate: new Date("2014-10-12T10:13:55.054Z"),
-      user: {
-        imgsrc: "https://secure.gravatar.com/avatar/b73e2fff665c33621c8a4347cf8074be?size=128&default=identicon&rating=pg",
-        name: "pitaj",
-        fullname: "PitaJ"
-      },
-      name: "Testy event",
-      place: "Muhammad's ass",
-      description: "bladibla",
-      usergroups: [],
-      allday: false,
-      notifications: [],
-      responses: [],
-      url: "/topic/1/bla"
-    },
-    {
-      id: 4,
-      startdate: new Date("2014-10-12T09:13:55.054Z"),
-      enddate: new Date("2014-10-12T10:13:55.054Z"),
-      user: {
-        imgsrc: "https://secure.gravatar.com/avatar/b73e2fff665c33621c8a4347cf8074be?size=128&default=identicon&rating=pg",
-        name: "pitaj",
-        fullname: "PitaJ"
-      },
-      name: "Testy event",
-      place: "Muhammad's ass",
-      description: "bladibla",
-      usergroups: [],
-      allday: false,
-      notifications: [],
-      responses: [],
-      url: "/topic/1/bla"
-    },
-    {
-      id: 5,
-      startdate: new Date("2014-10-12T09:13:55.054Z"),
-      enddate: new Date("2014-10-12T10:13:55.054Z"),
-      user: {
-        imgsrc: "https://secure.gravatar.com/avatar/b73e2fff665c33621c8a4347cf8074be?size=128&default=identicon&rating=pg",
-        name: "pitaj",
-        fullname: "PitaJ"
-      },
-      name: "Testy event",
-      place: "Muhammad's ass",
-      description: "bladibla",
-      usergroups: [],
-      allday: false,
-      notifications: [],
-      responses: [],
-      url: "/topic/1/bla"
-    },
-    {
-      id: 6,
-      startdate: new Date("2014-10-12T09:13:55.054Z"),
-      enddate: new Date("2014-10-12T10:13:55.054Z"),
-      user: {
-        imgsrc: "https://secure.gravatar.com/avatar/b73e2fff665c33621c8a4347cf8074be?size=128&default=identicon&rating=pg",
-        name: "pitaj",
-        fullname: "PitaJ"
-      },
-      name: "Testy event",
-      place: "Muhammad's ass",
-      description: "bladibla",
-      usergroups: [],
-      allday: false,
-      notifications: [],
-      responses: [],
-      url: "/topic/1/bla"
-    }
-  ];
-  */
 
   // window.theEvents = events;
 
@@ -268,7 +138,6 @@ require(["moment", "remarkable"], function (moment, remarkable) {
     response: '<div><small class="username" title="{{thisuser.fullname}}"><a href="/user/{{thisuser.name}}">{{thisuser.fullname}}</a></small><span class="{{value}}">{{nicevalue}}</span></div>',
     iframestyle: '<style>div[widget-area] { display: none; } .post-bar.col-xs-12.hide.bottom-post-bar { display: block!important; } .topic .topic-footer .row { padding: 0 10px 0 20px; } .topic ul li { margin-bottom: 5px; } .btn-sm { line-height: 1; } .topic .topic-footer .pull-right { line-height: 14px; } .topic .post-bar { padding: 6px; } .btn.btn-primary.post_reply { float: right; } .topic-main-buttons.pull-right.inline-block { display: block; width: 100%; } #header-menu, .overlay-container, .alert-window,  #post-container li.post-row:first-child,  #post-container li.post-bar,  .upvote,  .downvote,  .votes,  .share-dropdown,  .move,  .breadcrumb,  .post-bar.bottom-post-bar div:first-child,  .post-bar.bottom-post-bar .thread-tools,  #footer,  .topic-footer small.pull-right i,  .post-tools .quote,  .post-tools .post_reply { display: none!important; } body { padding-top: 10px!important; } .container { width:100%!important; }</style>',
     profilepic: '<a href="/user/{{user.name}}"><img src="{{user.imgsrc}}" alt="{{user.fullname}}" class="profile-image user-img" title="" data-original-title="{{user.fullname}}"></a><small class="username" title="{{user.fullname}}"><a href="/user/{{user.name}}">{{user.fullname}}</a></small>',
-
   };
 
   // actual calendar stuff
@@ -682,14 +551,14 @@ require(["moment", "remarkable"], function (moment, remarkable) {
       //console.log(obj);
 
       if(!visible(obj)){
-        
+
         whenScrollEnabled = false;
         scrollIn(firstOfMonth, function(){
           whenScrollEnabled = true;
           setTimeout(whenScroll, 100);
         });
       }
-      
+
       if(month){
         obj2 = dayArray[date.getFullYear()][date.getMonth()][d.numOfDays[date.getMonth()-1]];
         if(!visible(obj2)){
@@ -711,6 +580,8 @@ require(["moment", "remarkable"], function (moment, remarkable) {
     //window.whenSc = whenScroll;
 
     function whenScroll(e){
+
+      //document.getElementById("scrollStatus").innerHTML++;
 
       //console.log(e);
 
@@ -734,7 +605,7 @@ require(["moment", "remarkable"], function (moment, remarkable) {
               dayArray[nextYear][nextMonth] &&
               visible(dayArray[x][i][0], true) &&
               visible(dayArray[nextYear][nextMonth][0], true)){
-              
+
               $("#cal-month").html(d.month[i]);
               $("#cal-month-select").val(i);
               $("#cal-year-select").val(x);
@@ -743,7 +614,7 @@ require(["moment", "remarkable"], function (moment, remarkable) {
               //$(".this-month").removeClass("this-month");
 
               //$($.map(dayArray[x][i], toDo)).addClass("this-month");
-              
+
               nextMonth+=6;
               if(nextMonth - 12 >= 0){
                 nextMonth -= 12;
@@ -777,7 +648,7 @@ require(["moment", "remarkable"], function (moment, remarkable) {
       //cleanCache();
 
     }
-  
+
   /*
 
     var cleaning = false;
@@ -834,7 +705,7 @@ require(["moment", "remarkable"], function (moment, remarkable) {
       cleaning = false;
 
     }
-    
+
     */
 
   function sortEvents(parent){
@@ -859,9 +730,9 @@ require(["moment", "remarkable"], function (moment, remarkable) {
       }
       return 0;
     });
-    
+
     //console.log("evs middle: ", evs);
-    
+
     evs = evs.filter(function(index){
       for(var i=0; i<index; i++){
         if(evs.eq(i).data("event").id === $(this).data("event").id){
@@ -870,7 +741,7 @@ require(["moment", "remarkable"], function (moment, remarkable) {
       }
       return true;
     });
-    
+
     //console.log("evs after: ", evs);
 
     evs.appendTo(parent);
@@ -918,7 +789,7 @@ require(["moment", "remarkable"], function (moment, remarkable) {
       // go to the day part of the sidebar, if necessary
 
       //console.log("switching to day");
-      
+
       toggleSidebar(1);
 
       sidebar.children(".day").animate({ marginLeft: "0%" });
@@ -931,7 +802,7 @@ require(["moment", "remarkable"], function (moment, remarkable) {
       // go to the event part of the sidebar, if necessary
 
       //console.log("switching to event");
-      
+
       toggleSidebar(1);
 
       sidebar.children(".day").animate({ marginLeft: "-100%" });
@@ -988,15 +859,15 @@ require(["moment", "remarkable"], function (moment, remarkable) {
         e.children(".place").html(event.htmlPlace);
 
         e.children(".description").html(event.html);
-        
-        if(whoisin && event.whoisin){
-          
+
+        if(WhoisinPlugin && event.whoisin){
+
           e.children(".cal-whoisin").html(event.whoisin).css({ display: "initial" });
           c.css({ display: "none" });
           WhoisinPlugin.setup();
-          
+
         } else {
-          
+
           c.css({ display: "initial" });
           e.children(".cal-whoisin").css({ display: "none" });
 
@@ -1036,7 +907,7 @@ require(["moment", "remarkable"], function (moment, remarkable) {
 
             }
           }
-          
+
         }
 
         iframe
@@ -1186,7 +1057,7 @@ require(["moment", "remarkable"], function (moment, remarkable) {
       var thisEvent = oldday
         .children(".event")
         .filter(function(){
-          return ($(this).data("event").id == event.id);
+          return ($(this).data("event").id === event.id);
         });
 
       console.log(thisEvent);
@@ -1309,7 +1180,7 @@ require(["moment", "remarkable"], function (moment, remarkable) {
       waiting = true;
       socket.emit("plugins.calendar.deleteEvent", event, function(err, data){
 
-        if(data == event.oldId){
+        if(data === event.oldId){
 
           console.log("deleting event: "+data);
 
@@ -1318,7 +1189,7 @@ require(["moment", "remarkable"], function (moment, remarkable) {
           edit.fadeOut();
           var sdate = event.startdate, day = dayArray[sdate.getFullYear()][sdate.getMonth()][sdate.getDate()-1];
           day.children(".event").filter(function(){
-            return ($(this).data("event").id == event.oldId);
+            return ($(this).data("event").id === event.oldId);
           }).remove();
           showDay(day, false);
         }
@@ -1450,17 +1321,17 @@ require(["moment", "remarkable"], function (moment, remarkable) {
   }
 
   function toggleSidebar(value){
-    
+
     if(isNaN(value)){ value = false; }
-    
+
     var it = $("#cal-sidebar");
-    if(it.css("top") != "85px" && (!value || value == 1)){
+    if(it.css("top") !== "85px" && (!value || value === 1)){
       it.animate({
         top: "85px"
       }, 200, function(){
         it.children(".toggle").children(".fa").removeClass("fa-chevron-up").addClass("fa-chevron-down");
       });
-    } else if(!value || value == -1) {
+    } else if(!value || value === -1) {
       it.animate({
         top: "100%"
       }, 200, function(){
@@ -1468,13 +1339,13 @@ require(["moment", "remarkable"], function (moment, remarkable) {
       });
     }
   }
-  
+
   var waiting = false;
 
   function handleEvents(){
-    
+
     $("#cal-toolbar").children(".button-today").children("i").html((new Date()).getDate());
-    
+
     $("#cal-sidebar").children(".toggle").click(toggleSidebar);
 
     // taskbar functionality events
@@ -1545,6 +1416,8 @@ require(["moment", "remarkable"], function (moment, remarkable) {
     // figure out what month it is
 
     $("#cal-days-container").scroll(whenScroll);
+
+    //document.getElementById("cal-days-container").addEventListener("scroll", whenScroll, false);
 
     // sidebar functionality events
 
@@ -1670,11 +1543,11 @@ require(["moment", "remarkable"], function (moment, remarkable) {
       edit.fadeOut();
       var sdate = data.startdate, day = dayArray[sdate.getFullYear()][sdate.getMonth()][sdate.getDate()-1];
       day.children(".event").filter(function(){
-        return ($(this).data("event").id == data.id);
+        return ($(this).data("event").id === data.id);
       }).remove();
 
       sidebar.find(".day .event").filter(function(){
-        return ($(this).data("event").id == data.id);
+        return ($(this).data("event").id === data.id);
       }).remove();
 
       data.id = -1;
@@ -1696,7 +1569,7 @@ require(["moment", "remarkable"], function (moment, remarkable) {
     });
 
     // figure out size sidebar should be
-    
+
     /*function onresize(){
       // check if the sidebar should be side-by-side or not
       // then set it as so
@@ -1736,7 +1609,7 @@ require(["moment", "remarkable"], function (moment, remarkable) {
     if(!calendar.canCreate){
       $(".button-add-event").css("display", "none");
     }
-    
+
     whoisin = calendar.whoisin;
 
     app.enterRoom("calendar");
@@ -1745,6 +1618,10 @@ require(["moment", "remarkable"], function (moment, remarkable) {
     goToDate(new Date(), true);
 
     handleEvents();
+
+    $("#container0").scroll(function(){
+      $("#scrollTop").html($(this).scrollTop());
+    });
   });
 
 });

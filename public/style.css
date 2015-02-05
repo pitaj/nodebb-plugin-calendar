@@ -5,13 +5,16 @@ div[widget-area="footer"] {
 body, html {
   height: 100%;
   overflow: hidden;
+  padding:0;
+  margin:0;
+  /*overflow:auto;*/
 }
 #content > .row {
   /*position: fixed;*/
-  top: 70px;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  /*top: 70px;*/
+  /*/*left: 0;*/
+  /*right: 0;*/
+  /*bottom: 0;*/
   padding: 0;
   margin: 0;
   height: 100%;
@@ -26,9 +29,7 @@ body, html {
 #cal {
   position:relative;
   height:100%;
-  -webkit-box-shadow: 0px 10px 9px -3px rgba(0,0,0,0.75);
-  -moz-box-shadow: 0px 10px 9px -3px rgba(0,0,0,0.75);
-  box-shadow: 0px 10px 9px -3px rgba(0,0,0,0.75);
+  border: 1px solid #ddd;
 }
 
 #cal-toolbar {
@@ -82,6 +83,10 @@ body, html {
   width: 14.28571428571429%;
   position: relative;
 }
+#cal td:first-child {
+  border-left: none;
+}
+
 #cal #cal-headers tr {
   height: 100%;
   color: #444;
@@ -146,11 +151,8 @@ body, html {
   top: 85px;
   left: 0;
   right: 0;
-  bottom: 0; 
+  bottom: 0;
   border: 1px solid #ddd;
-  -webkit-box-shadow: 0px 10px 9px -3px rgba(0,0,0,0.75);
-  -moz-box-shadow: 0px 10px 9px -3px rgba(0,0,0,0.75);
-  box-shadow: 0px 10px 9px -3px rgba(0,0,0,0.75);
 }
 #cal-sidebar .toggle {
   background: dimgray;
@@ -325,7 +327,7 @@ body, html {
   margin-bottom: 30px;
 }
 #cal-sidebar .content .event .view .cal-whoisin .whoisin h4 {
-  display: block;  content: "Description";  font-size: 16px;  
+  display: block;  content: "Description";  font-size: 16px;
   margin-bottom: 5px;
   font-family: inherit;
   line-height: inherit;
@@ -413,7 +415,7 @@ body, html {
   top: 100%;
 }
 
-@media (min-width: 768px) { 
+@media (min-width: 768px) {
   #cal-sidebar .toggle {
     display:none;
   }
@@ -435,10 +437,11 @@ body, html {
     content: "today";
   }
   #cal-toolbar .right:before {
-    content: "add event";
+    content: "add event ";
     font-size: 14px;
     margin-left: 5px;
     vertical-align: middle;
+    margin-right: 5px;
   }
 }
 
@@ -481,6 +484,8 @@ body, html {
   }
 }
 
+/*
+
 @media (min-height: 600px){
   #cal-days tr {
     height: 80px;
@@ -510,4 +515,41 @@ body, html {
   #cal-days tr {
     height: 165px;
   }
+}
+
+*/
+
+#cal-days tr {
+  height: 13.33vh;
+}
+
+#scrollTop {
+  position: fixed;
+  top:100px;
+  left:50%;
+  color:red;
+  z-index: 1001;
+}
+
+#container0 > span {
+  margin-bottom: 100px;
+  height:0;
+  overflow:visible;
+  display:block;
+}
+
+#container0 {
+  height:100vh;
+  width:100%;
+  overflow-y: scroll;
+  margin:0;
+  padding:0;
+  position: absolute;
+  left:0;
+  right:0;
+  top:0;
+  bottom:0;
+  background-color: lightblue;
+  padding-left: 20px;
+  z-index: 1000;
 }

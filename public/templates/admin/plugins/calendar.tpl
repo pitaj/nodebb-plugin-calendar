@@ -1,80 +1,76 @@
-<h1><i class="fa fa-calendar"></i> Calendar Permissions configuration</h1>
+<h1><i class="fa fa-calendar"></i> [[calendar_admin:title]]</h1>
 <hr />
 
 <div class="bg-primary alert">
-    <p>This page allows the admin to configure what groups and users can edit, create, and administrate events.</p>
+    <p>[[calendar_admin:intro]]</p>
 </div>
 
-<h2>Explanation</h2>
+<h2>[[calendar_admin:explanation_header]]</h2>
 <p>
-  Users and groups with creation rights can create their own events and edit their own events. They can't edit others' events, though.
+  [[calendar_admin:explanation_creation_rights]]
   <br><br>
-  Calendar editors can create their own events and edit other people's events but can't delete other people's events.
+  [[calendar_admin:explanation_edit_rights]]
   <br><br>
-  Calendar admins can create their own events, edit other people's events, and delete other people's events.
-  Site admins get these rights as well, so there's no need to add them here.
-</p>
+  [[calendar_admin:explanation_admin_rights]]
+  <br><br>
+  [[calendar_admin:explanation_hierarchy]]
+  <br><br>
+  [[calendar_admin:explanation_one_group]]
+</p><br>
 <p>
-  When filling out the following forms, keep in mind that these are global permissions for every single event.
-  They can't be restricted by event-specific negations.
-  <br>
-  If you want to configure editing and viewing rights for individual events, do that in the Calendar interface itself.
+  [[calendar_admin:explanation_global_note]]
+  <br><br>
+  [[calendar_admin:explanation_individual_rights]]
 </p>
-<button id="save-button" class="btn btn-primary">Save</button>
-<p>
-  The following forms must be filled with the following syntax:
-  <br> - Values are separated by commas
-  <br> - Usernames are prefixed with an "at" symbol (@)
-  <br> - Higher levels get all permissions of lower levels (admins > editors > creation rights)
-</p>
+<button id="save-button" class="btn btn-primary">[[global:save_changes]]</button>
 <br>
 <div class="inputContainer">
   <div>
-    Creation rights:
-    <input class="creators form-control" placeholder="Groups & users that can create events" value="{perms.createEvents}" />
+    [[calendar_admin:creation_rights]]:
+    <input class="creators form-control" placeholder="[[calendar_admin:creation_placeholder]" value="{create}" />
   </div>
   <div>
-    Editors:
-    <input class="editors form-control" placeholder="Groups & users that can edit events" value="{perms.editEvents}" />
+    [[calendar_admin:edit_rights]]:
+    <input class="editors form-control" placeholder="[[calendar_admin:edit_placeholder]]" value="{edit}" />
   </div>
   <div>
-    Admins:
-    <input class="admins form-control" placeholder="Groups & users that are admins" value="{perms.admin}" />
+    [[calendar_admin:admin_rights]]:
+    <input class="admins form-control" placeholder="[[calendar_admin:admin_placeholder]]" value="{admins}" />
   </div>
 </div>
 <br>
 <hr>
-The category where event posts will be created, and the comments of those events will be:
-<input class="category form-control" placeholder="Enter a category number" value="{category}" />
+[[calendar_admin:category_label]]:
+<input class="category form-control" placeholder="[[calendar_admin:category_placeholder]]" value="{category}" />
+<hr>
+[[calendar_admin:use_whoisin_label]]
+<input type="checkbox" class="usewhoisin form-control" checked="{usewhoisin}" />
 
 <style>
-
 #save-button {
   float: right;
 }
 .inputContainer > div {
   display:inline-block;
   width:25%;
-  margin-left: 5%;
+  margin-left: 8%;
 }
-
 </style>
 
 <script>
-
 $("#save-button").click(function(){
   $.post("/api/admin/plugins/calendar/save", {
-    perms: {
-      createEvents: $(".creators").val(),
-      editEvents: $(".editors").val(),
-      admin: $(".admins").val()
-    },
-    category: $(".category").val()
+    create: $(".creators").val(),
+    edit: $(".editors").val(),
+    admin: $(".admins").val()
+    category: $(".category").val(),
+    usewhoisin: $(".usewhoisin").prop("checked")
   }, function(data){
-    if(typeof data === "string"){
-      app.alertSuccess(data);
+    if(data){
+      app.alertSuccess();
+    } else {
+      app.alertError();
     }
   });
 });
-
 </script>

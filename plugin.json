@@ -16,10 +16,7 @@
   		},
       {
         "hook": "filter:admin.header.build", "method": "addAdminNavigation"
-      },
-  		{
-  			"hook": "filter:widgets.getAreas", "method": "setWidgetAreas"
-  		}
+      }
     ],
     "templates": "public/templates",
     "scripts": [
