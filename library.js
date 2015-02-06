@@ -1,14 +1,41 @@
+/* event / user spec
+  fields for events {
+    id: (#) unique identifier for this event
+    canEdit: (Boolean) whether the current user can edit this event
+    canDelete: (Boolean) whether user can delete event
+    start: (Date) Date object of event start time
+    end: (Date) Date object of event end time
+    uid: (#) the uid of the user who made the event
+    name: ("") the name of the event
+    rawPlace: ("") the place this event is happening
+    place: ("html") the safe html version of the place, to be seen when viewing
+    rawDescription: ("") other information about the event including links
+    description: ("html") html version of the description that's safe for serving
+    allday: (Boolean) whether this event is allday or at a specific time
+    notifications: ([]) Date objects of when notifications should be sent to viewers
+    responses: ({}) responses, with uid of the user as key, and value as the value
+      value == "invited" || "not-attending" || "maybe" || "attending"
+    url: (url) the url of the event post, what will be shown in the iframe
+    editors: {
+      users: ([]) which users are allowed to edit the event, by uid
+      groups: ([]) which groups can edit the event, by groupname
+    }
+    viewers: {
+      users: ([]) which users are allowed to view the event, by uid
+      groups: ([]) which groups can view the event, by groupname
+    }
+    blocked: ([]) which users are blocked from viewing / editing the event, by uid
+  }
+*/
+
 (function(exports, module, undefined){
   "use strict";
 
   var async = require('async'),
     fs = require("fs"),
-    moment = require('moment'),
     schedule = require('node-schedule'),
     sanitize = require('google-caja').sanitize,
-    groups = module.parent.require("./groups"),
     users = module.parent.require("./user"),
-    utils = require("../../public/src/utils"),
     pluginSocket = module.parent.parent.require("./socket.io/plugins"),
     mainSocket = module.parent.parent.require("./socket.io/index"),
     plugins = module.parent.require('./plugins'),
@@ -22,63 +49,83 @@
   var db = require("subs/db"),
     posts = require("subs/posts");
 
-  function user(uid){
+  function user(uid, events, callback){
 
-    var thisUser = {
-      can: function(perm, event, callback){
-        async.waterfall([
-          db.settings.get,
-          function(settings, next){
-            async.parallel({
-              siteAdmin: async.apply(users.isAdministrator, uid),
-              admin: async.apply(db.groups.isMember, uid, settings.admin),
-              edit: async.apply(db.groups.isMember, uid, settings.edit),
-              create: async.apply(db.groups.isMember, uid, settings.create)
-            }, next);
-          },
-          function(globals, next){
-            var result = false;
-            if((perm === "edit" || perm === "view") && (globals.siteAdmin || globals.admin || globals.edit)){
-              result = true;
-            } else if(perm === "admin"  && (globals.siteAdmin || globals.admin)){
-              result = true;
-            } else if(perm === "create"  && (globals.siteAdmin || globals.admin || globals.edit || globals.create)){
-              result = true;
-            } else {
-              return next(new Error("Permission doesn't exist"));
+    var globals = {}, locals = {};
+
+    if(uid === 0){
+      callback(null, function can(perm, event){
+        if(perm === "view"){
+          return event.public;
+        }
+        return false;
+      });
+    }
+
+    async.waterfall([
+      db.settings.get,
+      function(settings, next){
+        async.parallel({
+          siteAdmin: async.apply(users.isAdministrator, uid),
+          admin: async.apply(db.groups.isMember, uid, settings.admin),
+          edit: async.apply(db.groups.isMember, uid, settings.edit),
+          create: async.apply(db.groups.isMember, uid, settings.create)
+        }, next);
+      },
+      function(perms, next){
+        globals.admin = perms.siteAdmin || perms.admin;
+        globals.edit = globals.admin || perms.edit;
+        globals.create = globals.edit || perms.create;
+        globals.delete = globals.admin;
+        next();
+      },
+      function(prev, next){
+        if(!events || !events.length){
+          return next();
+        }
+        var local;
+        async.each(events, function(event, nxt){
+          async.parallel({
+            edit: async.apply(db.groups.isMemberOfMultiple, uid, event.editors.groups),
+            view: async.apply(db.groups.isMemberOfMultiple, uid, event.viewers.groups),
+          }, function(err, groupPerms){
+            if(err){
+              return nxt(err);
             }
-            next(null, result);
-          },
-          function(globalResult, next){
-            if(globalResult || !event || perm === "create" || perm === "admin"){
-              return next(null, globalResult);
-            }
-            db.events.permissions.get(event, function(err, event){
-              if(err){
-                return next(err);
-              }
-              if(event.blocked.indexOf(uid) > -1){
-                return next(null, false);
-              }
-              if(perm === "view"){
-                if(event.viewers.users.indexOf(uid) > -1 || event.editors.users.indexOf(uid) > -1){
-                  return next(null, true);
-                }
-                db.groups.isMemberOfGroups(uid, event.viewers.groups.concat(event.editors.groups), next);
-              } else if(perm === "edit"){
-                if(event.editors.users.indexOf(uid) > -1){
-                  return next(null, true);
-                }
-                db.groups.isMemberOfGroups(uid, event.editors.groups, next);
-              } else {
-                next(new Error("Permission doesn't exist"));
-              }
-            });
-          }
-        ], callback);
+            local = {
+              edit: groupPerms.edit || event.editors.users.indexOf(uid) > -1,
+              view: groupPerms.view || event.viewers.users.indexOf(uid) > -1,
+              blocked: event.blocked.indexOf(uid) > -1,
+              delete: event.uid === uid,
+            };
+            local.edit = local.edit && !local.blocked;
+            local.view = (local.view || local.edit) && !local.blocked;
+            locals[event.id] = local;
+            nxt();
+          });
+        }, next);
       }
-    };
-    return thisUser;
+    ], function(err){
+      if(err){
+        return callback(err);
+      }
+      var can = function(perm, event){
+        if(typeof perm !== "string"){
+          return false;
+        }
+        if(perm === "admin" || perm === "create" || !event){
+          return globals[perm];
+        }
+        if(globals.admin){
+          return true;
+        }
+        if(globals.edit && (perm === "view" || perm === "edit")){
+          return true;
+        }
+        return locals[event.id][perm];
+      };
+      callback(null, can);
+    });
   }
 
   var render = {
@@ -95,13 +142,22 @@
         if(err){
           return next(err);
         }
+        settings.usewhoisin = settings.usewhoisin && whoisin;
         db.getEvents(function(err, events){
           if(err){
             return next(err);
           }
-          res.render("/calendar", {
-            settings: settings,
-            events: events
+          user(req.uid, events, function(err, can){
+            if(err){
+              return next(err);
+            }
+            eventstuff.trim(events, can, function(err, events){
+              next(err, {
+                events: events,
+                canCreate: can("create"),
+                settings: settings
+              });
+            });
           });
         });
       });
@@ -128,34 +184,146 @@
         });
       }, callback);
     },
+    on: {
+      createEvent: function(socket, event, callback){
 
+      },
+      editEvent: function(socket, event, callback){
+
+      },
+      deleteEvent: function(socket, event, callback){
+
+      },
+      response: function(socket, response, callback){
+        db.event.responses.set(response.event, response.uid, response.value, callback);
+      }
+    }
+  };
+
+  pluginSocket.calendar = sockets.on;
+
+  var eventstuff = {
+    edit: function(rawEvent, callback){
+      var event = {
+        id: rawEvent.id,
+        start: rawEvent.start,
+        end: rawEvent.end,
+        uid: rawEvent.uid,
+        name: rawEvent.name,
+        place: rawEvent.place,
+        description: rawEvent.description,
+        allday: rawEvent.allDay
+      };
+      async.parallel([
+        async.apply(db.event.edit, rawEvent),
+        async.apply(db.event.permissions.set, rawEvent),
+        async.apply(notifications.handle, rawEvent)
+      ], function(err){
+        callback(err, event);
+      });
+    },
+    create: function(rawEvent, callback){
+      var event = {
+        id: rawEvent.id,
+        start: rawEvent.start,
+        end: rawEvent.end,
+        uid: rawEvent.uid,
+        name: rawEvent.name,
+        place: rawEvent.place,
+        description: rawEvent.description,
+        allday: rawEvent.allDay
+      };
+      async.parallel([
+        async.apply(db.event.add, rawEvent),
+        async.apply(db.event.permissions.set, rawEvent),
+        async.apply(notifications.handle, rawEvent)
+      ], function(err, result){
+        callback(err, result[0]);
+      });
+    },
+    delete: function(rawEvent, callback){
+      async.parallel([
+        async.apply(db.event.delete, rawEvent),
+        async.apply(notifications.delete, rawEvent),
+        async.apply(db.event.responses.delete, rawEvent),
+        async.apply(notifications.clear, rawEvent)
+      ], callback);
+    },
+    trim: function(events, can, callback){
+      events = events.filter(function(event){
+        return can("view", event);
+      }).map(function(event){
+        event.canEdit = can("edit", event);
+        event.canDelete = can("delete", event);
+        if(!event.canEdit){
+          event = {
+            id: event.id,
+            canEdit: event.canEdit,
+            canDelete: event.canDelete,
+            start: event.start,
+            end: event.end,
+            uid: event.uid,
+            name: event.name,
+            place: event.place,
+            description: event.description,
+            allday: event.allday,
+            responses: event.responses,
+            url: event.url,
+          };
+        }
+        return event;
+      });
+      callback(null, events);
+    }
   };
 
   var notifications = {
-    load: function(err, notifs, callback){
-      var x, date, id;
+    handle: function(event, callback){
+      async.waterfall([
+        async.apply(async.parallel, [
+          async.apply(notifications.clear, event),
+          async.apply(notifications.delete, event)
+        ]),
+        function(thing, next){
+          notifications.save(event, event.notifications, next);
+        },
+        function(thing, next){
+          notifications.load([{
+            id: event.id,
+            notifications: event.notifications
+          }], next);
+        },
+      ], callback);
+    },
+    load: function(notifs, callback){
+      var x, date, id, i, these;
 
       function after(err){
-        console.log("notification "+id+" failed to send");
+        if(err){
+          console.log("notification "+id+" failed to send");
+        }
       }
 
       console.log(notifs);
       for(x in notifs){
         if(notifs.hasOwnProperty(x)){
-          date = new Date(notifs[x]);
-          id = x;
+          id = notifs[x].id;
+          these = notifs[x].notifications;
           notifications.jobs[id] = notifications.jobs[id] || [];
-          notifications.jobs[id].push(
-            schedule.scheduleJob(
-              date,
-              async.apply(
-                notifications.notify,
-                id,
+          for(i=0; i<these.length; i++){
+            date = new Date(these[i]);
+            notifications.jobs[id].push(
+              schedule.scheduleJob(
                 date,
-                after
+                async.apply(
+                  notifications.notify,
+                  id,
+                  date,
+                  after
+                )
               )
-            )
-          );
+            );
+          }
         }
       }
       callback();
@@ -168,12 +336,13 @@
       callback();
     },
     // cancel all node-schedule jobs for the event given
-    delete: db.notifications.remove,
+    delete: db.event.notifications.remove,
     // notifications.delete(event, callback(err){})
-    deleteOne: db.notifications.removeOne,
+    deleteOne: db.event.notifications.removeOne,
     // notifications.deleteOne(event, date, callback(err){})
+    save: db.event.notifications.set,
     notify: function(eventID, date, callback){
-      db.events.get(eventID, function(err, event){
+      db.event.get(eventID, function(err, event){
         if(err){
           return callback(err);
         }
@@ -242,7 +411,7 @@
           if(err){
             return next(err);
           }
-          notifications.load(null, data, next);
+          notifications.load(data, next);
         });
       },
       function(next){

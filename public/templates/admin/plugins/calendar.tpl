@@ -27,15 +27,15 @@
 <div class="inputContainer">
   <div>
     [[calendar_admin:creation_rights]]:
-    <input class="creators form-control" placeholder="[[calendar_admin:creation_placeholder]" value="{create}" />
+    <input type="text" class="creators form-control" placeholder="[[calendar_admin:creation_placeholder]" value="{create}" />
   </div>
   <div>
     [[calendar_admin:edit_rights]]:
-    <input class="editors form-control" placeholder="[[calendar_admin:edit_placeholder]]" value="{edit}" />
+    <input type="text" class="editors form-control" placeholder="[[calendar_admin:edit_placeholder]]" value="{edit}" />
   </div>
   <div>
     [[calendar_admin:admin_rights]]:
-    <input class="admins form-control" placeholder="[[calendar_admin:admin_placeholder]]" value="{admins}" />
+    <input type="text" class="admins form-control" placeholder="[[calendar_admin:admin_placeholder]]" value="{admins}" />
   </div>
 </div>
 <br>
@@ -56,7 +56,7 @@
   margin-left: 8%;
 }
 </style>
-
+<script src="/plugins/nodebb-plugin-calendar/public/typeahead.bundle.js"></script>
 <script>
 $("#save-button").click(function(){
   $.post("/api/admin/plugins/calendar/save", {
@@ -72,5 +72,35 @@ $("#save-button").click(function(){
       app.alertError();
     }
   });
+});
+
+var engine = new Bloodhound({
+  datumTokenizer: function(){
+    return Bloodhound.tokenizers.obj.whitespace('name');
+  },
+  queryTokenizer: Bloodhound.tokenizers.whitespace,
+  limit: 10,
+  prefetch: {
+    url: '/api/groups',
+    filter: function(list) {
+      var list = list.groups;
+      return list.map(function(group) { return { name: group.name }; });
+    }
+  },
+  remote: {
+    url: '/api/groups',
+    filter: function(list) {
+      var list = list.groups;
+      return list.map(function(group) { return { name: group.name }; });
+    }
+  },
+});
+
+engine.initialize();
+
+$(".creators, .editors, .admins").typeahead(null, {
+  name: 'groups',
+  displayKey: 'name',
+  source: engine.ttAdapter()
 });
 </script>

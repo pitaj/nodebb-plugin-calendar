@@ -55,7 +55,7 @@ var db = module.exports = {
           async.parallel([
             async.apply(database.setAdd, "plugins:calendar:events:"+event.id+":viewers:users", event.viewers.users),
             async.apply(database.setAdd, "plugins:calendar:events:"+event.id+":viewers:groups", event.viewers.groups),
-            async.apply(database.setAdd, "plugins:calendar:events:"+event.id+":viewers:blocked", event.blocked),
+            async.apply(database.setAdd, "plugins:calendar:events:"+event.id+":blocked", event.blocked),
             async.apply(database.setAdd, "plugins:calendar:events:"+event.id+":editors:users", event.editors.users),
             async.apply(database.setAdd, "plugins:calendar:events:"+event.id+":editors:groups", event.editors.groups)
           ], function(err){
@@ -112,14 +112,35 @@ var db = module.exports = {
           callback(err, event);
         });
       },
+    },
+    responses: {
+      set: function(event, uid, value, callback){
+        database.setObjectField("plugins:calendar:events:"+event.id+":responses", uid, value, callback);
+      },
+      get: function(event, callback){
+        database.getObject("plugins:calendar:events:"+event.id+":responses", function(err, responses){
+          event.responses = responses;
+          callback(err, event);
+        });
+      },
+      delete: function(event, callback){
+        database.delete("plugins:calendar:events:"+event.id+":responses", callback);
+      }
     }
   },
   getEvents: function(callback){
     async.waterfall([
       async.apply(database.getSortedSetRange, "plugins:calendar:events", 0, -1),
       database.getObjects,
-      async.apply(async.map, db.event.permissions.get),
-      async.apply(async.map, db.event.notifications.get)
+      function(events, next){
+        async.map(events, db.event.permissions.get, next);
+      },
+      function(events, next){
+        async.map(events, db.event.notifications.get, next);
+      },
+      function(events, next){
+        async.map(events, db.event.responses.get, next);
+      }
     ], callback);
   },
   getEventsByDate: function(start, end, callback){
@@ -130,7 +151,17 @@ var db = module.exports = {
     ], callback);
   },
   settings: {
-    get: async.apply(database.getObject, "plugins:calendar:settings"),
+    get: function(callback){
+      database.getObject("plugins:calendar:settings", function(err, data){
+        callback(err, data || {
+          create: "",
+          edit: "",
+          admin: "",
+          category: 1,
+          whoisin: false
+        });
+      });
+    },
     set: async.apply(database.setObject, "plugins:calendar:settings"),
   },
   getNotifications: async.apply(async.waterfall, [
