@@ -1,3 +1,5 @@
+(function(module){
+
 "use strict";
 
 var database = module.parent.parent.require("./database"),
@@ -15,13 +17,22 @@ var db = module.exports = {
         event.id = last+1;
         async.waterfall([
           async.apply(async.parallel, [
-            async.apply(database.sortedSetAdd, "plugins:calendar:events", event.startDate.valueOf(), "plugins:calendar:events:"+event.id),
+            async.apply(database.sortedSetAdd, "plugins:calendar:events", event.start.valueOf(), "plugins:calendar:events:"+event.id),
+            async.apply(database.setObjectKey, "plugins:calendar:eventsByTid", event.tid, event.id),
             async.apply(db.event.edit, event)
           ]),
           async.apply(database.increment, "plugins:calendar:events:last"),
         ], function(err){
           callback(err, event);
         });
+      });
+    },
+    getByTid: function(tid, callback){
+      database.getObjectKey("plugins:calendar:eventsByTid", tid, function(err, eid){
+        if(err){
+          return callback(err);
+        }
+        db.event.get(eid, callback);
       });
     },
     edit: function(event, callback){
@@ -145,9 +156,11 @@ var db = module.exports = {
   },
   getEventsByDate: function(start, end, callback){
     async.waterfall([
-      async.apply(database.getSortedSetRangeByScore, "plugins:calendar:events", null, null, start, end),
+      async.apply(database.getSortedSetRangeByScore, "plugins:calendar:events", 0, 100000, start.valueOf(), end.valueOf()),
       database.getObjects,
-      async.apply(async.map, db.event.permissions.get)
+      function(events, next){
+        async.map(events, db.event.permissions.get, next);
+      }
     ], callback);
   },
   settings: {
@@ -165,7 +178,7 @@ var db = module.exports = {
     set: async.apply(database.setObject, "plugins:calendar:settings"),
   },
   getNotifications: async.apply(async.waterfall, [
-    async.apply(database.getSetMembers, "plugins:calendar:notifications", 0, -1),
+    async.apply(database.getSetMembers, "plugins:calendar:notifications"),
     function(events, next){
       async.map(events, function(event, call){
         database.getSetMembers(event, function(err, notifs){
@@ -191,3 +204,5 @@ var db = module.exports = {
   }
 
 };
+
+})(module);

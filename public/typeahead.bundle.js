@@ -727,10 +727,10 @@
     var html = function() {
         return {
             wrapper: '<span class="twitter-typeahead"></span>',
-            dropdown: '<span class="tt-dropdown-menu"></span>',
+            dropdown: '<span class="tt-dropdown-menu dropdown-menu"></span>',
             dataset: '<div class="tt-dataset-%CLASS%"></div>',
             suggestions: '<span class="tt-suggestions"></span>',
-            suggestion: '<div class="tt-suggestion"></div>'
+            suggestion: '<div class="tt-suggestion" role="presentation"></div>'
         };
     }();
     var css = function() {

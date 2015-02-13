@@ -28,26 +28,26 @@
   }
 */
 
-(function(exports, module, undefined){
+(function(exports, module){
   "use strict";
 
   var async = require('async'),
-    fs = require("fs"),
+    //fs = require("fs"),
     schedule = require('node-schedule'),
     sanitize = require('google-caja').sanitize,
     users = module.parent.require("./user"),
     pluginSocket = module.parent.parent.require("./socket.io/plugins"),
     mainSocket = module.parent.parent.require("./socket.io/index"),
     plugins = module.parent.require('./plugins'),
-    Notifications = module.parent.require("./notifications"),
-    translator = module.parent.require('./translator'),
-    whoisin;
+    Notifications = module.parent.require("./notifications");
+    //translator = module.parent.require('../public/src/translator');
 
-  var parse = async.apply(plugins.fireHook, 'filter:parse.raw');
+  var parse = async.apply(plugins.fireHook, 'filter:parse.raw'),
+  whoisin;
   // parse(raw, callback(err, html){})
 
-  var db = require("subs/db"),
-    posts = require("subs/posts");
+  var db = require("./subs/db"),
+    posts = require("./subs/posts");
 
   function user(uid, events, callback){
 
@@ -79,7 +79,7 @@
         globals.delete = globals.admin;
         next();
       },
-      function(prev, next){
+      function(next){
         if(!events || !events.length){
           return next();
         }
@@ -134,7 +134,14 @@
         if (err) {
           return next(err);
         }
-        res.render("admin/plugins/calendar", data);
+        var settings = {
+          create: data.create || "",
+          edit: data.edit || "",
+          admin: data.admin || "",
+          category: data.category || "",
+          usewhoisin: !!data.usewhoisin
+        };
+        res.render("admin/plugins/calendar", settings);
       });
     },
     page: function(req, res, next){
@@ -142,8 +149,12 @@
         if(err){
           return next(err);
         }
-        settings.usewhoisin = settings.usewhoisin && whoisin;
-        db.getEvents(function(err, events){
+        var ago = new Date();
+        var ahead = new Date();
+        ago.setMonth(ago.getMonth()-6);
+        ahead.setMonth(ahead.getMonth()+6);
+        var today = new Date();
+        db.getEventsByDate(ago, ahead, function(err, events){
           if(err){
             return next(err);
           }
@@ -152,18 +163,33 @@
               return next(err);
             }
             eventstuff.trim(events, can, function(err, events){
-              next(err, {
+              if(err){
+                return next(err);
+              }
+              res.render("calendar", {
                 events: events,
                 canCreate: can("create"),
-                settings: settings
+                whoisin: !!settings.usewhoisin && whoisin,
+                today: {
+                  date: today.getDate(),
+                  month: today.getMonth(),
+                  year: today.getFullYear()
+                }
               });
             });
           });
         });
       });
     },
-    saveAdmin: function(req, res, next){
-      db.settings.set(req.body, function(err, data){
+    saveAdmin: function(req, res){
+      var settings = {
+        create: req.body.create,
+        edit: req.body.edit,
+        admin: req.body.admin,
+        category: req.body.category,
+        usewhoisin: !!req.body.usewhoisin
+      };
+      db.settings.set(settings, function(err){
         if(err){
           res.json(false);
         } else {
@@ -178,7 +204,10 @@
       var soks = mainSocket.server.sockets.in("calendar").sockets;
       async.each(Object.keys(soks), function(x, next){
         user(soks[x].uid).can("view", event, function(err, bool){
-          if(!err && bool){
+          if(err){
+            return next(err);
+          }
+          if(bool){
             mainSocket.server.sockets.socket(soks[x].uid).emit(message, event);
           }
         });
@@ -186,16 +215,131 @@
     },
     on: {
       createEvent: function(socket, event, callback){
-
+        async.waterfall([
+          async.apply(user, socket.uid, null),
+          function(can, next){
+            if(!can("create")){
+              next(new Error("[[calendar:permissions.forbidden.create]]"));
+            } else {
+              next(null, can);
+            }
+          },
+          function(can, next){
+            async.parallel({
+              place: async.apply(parse, event.rawPlace),
+              description: async.apply(parse, event.rawDescription),
+              name: function(next){
+                next(null, sanitize(event.name));
+              },
+            }, next);
+          },
+          function(parsed, next){
+            event = {
+              start: event.start,
+              end: event.end,
+              uid: socket.uid,
+              rawPlace: event.rawPlace,
+              rawDescription: event.rawDescription,
+              place: parsed.place,
+              description: parsed.description,
+              name: parsed.name,
+              allday: event.allday,
+              notifications: event.notifications,
+              editors: event.editors,
+              viewers: event.viewers,
+              blocked: event.blocked
+            };
+            next(null, event);
+          },
+          posts.create,
+          eventstuff.create,
+          function(event, next){
+            sockets.emitEventChange(event, "calendar.event.create", next);
+          }
+        ], callback);
       },
       editEvent: function(socket, event, callback){
-
+        async.waterfall([
+          async.apply(user, socket.uid, null),
+          function(can, next){
+            if(!can("edit", event)){
+              next(new Error("[[calendar:permissions.forbidden.edit]]"));
+            } else {
+              next(null, can);
+            }
+          },
+          function(can, next){
+            async.parallel({
+              place: async.apply(parse, event.rawPlace),
+              description: async.apply(parse, event.rawDescription),
+              name: function(next){
+                next(null, sanitize(event.name));
+              },
+            }, next);
+          },
+          function(parsed, next){
+            db.event.get(event.id, function(err, oldEvent){
+              next(err, { oldEvent: oldEvent, parsed: parsed });
+            });
+          },
+          function(obj, next){
+            event = {
+              id: event.id,
+              start: new Date(event.start).toISOString(),
+              end: new Date(event.end).toISOString(),
+              rawPlace: event.rawPlace,
+              rawDescription: event.rawDescription,
+              place: obj.parsed.place,
+              description: obj.parsed.description,
+              name: obj.parsed.name,
+              allday: !!event.allday,
+              notifications: event.notifications,
+              editors: event.editors,
+              viewers: event.viewers,
+              blocked: event.blocked,
+              pid: event.pid,
+            };
+            next(null, event);
+          },
+          posts.update,
+          eventstuff.edit,
+          function(event, next){
+            sockets.emitEventChange(event, "calendar.event.edit", next);
+          }
+        ], callback);
       },
       deleteEvent: function(socket, event, callback){
-
+        async.waterfall([
+          async.apply(user, socket.uid, null),
+          function(can, next){
+            if(!can("delete", event)){
+              next(new Error("[[calendar:permissions.forbidden.delete]]"));
+            } else {
+              next(null, can);
+            }
+          },
+          posts.delete,
+          eventstuff.delete,
+          function(event, next){
+            event = {
+              id: event.id
+            };
+            sockets.emitEventChange(event, "calendar.event.delete", next);
+          }
+        ], callback);
       },
-      response: function(socket, response, callback){
-        db.event.responses.set(response.event, response.uid, response.value, callback);
+      respond: function(socket, response, callback){
+        async.waterfall([
+          async.apply(user, response.uid, [response.event]),
+          function(can, next){
+            if(!can("view", response.event)){
+              return next(new Error("[[calendar:permissions.forbidden.view]]"));
+            }
+            next();
+          },
+          async.apply(db.event.responses.set, response.event, response.uid, response.value),
+          async.apply(sockets.emitEventChange, response.event, "calendar.event.respond")
+        ], callback);
       }
     }
   };
@@ -204,35 +348,15 @@
 
   var eventstuff = {
     edit: function(rawEvent, callback){
-      var event = {
-        id: rawEvent.id,
-        start: rawEvent.start,
-        end: rawEvent.end,
-        uid: rawEvent.uid,
-        name: rawEvent.name,
-        place: rawEvent.place,
-        description: rawEvent.description,
-        allday: rawEvent.allDay
-      };
       async.parallel([
         async.apply(db.event.edit, rawEvent),
         async.apply(db.event.permissions.set, rawEvent),
         async.apply(notifications.handle, rawEvent)
-      ], function(err){
-        callback(err, event);
+      ], function(err, result){
+        callback(err, result[0]);
       });
     },
     create: function(rawEvent, callback){
-      var event = {
-        id: rawEvent.id,
-        start: rawEvent.start,
-        end: rawEvent.end,
-        uid: rawEvent.uid,
-        name: rawEvent.name,
-        place: rawEvent.place,
-        description: rawEvent.description,
-        allday: rawEvent.allDay
-      };
       async.parallel([
         async.apply(db.event.add, rawEvent),
         async.apply(db.event.permissions.set, rawEvent),
@@ -247,7 +371,9 @@
         async.apply(notifications.delete, rawEvent),
         async.apply(db.event.responses.delete, rawEvent),
         async.apply(notifications.clear, rawEvent)
-      ], callback);
+      ], function(err){
+        callback(err, rawEvent);
+      });
     },
     trim: function(events, can, callback){
       events = events.filter(function(event){
@@ -255,25 +381,34 @@
       }).map(function(event){
         event.canEdit = can("edit", event);
         event.canDelete = can("delete", event);
-        if(!event.canEdit){
-          event = {
-            id: event.id,
-            canEdit: event.canEdit,
-            canDelete: event.canDelete,
-            start: event.start,
-            end: event.end,
-            uid: event.uid,
-            name: event.name,
-            place: event.place,
-            description: event.description,
-            allday: event.allday,
-            responses: event.responses,
-            url: event.url,
-          };
+        var ev = {
+          id: event.id,
+          start: event.start,
+          end: event.end,
+          uid: event.uid,
+          name: event.name,
+          place: event.place,
+          description: event.description,
+          allday: event.allday,
+          responses: event.responses,
+          url: event.url,
+        };
+        if(event.canEdit){
+          ev.canEdit = true;
+          ev.canDelete = event.canDelete;
+          ev.rawPlace = event.rawPlace;
+          ev.rawDescription = event.rawDescription;
+          ev.notifications = event.notifications;
         }
-        return event;
+        return ev;
       });
-      callback(null, events);
+
+      var evs = [];
+      for(var i=0; i<events.length; i++){
+        evs[events[i].id] = events[i];
+      }
+
+      callback(null, evs);
     }
   };
 
@@ -304,7 +439,7 @@
         }
       }
 
-      console.log(notifs);
+      //console.log("line 420: ", notifs);
       for(x in notifs){
         if(notifs.hasOwnProperty(x)){
           id = notifs[x].id;
@@ -350,6 +485,9 @@
           async.apply(async.map, event.viewers.groups, db.groups.getMembers),
           async.apply(async.map, event.editors.groups, db.groups.getMembers)
         ], function(err, users){
+          if(err){
+            return callback(err);
+          }
           users = users[0].concat(users[1]);
           users = Array.prototype.concat.apply([], users);
           users.reduce(function(elem){
@@ -399,12 +537,13 @@
     });
     callback(null, header);
   };
-  exports.init = function (obj, callback) {
+
+  exports.init = function(obj, callback) {
     obj.router.get('/calendar', obj.middleware.buildHeader, render.page);
     obj.router.get('/api/calendar', render.page);
     obj.router.get('/admin/plugins/calendar', obj.middleware.admin.buildHeader, render.admin);
     obj.router.get('/api/admin/plugins/calendar', render.admin);
-    obj.router.post("/api/admin/plugins/calendar/save", render.saveAdmin);
+    obj.router.post('/api/admin/plugins/calendar/save', render.saveAdmin);
     async.parallel([
       function(next){
         db.getNotifications(function(err, data){
@@ -415,65 +554,48 @@
         });
       },
       function(next){
-        db.settings.get(function(err, settings){
-          if(err){
-            return next(err);
-          }
-          try {
-            whoisin = require("../nodebb-plugin-whoisin");
-            if(!whoisin.include || typeof whoisin.include !== "function" || !settings.usewhoisin){
-              whoisin = false;
-            }
-          } catch(e){
+        try {
+          whoisin = require("../nodebb-plugin-whoisin");
+          if(!whoisin.include || typeof whoisin.include !== "function"){
             whoisin = false;
           }
-          if(whoisin){
-            console.log("[nodebb-plugin-whoisin] being utilized in [nodebb-plugin-calendar]");
-          }
-          next();
-        });
+        } catch(e){
+          whoisin = false;
+        }
+        if(whoisin){
+          console.log("[nodebb-plugin-whoisin] being utilized in [nodebb-plugin-calendar]");
+        }
+        next();
       },
-      function(next){
-        var rootDir = "public/translations", filePath, dirs = [];
-        async.waterfall([
-          async.apply(fs.readDir, rootDir),
-          function(files, next){
-            async.each(files, function(file, nxt){
-              if(file[0] !== '.'){
-                filePath = rootDir + '/' + file;
-                fs.stat(filePath, function(err, stat){
-                  if(err){
-                    return nxt(err);
-                  }
-                  if(stat.isDirectory()){
-                    dirs.push(file);
-                  }
-                  nxt();
-                });
-              }
-            }, function(err){
-              next(err, dirs);
-            });
-          },
-          function(dirs, next){
-            async.each(dirs, function(dir, nxt){
-              fs.readDir(dir, function(err, files){
-                if(err){
-                  return nxt(err);
-                }
-                async.each(files, function(file, cb){
-                  if(file[0] !== '.'){
-                    filePath = rootDir + '/' + file;
-                    translator.addTranslation(dir, filePath);
-                  }
-                  cb();
-                }, nxt);
-              });
-            }, next);
-          }
-        ], next);
+    ], function(err){
+      callback(err);
+    });
+  };
+
+  exports.topicFilter = function(topicData, callback){
+    db.event.getByTid(topicData.tid, function(err, event){
+      if(err){
+        return callback(err);
       }
-    ], callback);
+      if(!event || !event.id){
+        return callback(null, topicData);
+      }
+      user(topicData.uid, [event], function(err, can){
+        if(err){
+          return callback(err);
+        }
+        if(can("view", event)){
+          callback(null, { topic: topicData.topic });
+        } else {
+          callback(null, null);
+        }
+      });
+    });
+  };
+
+  exports.postParse = function(postContent){
+    var reg = new RegExp("\\[\\s*\s*allday\s*\=\s*(\w*)\s*date\\s*\\=\\s*((\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d\\.\\d+([+-][0-2]\\d:[0-5]\\d|Z))|(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z))|(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)))\\s*\\]", "g");
+    return postContent.replace(reg, '<span class="date-timestamp" data-allday="$1" data-timestamp="$2"></span>');
   };
 
 })(module.exports, module);

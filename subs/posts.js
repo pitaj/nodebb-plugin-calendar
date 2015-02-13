@@ -1,22 +1,31 @@
+(function(module){
+
 "use strict";
 
 var posttools = module.parent.parent.require("./postTools"),
-  topics = module.parent.parent.require("./topics");
+  topics = module.parent.parent.require("./topics"),
+  postsModule = module.parent.parent.require("./posts");
 
 var posts = module.exports = {
   create: function(event, callback){
-    topics.post({
-      uid: event.uid,
-      cid: event.cid,
-      title: event.name,
-      content: event.raw
-    }, function(err, data){
+    posts.compile(event, function(err, raw){
       if(err){
         return callback(err);
       }
-      event.tid = data.postData.tid;
-      event.pid = data.postData.pid;
-      callback(null, event);
+      topics.post({
+        uid: event.uid,
+        cid: event.cid,
+        title: event.name,
+        content: raw
+      }, function(err, data){
+        if(err){
+          return callback(err);
+        }
+        event.url = "/category/"+event.cid+"/"+data.topicData.slug;
+        event.pid = data.postData.pid;
+        event.tid = data.postData.tid;
+        callback(null, event);
+      });
     });
   },
   update: function(event, callback){
@@ -32,13 +41,23 @@ var posts = module.exports = {
       }, callback);
     });
   },
+  delete: function(event, callback){
+    postsModule.getPostField(event.pid, 'tid', function(err, tid) {
+      if (err) {
+        return callback(err);
+      }
+      topics.delete(tid, callback);
+    });
+  },
   compile: function(event, callback){
-    app.render('calendar/post', {
+    app.render('partials/calendar/post', {
       start: event.start,
       end: event.end,
-      place: event.place,
-      description: event.description,
+      place: event.rawPlace,
+      description: event.rawDescription,
       allday: event.allday
     }, callback);
   }
 };
+
+})(module);

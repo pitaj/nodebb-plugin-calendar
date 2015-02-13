@@ -1,0 +1,68 @@
+#cal-toolbar {
+  /*padding: 10px;*/
+  line-height: 25px;
+}
+#cal-toolbar .left {
+  font-size: 18px;
+  color: #444;
+}
+#cal-toolbar .button-add-event > span {
+  margin-right: 5px;
+}
+#cal-toolbar .button-add-event,
+#cal-toolbar .button-today {
+  float: right;
+  margin-left:5px;
+  padding-left: 7px;
+  padding-right: 7px;
+}
+#cal-toolbar .button-add-event i {
+  font-size: 30px;
+  line-height: 1px;
+  position: relative;
+  bottom: -7px;
+}
+#cal-toolbar .button-today {
+  padding-left: 3px;
+  padding-right: 3px;
+}
+#cal-toolbar .button-today i {
+  margin-left: -16px;
+  margin-right: 8px;
+  line-height: 1px;
+  position: relative;
+  bottom: -3px;
+}
+#cal-toolbar .button-today i:before {
+  position: relative;
+  right: -50%;
+  font-size: 25px;
+}
+#cal-toolbar .left .arrows {
+  position: relative;
+  font-size: 14px;
+  height: 30px;
+  display: inline-block;
+  top: 4px;
+  left: -25px;
+}
+#cal-toolbar .left .arrows i:first-child {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+#cal-toolbar .left .arrows i:last-child {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+}
+#cal-year-select {
+  padding-right:20px;
+  vertical-align:top;
+  padding-left: 8px;
+}
+.form-inline .form-group {
+  display: inline-block;
+  margin-bottom: 0;
+  vertical-align: middle;
+}

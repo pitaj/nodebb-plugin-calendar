@@ -1,0 +1,92 @@
+#cal {
+  position:relative;
+  height:100%;
+  border: 1px solid #ddd;
+  background-color: white;
+}
+#cal table {
+  width: 100%;
+}
+#cal-headers-cont {
+  overflow-y: scroll;
+  width:100%;
+}
+#cal-headers {
+  height: 100%;
+}
+#cal-headers tr {
+  height: 100%;
+  color: #444;
+  text-align: center;
+  font-weight: bold;
+}
+#cal td {
+  border: 1px solid #ddd;
+  margin: 0;
+  max-width: 14.28571428571429%;
+  width: 14.28571428571429%;
+  position: relative;
+}
+#cal td:first-child {
+  border-left: none;
+}
+#cal-days-container {
+  overflow-y: scroll;
+  width: 100%;
+  position: absolute;
+  top: 72px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+#cal-days tr {
+  height: 50px;
+  vertical-align: top;
+  text-align: right;
+}
+#cal .event {
+  text-align: left;
+  font-size: 0;
+  line-height: 7px;
+  border: 1px solid #3a87ad;
+  background-color: #3a87ad;
+  font-weight: normal;
+  color: whitesmoke;
+  padding: 0 1px;
+  overflow: hidden;
+  margin-bottom: 2px;
+  cursor: pointer;
+}
+#cal td.dark-month {
+  background-color: rgba(192, 192, 192, 0.2);
+  background-clip: padding-box;
+}
+#cal td .day-number {
+  display: block;
+  padding-right: 3px;
+  color: #444;
+  font-family: Lato, sans-serif;
+  font-weight: 300;
+  margin-bottom: 2px;
+}
+#cal #cal-day-selected {
+  background: #CFFFCA;
+}
+#cal-days tr {
+  height: 13.33vh;
+}
+@media (min-width: 768px) {
+  #cal {
+    position: relative;
+    float: left;
+    width: 60%;
+    height: 100%;
+    margin-right: 10px;
+    max-width:800px;
+  }
+}
+@media (min-width:1100px){
+  #cal {
+    max-width: 50%;
+  }
+}

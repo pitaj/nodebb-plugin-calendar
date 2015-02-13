@@ -3,3 +3,5 @@ node_modules
 npm-debug.log
 public/style.o.css
 library.o.js
+public/cal.o.js
+.eslintrc

@@ -1,0 +1,57 @@
+#cal-sidebar .content > .day {
+  float: left;
+  width: 50%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: 100%;
+  transition: margin-left .1s linear;
+  margin-left:-100%;
+  border-right: 1px solid #ddd;
+}
+#cal-sidebar .content > .day.active {
+  margin-left:0;
+}
+#cal-sidebar .content > .day .date {
+  text-align: center;
+  font-size: 20px;
+  padding: 10px;
+}
+#cal-sidebar .content > .day .event {
+  padding: 10px;
+  padding-bottom: 15px;
+  border-top: 1px solid rgb(231, 231, 231);
+  cursor: pointer;
+  margin: 0;
+  width: 100%;
+  height: initial;
+  overflow: hidden;
+}
+#cal-sidebar .content > .day .event .event-name {
+  font-weight: bold;
+  font-size: 15px;
+}
+#cal-sidebar .content > .day .event .time {
+  line-height: 12px;
+  margin-top: 2px;
+  font-size: 11px;
+  font-variant: small-caps;
+}
+#cal-sidebar .content > .day .event .place {
+  font-size: 13px;
+}
+#cal-sidebar .content > .day .event:hover {
+  background-color: #F2F2F2;
+}
+#cal-sidebar .content > .day .event:active {
+  background-color: grey;
+  color: white;
+}
+#cal-sidebar .content > .day .events {
+  overflow-y: auto;
+}
+
+@media (min-width:1100px), (min-width: 650px) and (max-width: 767px){
+  #cal-sidebar .content > .day {
+    margin-left:0;
+  }
+}

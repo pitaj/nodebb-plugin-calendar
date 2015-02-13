@@ -1,0 +1,173 @@
+#cal-sidebar .content > .event {
+  float: left;
+  width: 50%;
+  overflow-x: hidden;
+  position: relative;
+  height: 100%;
+}
+#cal-sidebar .content > .event .view iframe.comments {
+  border: none;
+  padding: 0;
+  width: 100%;
+  min-height: 300px;
+}
+#cal-sidebar .content > .event .edit > span {
+  float: left;
+}
+#cal-sidebar .content .event .view .topic-profile-pic a {
+  display: block;
+}
+#cal-sidebar .content .event .view .topic-profile-pic {
+  float: left;
+  margin: 10px;
+  margin-right: 15px;
+}
+#cal-sidebar .content .event .view .name {
+  text-align: center; font-size: 20px; padding: 10px;
+}
+#cal-sidebar .content .event .view .date {
+  margin-bottom: 5px;
+  margin-left:10px;
+}
+#cal-sidebar .content .event .view .date::before {
+  content: "when: ";
+  font-variant: small-caps;
+}
+#cal-sidebar .content .event .view .date span {
+  display:block;
+}
+#cal-sidebar .content .event .view .place {
+  margin-left:10px;
+}
+#cal-sidebar .content .event .view .place::before {
+  content: "where: ";
+  font-variant: small-caps;
+}
+#cal-sidebar .content .event .view .responses div.my-response span {
+  cursor: pointer;
+}
+#cal-sidebar .content .event .view .responses div {
+  margin-bottom: 5px;
+}
+#cal-sidebar .content .event .view .responses div span {
+  border-radius: 3px;
+  padding:2px 5px;
+  margin-left:3px;
+}
+#cal-sidebar .content .event .view .responses div span.invited {
+  background-color: lightgrey;
+}
+#cal-sidebar .content .event .view .responses div span.not-attending {
+  background-color: pink;
+}
+#cal-sidebar .content .event .view .responses div span.attending {
+  background: lightgreen;
+}
+#cal-sidebar .content .event .view .responses div span.maybe {
+  background: lightblue;
+}
+#cal-sidebar .content .event .view .responses div small.username {
+  font-size: 15px;
+  font-weight: bold;
+}
+#cal-sidebar .content .event .view .responses {
+  padding-left:10px;
+}
+#cal-sidebar .content .event .view .responses::before {
+  display: block;
+  content: "Responses";
+  font-size: 16px;
+  margin-bottom:5px;
+}
+#cal-sidebar .content .event .view .cal-whoisin .whoisin {
+  margin-left: 10px;
+  margin-bottom: 30px;
+}
+#cal-sidebar .content .event .view .cal-whoisin .whoisin h4 {
+  display: block;  content: "Description";  font-size: 16px;
+  margin-bottom: 5px;
+  font-family: inherit;
+  line-height: inherit;
+}
+#cal-sidebar .content .event .view .comments-title {
+  display: block;
+  padding-left: 10px;
+  font-size: 16px;
+}
+#cal-sidebar .content .event .view .description {
+  padding-left:10px;
+}
+#cal-sidebar .content .event .view .description::before {
+  display: block;
+  content: "Description";
+  font-size: 16px;
+  margin-bottom:5px;
+}
+#cal-sidebar .content .event .view.unselected .name {
+  display: block;
+}
+#cal-sidebar .content .event .view.unselected * {
+  display: none;
+}
+#cal-sidebar .content .event .view .responses div span.selected {
+  border: 1px solid black;
+}
+#cal-sidebar .content .event .view .edit-event-button {
+  float: right;
+  margin: 10px;
+}
+#cal-sidebar .content .event .edit {
+  position: absolute;
+  background: #FAFAFA;
+  padding: 10px;
+  font-weight: bold;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  overflow: auto;
+}
+#cal-sidebar .content .event .edit input, #cal-sidebar .content .event .edit textarea {
+  font-weight: normal;
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
+#cal-sidebar .content .event .edit textarea {
+  height: 200px;
+}
+#cal-sidebar .content .event .edit .allday {
+  margin-right: 4px;
+}
+#cal-sidebar .content .event .edit .title {
+  text-align: center;
+  font-size: 20px;
+  margin-bottom: 20px;
+  display: block;
+  font-weight: normal;
+  float:none;
+}
+#cal-sidebar .content .event .edit .save-event-button {
+  float: right;
+}
+#cal-sidebar .content .event .edit .delete-event-button {
+  float: left;
+  margin-left: 10px;
+}
+#cal-sidebar .content .event .edit .cancel-edit-button {
+  float: left;
+}
+#cal-sidebar .content .event .edit small {
+  font-weight:normal;
+  opacity: 0;
+  transition: opacity .25s ease-in, max-height .25s;
+  display:block;
+  max-height:20px;
+  text-align:right;
+}
+#cal-sidebar .content .event .edit small:hover {
+  opacity:1;
+  max-height:50px;
+}
+#cal-sidebar.down {
+  top: 100%;
+}

@@ -17,34 +17,42 @@
   <br><br>
   [[calendar_admin:explanation_one_group]]
 </p><br>
+<button id="save-button" class="btn btn-primary">[[global:save_changes]]</button>
 <p>
   [[calendar_admin:explanation_global_note]]
   <br><br>
   [[calendar_admin:explanation_individual_rights]]
 </p>
-<button id="save-button" class="btn btn-primary">[[global:save_changes]]</button>
 <br>
 <div class="inputContainer">
   <div>
-    [[calendar_admin:creation_rights]]:
-    <input type="text" class="creators form-control" placeholder="[[calendar_admin:creation_placeholder]" value="{create}" />
+    <!-- [[calendar_admin:creation_rights]]: -->
+    <input type="text" class="creators form-control" placeholder="[[calendar_admin:creation_placeholder]]" value="{create}" />
   </div>
   <div>
-    [[calendar_admin:edit_rights]]:
+    <!-- [[calendar_admin:edit_rights]]: -->
     <input type="text" class="editors form-control" placeholder="[[calendar_admin:edit_placeholder]]" value="{edit}" />
   </div>
   <div>
-    [[calendar_admin:admin_rights]]:
-    <input type="text" class="admins form-control" placeholder="[[calendar_admin:admin_placeholder]]" value="{admins}" />
+    <!-- [[calendar_admin:admin_rights]]: -->
+    <input type="text" class="admins form-control" placeholder="[[calendar_admin:admin_placeholder]]" value="{admin}" />
   </div>
 </div>
 <br>
 <hr>
 [[calendar_admin:category_label]]:
 <input class="category form-control" placeholder="[[calendar_admin:category_placeholder]]" value="{category}" />
-<hr>
-[[calendar_admin:use_whoisin_label]]
-<input type="checkbox" class="usewhoisin form-control" checked="{usewhoisin}" />
+
+<div class="checkbox">
+  <label>
+    <!-- IF usewhoisin -->
+    <input type="checkbox" class="usewhoisin" checked>
+    <!-- ELSE -->
+    <input type="checkbox" class="usewhoisin">
+    <!-- ENDIF usewhoisin -->
+     [[calendar_admin:use_whoisin_label]]
+  </label>
+</div>
 
 <style>
 #save-button {
@@ -55,6 +63,20 @@
   width:25%;
   margin-left: 8%;
 }
+.inputContainer > div > span {
+  width:100%;
+}
+.tt-suggestion {
+  padding: 3px 20px;
+  clear: both;
+  font-weight: 400;
+  line-height: 1.42857143;
+  color: #333;
+  white-space: nowrap;
+}
+.tt-suggestion.tt-cursor {
+  background-color: #f5f5f5;
+}
 </style>
 <script src="/plugins/nodebb-plugin-calendar/public/typeahead.bundle.js"></script>
 <script>
@@ -62,7 +84,7 @@ $("#save-button").click(function(){
   $.post("/api/admin/plugins/calendar/save", {
     create: $(".creators").val(),
     edit: $(".editors").val(),
-    admin: $(".admins").val()
+    admin: $(".admins").val(),
     category: $(".category").val(),
     usewhoisin: $(".usewhoisin").prop("checked")
   }, function(data){
@@ -75,9 +97,7 @@ $("#save-button").click(function(){
 });
 
 var engine = new Bloodhound({
-  datumTokenizer: function(){
-    return Bloodhound.tokenizers.obj.whitespace('name');
-  },
+  datumTokenizer: Bloodhound.tokenizers.obj.whitespace,
   queryTokenizer: Bloodhound.tokenizers.whitespace,
   limit: 10,
   prefetch: {

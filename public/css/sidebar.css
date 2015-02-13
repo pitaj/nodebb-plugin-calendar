@@ -1,0 +1,53 @@
+@import url("/plugins/nodebb-plugin-calendar/public/css/sidebar-nav.css");
+@import url("/plugins/nodebb-plugin-calendar/public/css/sidebar-event.css");
+@import url("/plugins/nodebb-plugin-calendar/public/css/sidebar-day.css");
+
+#cal-sidebar {
+  background-color: white;
+  position: fixed;
+  top: 85px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 1px solid #ddd;
+  transition: top .1s linear;
+}
+#cal-sidebar .toggle {
+  background: dimgray;
+  text-align: center;
+  margin-top: -20px;
+  color:white;
+}
+#cal-sidebar hr {
+  float: left;
+  width: 100%;
+  margin: 10px 0;
+}
+#cal-sidebar .content {
+  font-family: Arial, Sans-serif;
+  width: 200%;
+  position: absolute;
+  top: 41px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  #cal-sidebar .toggle {
+    display:none;
+  }
+  #cal-sidebar {
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+    top: 0;
+  }
+}
+
+@media (min-width:1100px), (min-width: 650px) and (max-width: 767px){
+  #cal-sidebar .content {
+    width: 100%;
+  }
+}

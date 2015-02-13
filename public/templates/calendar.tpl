@@ -1,159 +1,130 @@
+<div id="cal">
+  <div id="cal-toolbar">
+    <button class="button-add-event btn btn-success">
+      <span class="hidden-xs">[[calendar:add_event]]</span>
+      <i class="fa fa-plus-square-o"></i>
+    </button>
+    <button class="button-today btn btn-primary">
+      <span class="hidden-xs">[[calendar:today]]</span>
+      <i class="fa fa-calendar-o">{today.date}</i>
+    </button>
+    <div class="left">
+      <form class="form-inline">
+        <div class="form-group">
+          <label class="sr-only" for="cal-month-select">[[calendar:month]]</label>
+          <div class="dropdown" id="cal-month-select">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+              <span class="month">[[calendar:month_{today.month}]]</span> <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+              <li data-value="0">
+                <a href="#" >[[calendar:month_0]]</a>
+              </li>
+              <li data-value="1">
+                <a href="#" >[[calendar:month_1]]</a>
+              </li>
+              <li data-value="2">
+                <a href="#" >[[calendar:month_2]]</a>
+              </li>
+              <li data-value="3">
+                <a href="#" >[[calendar:month_3]]</a>
+              </li>
+              <li data-value="4">
+                <a href="#" >[[calendar:month_4]]</a>
+              </li>
+              <li data-value="5">
+                <a href="#" >[[calendar:month_5]]</a>
+              </li>
+              <li data-value="6">
+                <a href="#" >[[calendar:month_6]]</a>
+              </li>
+              <li data-value="7">
+                <a href="#" >[[calendar:month_7]]</a>
+              </li>
+              <li data-value="8">
+                <a href="#" >[[calendar:month_8]]</a>
+              </li>
+              <li data-value="9">
+                <a href="#" >[[calendar:month_9]]</a>
+              </li>
+              <li data-value="10">
+                <a href="#" >[[calendar:month_10]]</a>
+              </li>
+              <li data-value="11">
+                <a href="#" >[[calendar:month_11]]</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="sr-only" for="cal-year-select">[[calendar:year]]</label>
+          <input id="cal-year-select" type="tel" value="{today.year}" class="btn btn-default" max="2100" min="1950" size="4" maxlength="4" minlength="4"/>
+          <span class="arrows">
+            <i class="fa fa-chevron-circle-up"></i>
+            <i class="fa fa-chevron-circle-down"></i>
+          </span>
+        </div>
+      </form>
+    </div>
+  </div>
 
-<div id="container0">
-  <span> 0px </span>
-  <span> 100px </span>
-  <span> 200px </span>
-  <span> 300px </span>
-  <span> 400px </span>
-  <span> 500px </span>
-  <span> 600px </span>
-  <span> 700px </span>
-  <span> 800px </span>
-  <span> 900px </span>
-  <span> 1000px </span>
-  <span> 1100px </span>
-  <span> 1200px </span>
-  <span> 1300px </span>
-  <span> 1400px </span>
-  <span> 1500px </span>
-  <span> 1600px </span>
-  <span> 1700px </span>
-  <span> 1800px </span>
-  <span> 1900px </span>
-  <span> 2000px </span>
-  <span> 2100px </span>
-  <span> 2200px </span>
-  <span> 2300px </span>
-  <span> 2400px </span>
-  <span> 2500px </span>
-  <span> 2600px </span>
-  <span> 2700px </span>
-  <span> 2800px </span>
-  <span> 2900px </span>
-  <span> 3000px </span>
-  <span> 3100px </span>
-  <span> 3200px </span>
-  <span> 3300px </span>
-  <span> 3400px </span>
-  <span> 3500px </span>
-  <span> 3600px </span>
-  <span> 3700px </span>
-  <span> 3800px </span>
-  <span> 3900px </span>
-  <span> 4000px </span>
+  <div id="cal-headers-cont">
+    <table id="cal-headers">
+      <tbody>
+        <tr>
+          <td>
+            [[calendar:day_0]]
+          </td>
+          <td>
+            [[calendar:day_1]]
+          </td>
+          <td>
+            [[calendar:day_2]]
+          </td>
+          <td>
+            [[calendar:day_3]]
+          </td>
+          <td>
+            [[calendar:day_4]]
+          </td>
+          <td>
+            [[calendar:day_5]]
+          </td>
+          <td>
+            [[calendar:day_6]]
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="cal-days-container">
+    <table id="cal-days">
+      <tbody>
+
+      </tbody>
+    </table>
+  </div>
 </div>
 
-<div id="scrollTop">0</div>
-
-<div class="row">
-  <div>
-    <div id="cal">
-      <div id="cal-toolbar">
-        <div class="button-add-event right">
-          <i class="fa fa-plus-square-o"></i>
-        </div>
-        <div class="button-today arrow-group">
-          <i class="fa fa-calendar-o">6</i>
-        </div>
-        <div class="center">
-          <select id="cal-month-select">
-            <option value="0">
-              [[calendar:month_0]]
-            </option>
-            <option value="1">
-              [[calendar:month_1]]
-            </option>
-            <option value="2">
-              [[calendar:month_2]]
-            </option>
-            <option value="3">
-              [[calendar:month_3]]
-            </option>
-            <option value="4">
-              [[calendar:month_4]]
-            </option>
-            <option value="5">
-              [[calendar:month_5]]
-            </option>
-            <option value="6">
-              [[calendar:month_6]]
-            </option>
-            <option value="7">
-              [[calendar:month_7]]
-            </option>
-            <option value="8">
-              [[calendar:month_8]]
-            </option>
-            <option value="9">
-              [[calendar:month_9]]
-            </option>
-            <option value="10">
-              [[calendar:month_10]]
-            </option>
-            <option value="11">
-              [[calendar:month_11]]
-            </option>
-          </select>
-          <input id="cal-year-select" type="number" value="2014"/>
-        </div>
-      </div>
-      <div id="cal-headers-cont">
-      <table id="cal-headers">
-        <tbody>
-          <tr>
-            <td>
-              [[calendar:day_0]]
-            </td>
-            <td>
-              [[calendar:day_1]]
-            </td>
-            <td>
-              [[calendar:day_2]]
-            </td>
-            <td>
-              [[calendar:day_3]]
-            </td>
-            <td>
-              [[calendar:day_4]]
-            </td>
-            <td>
-              [[calendar:day_5]]
-            </td>
-            <td>
-              [[calendar:day_6]]
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-      <div id="cal-days-container">
-        <table id="cal-days">
-          <tbody>
-
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <div id="cal-sidebar">
-    <div class="toggle">
-      <i class="fa fa-chevron-up"></i>
-    </div>
-    <ul class="nav">
-      <li class="day cal-sb-active">
-        <a href="#" title="" data-original-title="[[calendar:day_title]]">
+<div id="cal-sidebar">
+  <div class="toggle">
+    <i class="fa fa-chevron-down"></i>
+  </div>
+  <ul class="nav">
+    <li role="presentation" class="day">
+      <a href="#" title="" data-original-title="[[calendar:day_title]]" class="active">
           [[calendar:day_title]]
         </a>
-      </li>
-      <li class="event">
-        <a href="#" title="" data-original-title="[[calendar:event_title]]">
+    </li>
+    <li role="presentation" class="event">
+      <a href="#" title="" data-original-title="[[calendar:event_title]]">
           [[calendar:event_title]]
         </a>
-      </li>
-    </ul>
-    <div class="content">
-    <div class="day">
+    </li>
+  </ul>
+  <div class="content">
+    <div class="day active">
       <div class="date">
 
       </div>
@@ -179,7 +150,8 @@
         <hr>
         <div class="responses">
           <div class="my-response">
-            <small class="username" title="You"><a href="/user/{{user.name}}">{{user.fullname}}</a></small>
+            <small class="username" title="You"><a href="/user/{{user.name}}">{{user.fullname}}</a>
+            </small>
             <span class="invited">[[calendar:response_invited]]</span>
             <span class="not-attending">[[calendar:response_not_attending]]</span>
             <span class="maybe">[[calendar:response_maybe]]</span>
@@ -195,7 +167,7 @@
       </div>
 
       <div class="edit" style="display:none;">
-        <button class="save-event-button btn btn-success"><i class="fa fa-save"></i>  [[groups:cover-save]]</button>
+        <button class="save-event-button btn btn-success"><i class="fa fa-save"></i> [[groups:cover-save]]</button>
         <button class="cancel-edit-button btn btn-warning"><i class="fa fa-times"></i> [[calendar:cancel]]</button>
         <button class="delete-event-button btn btn-danger"><i class="fa fa-trash-o"></i> [[topic:delete]]</button>
 
@@ -205,7 +177,8 @@
 
         <span>[[calendar:event_name]]: </span>
         <input class="name form-control" placeholder="Event name" />
-        <input type="checkbox" class="allday" /> [[calendar:all_day]]<br>
+        <input type="checkbox" class="allday" /> [[calendar:all_day]]
+        <br>
         <span>[[calendar:start_date]]: </span>
         <input class="start-time form-control" />
         <span>[[calendar:end_date]]: </span>
@@ -214,7 +187,8 @@
         <input class="place form-control" placeholder="[[calendar:place]]" />
         <span>[[calendar:editors]]: </span>
         <input class="editors form-control" placeholder="[[calendar:start_typing]]" />
-        <input type="checkbox" class="public" /> [[calendar:public]]<br>
+        <input type="checkbox" class="public" /> [[calendar:public]]
+        <br>
         <span>[[calendar:viewers]]: </span>
         <input class="viewers form-control" placeholder="[[calendar:start_typing]]" />
         <span>[[calendar:blocked]]: </span>
@@ -226,21 +200,19 @@
       </div>
     </div>
   </div>
-  </div>
-  </div>
 </div>
 
 <style>
-
-@import url("/plugins/nodebb-plugin-calendar/public/style.css");
-
+  @import url("/plugins/nodebb-plugin-calendar/public/style.css");
 </style>
 
 <script id="calll">
+/*
   window.calendar = {};
-  calendar.events = {events};
-  calendar.canCreate = {canCreate};
-  calendar.whoisin = {whoisin};
+  window.calendar.events = {events};
+  window.calendar.canCreate = {canCreate};
+  window.calendar.whoisin = {settings.whoisin};
+  */
 </script>
 
 <script src="/plugins/nodebb-plugin-calendar/public/cal.js"></script>
