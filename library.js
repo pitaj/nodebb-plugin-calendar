@@ -16,7 +16,7 @@
       topics = realModule.parent.require("./topics"),
       socketthing = realModule.parent.require("./socket.io/plugins"),
       websockets = realModule.parent.require("./socket.io/index"),
-      utils = require("../../public/src/utils"),
+      utils = realModule.parent.require("../public/src/utils"),
       threadtools = realModule.parent.require("./threadTools"),
       plugins = realModule.parent.require('./plugins'),
       //permissions = require("nodebb-plugin-permissions").permissions,
@@ -100,19 +100,19 @@
     db.set('plugins:calendar', JSON.stringify(data), callback);
   }
 
-  module.init = function (app, middleware, controllers, callback) {
+  module.init = function (data, callback) {
 
-    app.get('/calendar', middleware.buildHeader, renderPage);
-    app.get('/api/calendar', renderPage);
-    app.get('/templates/calendar.tpl', renderPage);
+    data.router.get('/calendar', data.middleware.buildHeader, renderPage);
+    data.router.get('/api/calendar', renderPage);
+    data.router.get('/templates/calendar.tpl', renderPage);
 
-    //app.get("/api/plugins/calendar", renderAPI);
-    //app.post('/api/plugins/calendar/save', save);
+    //data.router.get("/api/plugins/calendar", renderAPI);
+    //data.router.post('/api/plugins/calendar/save', save);
 
-    app.get('/admin/plugins/calendar', middleware.admin.buildHeader, renderAdmin);
-    app.get('/api/admin/plugins/calendar', renderAdmin);
+    data.router.get('/admin/plugins/calendar', data.middleware.admin.buildHeader, renderAdmin);
+    data.router.get('/api/admin/plugins/calendar', renderAdmin);
 
-    app.post("/api/admin/plugins/calendar/save", saveAdmin);
+    data.router.post("/api/admin/plugins/calendar/save", saveAdmin);
     
     try {
       whoisin = require("../nodebb-plugin-whoisin");
@@ -305,7 +305,7 @@
         // jshint ignore:start
         reduce(sok.uid, events, function (evs, thisuser){
           if(evs.length){
-            websockets.server.sockets.socket(sok.id).emit(message, data || {});
+            websockets.server.sockets.connected[sok.id].emit(message, data || {});
           }
         });
         // jshint ignore:end
@@ -523,17 +523,18 @@
 
     getData(function(err, data){
       topics.create({
-        uid: event.user.cid,
+        uid: event.uid,
         cid: data.category,
         title: event.name
       }, function(tid){
         topics.post({
-          uid: event.user.cid,
+          uid: event.uid,
           tid: tid,
           cid: data.category,
           title: event.name,
           content: content
         }, function(err, results){
+          console.log(err);
           callback(results.topicData.slug, results.postData.pid, results.topicData.tid);
         });
       });
@@ -710,6 +711,7 @@
           return !!val;
         });
 
+        event.uid = cid;
         event.notificationDates = nots || [];
         event.user = oevents[i] ? oevents[i].user : nevent.user;
         event.sentNotifications = oevents[i] ? oevents[i].sentNotifications : [];
