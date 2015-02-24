@@ -1,3 +1,5 @@
+[![Donate to help me out](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=LSEF6AFFPFLU4&lc=US&item_name=PitaJ%27s%20open%20source%20development&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted "Donate to help me out")
+
 #nodebb-plugin-calendar
 
 ![Full page image](http://i.imgur.com/YKdOuTt.png)
