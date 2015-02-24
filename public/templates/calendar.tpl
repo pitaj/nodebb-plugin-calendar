@@ -1,20 +1,29 @@
 <div id="cal">
+  <div id="cal-days-container">
+    <table id="cal-days">
+      <tbody>
+
+      </tbody>
+    </table>
+  </div>
   <div id="cal-toolbar">
-    <button class="button-add-event btn btn-success">
-      <span class="hidden-xs">[[calendar:add_event]]</span>
-      <i class="fa fa-plus-square-o"></i>
-    </button>
-    <button class="button-today btn btn-primary">
-      <span class="hidden-xs">[[calendar:today]]</span>
-      <i class="fa fa-calendar-o">{today.date}</i>
-    </button>
     <div class="left">
+      <!-- IF canCreate -->
+      <button class="button-add-event btn btn-success">
+        <span class="hidden-xs">[[calendar:add_event]]</span>
+        <i class="fa fa-plus-square-o"></i>
+      </button>
+      <!-- ENDIF canCreate -->
+      <button class="button-today btn btn-primary">
+        <span class="hidden-xs">[[calendar:today]]</span>
+        <i class="fa fa-calendar-o">{today.date}</i>
+      </button>
       <form class="form-inline">
         <div class="form-group">
           <label class="sr-only" for="cal-month-select">[[calendar:month]]</label>
           <div class="dropdown" id="cal-month-select">
             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-              <span class="month">[[calendar:month_{today.month}]]</span> <span class="caret"></span>
+              <span data-value="{today.month}" class="month">[[calendar:month_{today.month}]]</span> <span class="caret"></span>
             </button>
             <ul class="dropdown-menu" role="menu">
               <li data-value="0">
@@ -56,9 +65,9 @@
             </ul>
           </div>
         </div>
-        <div class="form-group">
+        <div class="form-group btn btn-default">
           <label class="sr-only" for="cal-year-select">[[calendar:year]]</label>
-          <input id="cal-year-select" type="tel" value="{today.year}" class="btn btn-default" max="2100" min="1950" size="4" maxlength="4" minlength="4"/>
+          <input id="cal-year-select" type="tel" value="{today.year}" max="2100" min="1950" size="4" maxlength="4" minlength="4"/>
           <span class="arrows">
             <i class="fa fa-chevron-circle-up"></i>
             <i class="fa fa-chevron-circle-down"></i>
@@ -66,44 +75,35 @@
         </div>
       </form>
     </div>
-  </div>
-
-  <div id="cal-headers-cont">
-    <table id="cal-headers">
-      <tbody>
-        <tr>
-          <td>
-            [[calendar:day_0]]
-          </td>
-          <td>
-            [[calendar:day_1]]
-          </td>
-          <td>
-            [[calendar:day_2]]
-          </td>
-          <td>
-            [[calendar:day_3]]
-          </td>
-          <td>
-            [[calendar:day_4]]
-          </td>
-          <td>
-            [[calendar:day_5]]
-          </td>
-          <td>
-            [[calendar:day_6]]
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div id="cal-days-container">
-    <table id="cal-days">
-      <tbody>
-
-      </tbody>
-    </table>
+    <div id="cal-headers-cont">
+      <table id="cal-headers">
+        <tbody>
+          <tr>
+            <td>
+              [[calendar:day_0]]
+            </td>
+            <td>
+              [[calendar:day_1]]
+            </td>
+            <td>
+              [[calendar:day_2]]
+            </td>
+            <td>
+              [[calendar:day_3]]
+            </td>
+            <td>
+              [[calendar:day_4]]
+            </td>
+            <td>
+              [[calendar:day_5]]
+            </td>
+            <td>
+              [[calendar:day_6]]
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 
@@ -135,7 +135,7 @@
     <div class="event">
 
       <div class="view unselected">
-        <div class="name">[[calendar:event_unselected]]</div>
+        <div class="name"><span class="selected"></span><span class="unselected">[[calendar:event_unselected]]</span></div>
         <div class="topic-profile-pic text-center">
 
         </div>
@@ -150,7 +150,8 @@
         <hr>
         <div class="responses">
           <div class="my-response">
-            <small class="username" title="You"><a href="/user/{{user.name}}">{{user.fullname}}</a>
+            <small class="username">
+              <a href="/user/{user.userslug}">{user.username}</a>
             </small>
             <span class="invited">[[calendar:response_invited]]</span>
             <span class="not-attending">[[calendar:response_not_attending]]</span>
@@ -206,13 +207,12 @@
   @import url("/plugins/nodebb-plugin-calendar/public/style.css");
 </style>
 
-<script id="calll">
-/*
-  window.calendar = {};
-  window.calendar.events = {events};
-  window.calendar.canCreate = {canCreate};
-  window.calendar.whoisin = {settings.whoisin};
-  */
-</script>
+<div id="data_script">
+  {
+    "events": {events},
+    "canCreate": {canCreate},
+    "whoisin": {whoisin}
+  }
+</div>
 
 <script src="/plugins/nodebb-plugin-calendar/public/cal.js"></script>

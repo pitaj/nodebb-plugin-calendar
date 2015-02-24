@@ -28,8 +28,9 @@
   }
 */
 
+"use strict";
+
 (function(exports, module){
-  "use strict";
 
   var async = require('async'),
     //fs = require("fs"),
@@ -51,10 +52,12 @@
 
   function user(uid, events, callback){
 
+    console.log("uid: ", uid);
+
     var globals = {}, locals = {};
 
-    if(uid === 0){
-      callback(null, function can(perm, event){
+    if(!uid){
+      return callback(null, function can(perm, event){
         if(perm === "view"){
           return event.public;
         }
@@ -110,6 +113,8 @@
         return callback(err);
       }
       var can = function(perm, event){
+        console.log("globals: ", globals);
+        console.log("locals: ", locals);
         if(typeof perm !== "string"){
           return false;
         }
@@ -144,41 +149,68 @@
         res.render("admin/plugins/calendar", settings);
       });
     },
-    page: function(req, res, next){
-      db.settings.get(function(err, settings){
-        if(err){
-          return next(err);
-        }
-        var ago = new Date();
-        var ahead = new Date();
-        ago.setMonth(ago.getMonth()-6);
-        ahead.setMonth(ahead.getMonth()+6);
-        var today = new Date();
-        db.getEventsByDate(ago, ahead, function(err, events){
-          if(err){
-            return next(err);
-          }
-          user(req.uid, events, function(err, can){
+    page: function(req, res, callback){
+      var today, evs, settings, can;
+      async.waterfall([
+        function(next){
+          db.settings.get(next);
+        },
+        function(sets, next){
+          settings = sets;
+          var ago = new Date();
+          var ahead = new Date();
+          ago.setMonth(ago.getMonth()-6);
+          ahead.setMonth(ahead.getMonth()+6);
+          today = new Date();
+          db.getEventsByDate(ago, ahead, next);
+        },
+        function(events, next){
+          evs = events;
+          user(req.user ? req.user.uid : 0, events, next);
+        },
+        function(cn, next){
+          can = cn;
+          eventstuff.trim(evs, can, next);
+        },
+        function(events, next){
+          async.each(events, function(event, nxt){
+            async.each(Object.keys(event.responses), function(key, cb){
+              db.users.getInfo(key, function(err, info){
+                if(err){
+                  return cb(err);
+                }
+                event.responses[key] = {
+                  value: event.responses[key],
+                  username: info.username,
+                  userslug: info.userslug,
+                  picture: info.picture
+                };
+                cb();
+              });
+            }, nxt);
+          }, function(err){
             if(err){
               return next(err);
             }
-            eventstuff.trim(events, can, function(err, events){
-              if(err){
-                return next(err);
-              }
-              res.render("calendar", {
-                events: events,
-                canCreate: can("create"),
-                whoisin: !!settings.usewhoisin && whoisin,
-                today: {
-                  date: today.getDate(),
-                  month: today.getMonth(),
-                  year: today.getFullYear()
-                }
-              });
-            });
+            next(null, events);
           });
-        });
+        },
+        function(events){
+          res.render("calendar", {
+            events: JSON.stringify(events),
+            canCreate: can("create"),
+            whoisin: !!(settings.usewhoisin && whoisin),
+            today: {
+              date: today.getDate(),
+              month: today.getMonth(),
+              year: today.getFullYear()
+            },
+          });
+        }
+      ], function(err){
+        if(err){
+          callback(err);
+        }
       });
     },
     saveAdmin: function(req, res){
@@ -573,7 +605,7 @@
   };
 
   exports.topicFilter = function(topicData, callback){
-    db.event.getByTid(topicData.tid, function(err, event){
+    db.event.getByTid(topicData.topic.tid, function(err, event){
       if(err){
         return callback(err);
       }
@@ -585,7 +617,7 @@
           return callback(err);
         }
         if(can("view", event)){
-          callback(null, { topic: topicData.topic });
+          callback(null, topicData);
         } else {
           callback(null, null);
         }
@@ -593,9 +625,9 @@
     });
   };
 
+  var reg = new RegExp("\\[\\s*\\s*allday\\s*\\=\\s*(\\w*)\\s*date\\s*\\=\\s*((\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d\\.\\d+([+-][0-2]\\d:[0-5]\\d|Z))|(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z))|(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)))\\s*\\]", "g");
   exports.postParse = function(postContent){
-    var reg = new RegExp("\\[\\s*\s*allday\s*\=\s*(\w*)\s*date\\s*\\=\\s*((\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d\\.\\d+([+-][0-2]\\d:[0-5]\\d|Z))|(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z))|(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)))\\s*\\]", "g");
-    return postContent.replace(reg, '<span class="date-timestamp" data-allday="$1" data-timestamp="$2"></span>');
+    return postContent.replace(reg, '<span class="date-timestamp" data-allday="$1" data-timestamp="$2" data-onlytime="false"></span>');
   };
 
 })(module.exports, module);

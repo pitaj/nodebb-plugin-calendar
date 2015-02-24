@@ -1,6 +1,6 @@
-(function(module){
-
 "use strict";
+
+(function(module){
 
 var database = module.parent.parent.require("./database"),
   async = require("async"),
@@ -28,15 +28,17 @@ var db = module.exports = {
       });
     },
     getByTid: function(tid, callback){
-      database.getObjectKey("plugins:calendar:eventsByTid", tid, function(err, eid){
+      database.getObjectField("plugins:calendar:eventsByTid", tid, function(err, eid){
         if(err){
           return callback(err);
+        }
+        if(!eid){
+          return callback();
         }
         db.event.get(eid, callback);
       });
     },
     edit: function(event, callback){
-      var allowedKeys = ["uid", "tid", "pid", ];
       database.setObject("plugins:calendar:events:"+event.id, event, callback);
     },
     delete: function(event, callback){
@@ -201,8 +203,12 @@ var db = module.exports = {
     isMember: groups.isMember,
     isMemberOfMultiple: groups.isMemberOfGroups,
     getMembers: groups.getMembers
+  },
+  users: {
+    getInfo: function(uid, callback){
+      database.getUserFields(uid, ["uid", "username", "userslug", "picture"], callback);
+    }
   }
-
 };
 
 })(module);

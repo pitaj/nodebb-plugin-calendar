@@ -8,15 +8,10 @@
 body, html {
   height: 100%;
   overflow: hidden;
-  padding:0;
-  margin:0;
-}
-#content > .row {
-  padding: 0;
-  margin: 0;
-  height: 100%;
 }
 #content {
   height:100%;
-  padding-top:70px;
+}
+#data_script {
+  display:none;
 }

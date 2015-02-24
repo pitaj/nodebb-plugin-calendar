@@ -3,6 +3,8 @@
 /* global calendar */
 /* global WhoisinPlugin */
 
+/*eslint-disable*/
+
 require.config({
   paths: {
     "moment": "//cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.3/moment.min",
@@ -1619,3 +1621,5 @@ require(["moment", "remarkable"], function (moment, remarkable) {
   });
 
 });
+
+/*eslint-enable*/

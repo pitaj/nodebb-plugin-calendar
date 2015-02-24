@@ -1,10 +1,15 @@
 #cal-toolbar {
-  /*padding: 10px;*/
   line-height: 25px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: white;
 }
 #cal-toolbar .left {
   font-size: 18px;
   color: #444;
+  padding:10px;
 }
 #cal-toolbar .button-add-event > span {
   margin-right: 5px;
@@ -12,9 +17,9 @@
 #cal-toolbar .button-add-event,
 #cal-toolbar .button-today {
   float: right;
-  margin-left:5px;
   padding-left: 7px;
   padding-right: 7px;
+  margin-bottom: 10px;
 }
 #cal-toolbar .button-add-event i {
   font-size: 30px;
@@ -39,12 +44,12 @@
   font-size: 25px;
 }
 #cal-toolbar .left .arrows {
-  position: relative;
+  position: absolute;
   font-size: 14px;
   height: 30px;
   display: inline-block;
-  top: 4px;
-  left: -25px;
+  top: 3px;
+  right: 16px;
 }
 #cal-toolbar .left .arrows i:first-child {
   position: absolute;
@@ -57,12 +62,26 @@
   bottom: 0;
 }
 #cal-year-select {
-  padding-right:20px;
   vertical-align:top;
-  padding-left: 8px;
+  height: 100%;
+  width: 100%;
+  border: none;
+  padding: 0;
+  border-radius: 2px;
 }
-.form-inline .form-group {
-  display: inline-block;
-  margin-bottom: 0;
-  vertical-align: middle;
+.left .form-inline .form-group {
+  float: left;
+}
+.left .form-inline .form-group:last-child {
+  border-left: none;
+  position: relative;
+  padding-right: 20px;
+}
+@media (min-width:768px){
+  #cal-toolbar .button-today {
+    padding-left: 8px;
+  }
+  #cal-toolbar .button-add-event {
+    padding-left: 10px;
+  }
 }
