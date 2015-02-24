@@ -1064,7 +1064,8 @@ require(["moment", "remarkable"], function (moment, remarkable) {
 
       sidebar.find(".event .edit .delete-event-button").css("display", "none");
 
-      getUserImage(app.userslug, function(imgurl){
+      getUserImage(app.user.userslug, function(imgurl){
+        console.log(imgurl);
         var thenewone = {
           id: l,
           user: {
@@ -1090,6 +1091,7 @@ require(["moment", "remarkable"], function (moment, remarkable) {
         //events[l] = thenewone;
         currentEvent = thenewone;
 
+console.log('ok here', callback);
         callback();
       });
 
@@ -1330,7 +1332,7 @@ require(["moment", "remarkable"], function (moment, remarkable) {
     function getUserImage(slug, callback){
       $.getJSON("/api/user/"+slug, function(data){
         //data = data.match(/<img src=".*" class="user-profile-picture/g)[0].match(/".*?"/)[0].replace(/"/g, "");
-        callback(data.gravatarpicture || data.uploadedpicture || data.picture);
+        callback(data.picture);
       });
     }
 
