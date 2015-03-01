@@ -598,7 +598,7 @@
           whoisin = false;
         }
         if(whoisin){
-          console.log("[nodebb-plugin-whoisin] being utilized in [nodebb-plugin-calendar]");
+          winston.log("[nodebb-plugin-whoisin] being utilized in [nodebb-plugin-calendar]");
         }
         next();
       },
@@ -632,6 +632,7 @@
   var otherReg = new RegExp("\\[\\s*(h1|h2|h3|h4|h5|h6|strong|b|em|i)\\s*\\]\\s*([a-zA-Z0-9\\.\\:\\-\\;]+)\\[\\s*\\/\\s*(h1|h2|h3|h4|h5|h6|strong|b|em|i)\\s*\\]", "g");
   exports.postParse = function(postContent){
     postContent = postContent.replace(reg, '<span class="date-timestamp" data-allday="$1" data-timestamp="$2" data-onlytime="false"></span>');
+    postContent = postContent.replace(/\[\s*hr\s*\]/g, "<hr>");
     return postContent.replace(otherReg, "<$1>$2</$1>");
   };
 

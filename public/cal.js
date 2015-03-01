@@ -150,7 +150,7 @@ require(["moment"], function (moment) {
               number: d,
               darkmonth: m%2 ? "dark-month" : ""
             });
-            $(day).prependTo(calendar.calDays.find("tr:first-child"))
+            day = $(day).prependTo(calendar.calDays.find("tr:first-child"))
               .data("date", e.toISOString());
             e.subtract(1, "day");
             calendar.days[y][m][d-1] = day;
@@ -214,7 +214,7 @@ require(["moment"], function (moment) {
             lastOfMonth = calendar.days[y][m][27];
             firstOfMonth = calendar.days[y][m][0];
           }
-          // console.log("obj: ", obj, " firstOfMonth: ", firstOfMonth);
+          //console.log("firstOfMonth: ", firstOfMonth, "lastofmonth: ", lastOfMonth);
           if(!firstOfMonth.visible(calendar.calDaysContainer) ||
             !lastOfMonth.visible(calendar.calDaysContainer)){
             scrollIn(firstOfMonth, callback || function(){});
@@ -230,7 +230,7 @@ require(["moment"], function (moment) {
           if(sixafter > last){
             calendar.actions.appendWeeks(last.add(1, "day"), sixafter);
           } else if(sixbefore < first){
-            calendar.actions.prependWeeks(sixbefore, first.subtract(3, "day"));
+            calendar.actions.prependWeeks(sixbefore, first.subtract(1, "day"));
           } else {
             return;
           }
@@ -248,47 +248,32 @@ require(["moment"], function (moment) {
           var offset = calendar.calDaysContainer.offset();
           offset.left += calendar.calDaysContainer.width() / 2;
           offset.top += calendar.calDaysContainer.height() / 2;
-          var date, nextMonth, nextYear, prevMonth, prevYear;
+          var date, first, last;
           if(document.elementFromPoint){
             date = $(document.elementFromPoint(offset.left, offset.top));
             if(date.is("span")){
               date = date.parent();
             }
-            date = date.data("date");
+            date = moment(date.data("date"));
             //console.log(document.elementFromPoint(offset.left, offset.top));
           } else {
             calendar.incompatible();
           }
-          date = moment(date);
-          nextYear = prevYear = calendar.currentMonth.year = date.year();
-          nextMonth = prevMonth = calendar.currentMonth.month = date.month();
+          calendar.currentMonth.year = date.year();
+          calendar.currentMonth.month = date.month();
 
-          nextMonth+=6;
-          if(nextMonth - 12 >= 0){
-            nextMonth -= 12;
-            nextYear++;
-          }
+          first = moment(calendar.firstDay().data("date"));
+          last = moment(calendar.lastDay().data("date"));
 
-          if(!Array.isArray(calendar.days[nextYear]) ||
-          !Array.isArray(calendar.days[nextYear][nextMonth])){
-            calendar.actions.build(date.add(6, "months"));
-          }
-
-          prevMonth -= 6;
-          if(prevMonth < 0){
-            prevMonth += 12;
-            prevYear--;
-          }
-
-          if(!Array.isArray(calendar.days[prevYear]) ||
-          !Array.isArray(calendar.days[prevYear][prevMonth])){
-            var scroll = calendar.calDaysContainer.scrollTop();
-            calendar.actions.build(date.subtract(6, "months"));
-            calendar.calDaysContainer.scrollTop(scroll);
+          if(moment(date).add(6, "M").valueOf() > last.valueOf()){
+            calendar.actions.build(moment(date).add(1, "y"));
+          } else if(moment(date).subtract(6, "M").valueOf() < first.valueOf()){
+            calendar.actions.build(moment(date).subtract(1, "y"));
+            calendar.days[date.year()][date.month()][0][0].scrollIntoView();
           }
         },
-        addevent: function(){
-          
+        editEvent: function(){
+
         },
       },
       days: {
@@ -337,13 +322,13 @@ require(["moment"], function (moment) {
           });
           // console.log("set month to", val);
         },
-        go: function(){
+        go: function(instant){
           calendar.actions.onscroll.disabled = true;
           var mom = moment({
             "year": calendar.currentMonth.y,
             "month": calendar.currentMonth.m
           });
-          calendar.actions.scrollToDate(mom, false, function(){
+          calendar.actions.scrollToDate(mom, instant, function(){
             calendar.actions.onscroll.disabled = false;
           });
         }

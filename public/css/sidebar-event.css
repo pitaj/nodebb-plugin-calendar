@@ -5,6 +5,8 @@
   position: relative;
   height: 100%;
 }
+/*
+
 #cal-sidebar .content > .event .view iframe.comments {
   border: none;
   padding: 0;
@@ -181,4 +183,77 @@
 }
 #cal-sidebar.down {
   top: 100%;
+}
+
+*/
+
+#cal-sidebar .content > .event .topic-title {
+  line-height: 1.5em;
+  width: auto;
+  overflow: hidden;
+  margin: 0 0 -5px 0;
+  padding: 0 0 5px 0;
+  font-weight: 500;
+  color: #2461b2;
+  margin:10px;
+}
+
+#cal-sidebar .content > .event .post-content {
+  margin: 10px;
+  clear: left;
+}
+
+#cal-sidebar .content > .event .edit-event-button {
+  float: right;
+  line-height: 2.25em;
+}
+
+#cal-sidebar .content > .event .topic-text {
+  font-size: 18px;
+  color: #666;
+  overflow: hidden;
+  word-wrap: break-word;
+}
+
+#cal-sidebar .content > .event .topic-profile-pic {
+  margin: 15px;
+}
+
+#cal-sidebar .content > .event iframe.comments {
+  border: none;
+  padding: 0;
+  width: 100%;
+  min-height: 300px;
+}
+
+#cal-sidebar .content > .event .responses span {
+  border-radius: 3px;
+  padding: 2px 5px;
+  margin-left: 3px;
+  margin-right: 3px;
+  float: right;
+  font-size: 70%;
+}
+#cal-sidebar .content > .event .responses .my-response span.selected {
+  border: 1px solid black;
+  padding: 1px 4px;
+}
+#cal-sidebar .content > .event .responses span.invited {
+  background-color: lightgrey;
+}
+#cal-sidebar .content > .event .responses span.not-attending {
+  background-color: pink;
+}
+#cal-sidebar .content > .event .responses span.attending {
+  background: lightgreen;
+}
+#cal-sidebar .content > .event .responses span.maybe {
+  background: lightblue;
+}
+#cal-sidebar .content > .event .responses .my-response span {
+  cursor: pointer;
+}
+
+#editEvent .modal-body .bootstrap-tagsinput {
+  display: block;
 }

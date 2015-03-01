@@ -1,3 +1,80 @@
+<div id="editEvent" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">[[calendar:edit_event]]</h4>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="errors"></div>
+          <div class="form-group">
+            <label for="event-name">[[calendar:event_name]]</label>
+            <input id="event-name" class="form-control" placeholder="[[calendar:event_name]]" />
+          </div>
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" id="event-allday" /> [[calendar:all_day]]
+            </label>
+          </div>
+          <div class="form-group">
+            <label for="event-start">[[calendar:start_date]]</label>
+            <div class="input-group date" id="event-start">
+              <input type="text" class="form-control" />
+              <span class="input-group-addon">
+                <i class="fa fa-calendar"></i>
+              </span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="event-end">[[calendar:end_date]]</label>
+            <div class="input-group date" id="event-end">
+              <input type="text" class="form-control" />
+              <span class="input-group-addon">
+                <i class="fa fa-calendar"></i>
+              </span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="event-place">[[calendar:place]]</label>
+            <input id="event-place" class="form-control" placeholder="[[calendar:place]]" />
+          </div>
+          <div class="form-group">
+            <label for="event-editors">[[calendar:editors]]</label>
+            <input id="event-editors" class="form-control" data-role="tagsinput" placeholder="[[calendar:start_typing]]" />
+          </div>
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" id="event-public" /> [[calendar:public]]
+            </label>
+          </div>
+          <div class="form-group">
+            <label for="event-viewers">[[calendar:viewers]]</label>
+            <input id="event-viewers" type="text" class="form-control" data-role="tagsinput" placeholder="[[calendar:start_typing]]" />
+          </div>
+          <div class="form-group">
+            <label for="event-blocked">[[calendar:blocked]]</label>
+            <input id="event-blocked" type="text" class="form-control" data-role="tagsinput" placeholder="[[calendar:start_typing]]" />
+          </div>
+          <div class="form-group">
+            <label for="event-notifications">[[pages:notifications]]</label>
+            <input id="event-notifications" type="text" class="form-control" data-role="tagsinput" placeholder="[[calendar:start_typing]]" />
+          </div>
+          <div class="form-group">
+            <label for="event-description">[[calendar:description]]</label>
+            <textarea rows="10" id="event-description" class="form-control" placeholder="[[calendar:description_ext]]"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> [[global:close]]</button>
+        <button type="button" class="btn btn-primary"><i class="fa fa-save"></i> [[global:save_changes]]</button>
+        <button type="button" class="delete-event-button btn btn-danger"><i class="fa fa-trash-o"></i> [[topic:delete]]</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="cal">
   <div id="cal-days-container">
     <table id="cal-days">
@@ -126,78 +203,65 @@
   <div class="content">
     <div class="day active">
       <div class="date">
-
+        <!-- date goes here -->
       </div>
       <div class="events">
-
+        <!-- events go here -->
       </div>
     </div>
-    <div class="event">
-
-      <div class="view unselected">
-        <div class="name"><span class="selected"></span><span class="unselected">[[calendar:event_unselected]]</span></div>
-        <div class="topic-profile-pic text-center">
-
+    <div class="event topic">
+      <div class="topic-text">
+        <div class="topic-profile-pic hidden-xs text-center">
+          <a href="/user/{userslug}">
+            <img src="{picture}" alt="{username}" class="profile-image user-img" title="" data-original-title="{username}">
+          </a>
+          <small class="username" title="{username}">
+            <a href="/user/{userslug}">{username}</a>
+          </small>
         </div>
-        <i class="edit-event-button fa fa-pencil-square-o"></i>
-        <div class="date">
-        </div>
-        <div class="place">
-        </div>
-        <hr>
-        <div class="description">
-        </div>
-        <hr>
-        <div class="responses">
-          <div class="my-response">
-            <small class="username">
-              <a href="/user/{user.userslug}">{user.username}</a>
-            </small>
-            <span class="invited">[[calendar:response_invited]]</span>
-            <span class="not-attending">[[calendar:response_not_attending]]</span>
-            <span class="maybe">[[calendar:response_maybe]]</span>
-            <span class="attending">[[calendar:response_attending]]</span>
+        <h3 class="topic-title">
+          <i class="edit-event-button fa fa-pencil-square-o" data-toggle="modal" data-target="#editEvent"></i>
+          <p class="topic-title" itemprop="name">[[calendar:event_unselected]]</p>
+          <hr>
+        </h3>
+        <div class="post-content" itemprop="text">
+          <h3>[[calendar:when]]</h3>
+          <p class="dates">
+            <strong>[[calendar:starts]]:</strong> <span class="date-timestamp start" data-allday="{allday}" data-timestamp="{timestamp}" data-onlytime="{onlytime}"></span><br>
+            <strong>[[calendar:ends]]:</strong> <span class="date-timestamp end" data-allday="{allday}" data-timestamp="{timestamp}" data-onlytime="{onlytime}"></span>
+          </p>
+          <h3>[[calendar:where]]</h3>
+          <p>
+            <span class="place"><!-- place goes here --></span>
+          </p>
+          <hr>
+          <p class="description">
+            <!-- description goes here -->
+          </p>
+          <h3>[[calendar:responses_title]]</h3>
+          <div class="responses">
+            <p class="my-response">
+              <small class="username">
+                <a href="/user/{userslug}">{username}</a>
+              </small>
+              <span class="invited selected">[[calendar:response_invited]]</span>
+              <span class="not-attending">[[calendar:response_not_attending]]</span>
+              <span class="maybe">[[calendar:response_maybe]]</span>
+              <span class="attending">[[calendar:response_attending]]</span>
+            </p>
+            <!-- other responses appended like
+            <p class="response">
+              <small class="username" title="{username}">
+                <a href="/user/{userslug}">{username}</a>
+              </small>
+              <span class="{value}">[[calendar:response_{value}]]</span>
+            </p>
+            -->
           </div>
+          <div class="cal-whoisin" style="display:none;"></div>
+          <h3>[[calendar:comments_title]]</h3>
+          <iframe class="comments" scrolling="no"></iframe>
         </div>
-        <div class="cal-whoisin" style="display:none;"></div>
-        <hr>
-        <span class="comments-title">[[calendar:comment_title]]</span>
-        <!-- embed nodebb comments here somehow -->
-        <iframe class="comments" scrolling="no"></iframe>
-
-      </div>
-
-      <div class="edit" style="display:none;">
-        <button class="save-event-button btn btn-success"><i class="fa fa-save"></i> [[groups:cover-save]]</button>
-        <button class="cancel-edit-button btn btn-warning"><i class="fa fa-times"></i> [[calendar:cancel]]</button>
-        <button class="delete-event-button btn btn-danger"><i class="fa fa-trash-o"></i> [[topic:delete]]</button>
-
-        <span class="title">[[calendar:edit_event]]</span>
-
-        <div class="errors"></div>
-
-        <span>[[calendar:event_name]]: </span>
-        <input class="name form-control" placeholder="Event name" />
-        <input type="checkbox" class="allday" /> [[calendar:all_day]]
-        <br>
-        <span>[[calendar:start_date]]: </span>
-        <input class="start-time form-control" />
-        <span>[[calendar:end_date]]: </span>
-        <input class="end-time form-control" />
-        <span>[[calendar:place]]: </span>
-        <input class="place form-control" placeholder="[[calendar:place]]" />
-        <span>[[calendar:editors]]: </span>
-        <input class="editors form-control" placeholder="[[calendar:start_typing]]" />
-        <input type="checkbox" class="public" /> [[calendar:public]]
-        <br>
-        <span>[[calendar:viewers]]: </span>
-        <input class="viewers form-control" placeholder="[[calendar:start_typing]]" />
-        <span>[[calendar:blocked]]: </span>
-        <input class="blocked form-control" placeholder="[[calendar:start_typing]]" />
-        <span>[[pages:notifications]]: </span>
-        <input class="notifications form-control" placeholder="[[calendar:start_typing]]" />
-        <span>[[calendar:description]]: </span>
-        <textarea class="description form-control" placeholder="[[calendar:description_ext]]"></textarea>
       </div>
     </div>
   </div>

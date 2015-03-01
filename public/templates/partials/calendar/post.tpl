@@ -7,5 +7,6 @@
 [h3][[calendar:where]]:[/h3]
 {place}
 
-[h3][[calendar:description]]:[/h3]
+[hr][/hr]
+
 {description}

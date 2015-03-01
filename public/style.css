@@ -15,3 +15,6 @@ body, html {
 #data_script {
   display:none;
 }
+body {
+  padding-bottom: 5px;
+}
