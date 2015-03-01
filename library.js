@@ -37,22 +37,24 @@
     schedule = require('node-schedule'),
     sanitize = require('google-caja').sanitize,
     users = module.parent.require("./user"),
-    pluginSocket = module.parent.parent.require("./socket.io/plugins"),
-    mainSocket = module.parent.parent.require("./socket.io/index"),
+    pluginSocket = module.parent.require("./socket.io/plugins"),
+    mainSocket = module.parent.require("./socket.io/index"),
     plugins = module.parent.require('./plugins'),
+    winston = module.parent.require("winston"),
     Notifications = module.parent.require("./notifications");
     //translator = module.parent.require('../public/src/translator');
 
   var parse = async.apply(plugins.fireHook, 'filter:parse.raw'),
-  whoisin;
-  // parse(raw, callback(err, html){})
+    // parse(raw, callback(err, html){})
+    whoisin, buffer = 6;
+
 
   var db = require("./subs/db"),
     posts = require("./subs/posts");
 
   function user(uid, events, callback){
 
-    console.log("uid: ", uid);
+    //console.log("uid: ", uid);
 
     var globals = {}, locals = {};
 
@@ -113,8 +115,8 @@
         return callback(err);
       }
       var can = function(perm, event){
-        console.log("globals: ", globals);
-        console.log("locals: ", locals);
+        //console.log("globals: ", globals);
+        //console.log("locals: ", locals);
         if(typeof perm !== "string"){
           return false;
         }
@@ -159,8 +161,8 @@
           settings = sets;
           var ago = new Date();
           var ahead = new Date();
-          ago.setMonth(ago.getMonth()-6);
-          ahead.setMonth(ahead.getMonth()+6);
+          ago.setMonth(ago.getMonth()-buffer);
+          ahead.setMonth(ahead.getMonth()+buffer);
           today = new Date();
           db.getEventsByDate(ago, ahead, next);
         },
@@ -205,6 +207,7 @@
               month: today.getMonth(),
               year: today.getFullYear()
             },
+            buffer: buffer
           });
         }
       ], function(err){
@@ -467,7 +470,7 @@
 
       function after(err){
         if(err){
-          console.log("notification "+id+" failed to send");
+          winston.log("notification "+id+" failed to send");
         }
       }
 
@@ -625,9 +628,11 @@
     });
   };
 
-  var reg = new RegExp("\\[\\s*\\s*allday\\s*\\=\\s*(\\w*)\\s*date\\s*\\=\\s*((\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d\\.\\d+([+-][0-2]\\d:[0-5]\\d|Z))|(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z))|(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)))\\s*\\]", "g");
+  var reg = new RegExp("\\[\\s*allday\\s*\\=\\s*(\\w*)\\s*date\\s*\\=\\s*((\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d\\.\\d+([+-][0-2]\\d:[0-5]\\d|Z))|(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z))|(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)))\\s*\\]", "g");
+  var otherReg = new RegExp("\\[\\s*(h1|h2|h3|h4|h5|h6|strong|b|em|i)\\s*\\]\\s*([a-zA-Z0-9\\.\\:\\-\\;]+)\\[\\s*\\/\\s*(h1|h2|h3|h4|h5|h6|strong|b|em|i)\\s*\\]", "g");
   exports.postParse = function(postContent){
-    return postContent.replace(reg, '<span class="date-timestamp" data-allday="$1" data-timestamp="$2" data-onlytime="false"></span>');
+    postContent = postContent.replace(reg, '<span class="date-timestamp" data-allday="$1" data-timestamp="$2" data-onlytime="false"></span>');
+    return postContent.replace(otherReg, "<$1>$2</$1>");
   };
 
 })(module.exports, module);

@@ -43,24 +43,6 @@ require(["moment"], function (moment) {
   "use strict";
 
   window.moment = moment;
-  /*
-  function visible($obj, partial){
-    try {
-      var viewport = {};
-      viewport.top = $("#cal-days-container").offset().top;
-      viewport.bottom = viewport.top + $("#cal-days-container").height();
-      var bounds = {};
-      bounds.top = $obj.offset().top;
-      bounds.bottom = bounds.top + $obj.outerHeight();
-      if(partial){
-        return ((bounds.top <= viewport.bottom) && (bounds.bottom >= viewport.top));
-      }
-      return ((bounds.bottom <= viewport.bottom) && (bounds.top >= viewport.top));
-    } catch(e){
-      return false;
-    }
-  }
-  */
 
   (function($, app, translator, templates, socket, moment){
 
@@ -85,12 +67,18 @@ require(["moment"], function (moment) {
 
     var calendar = {
       events: loaded.events,
+      buffer: loaded.buffer,
       actions: {
         init: function(){
-          calendar.actions.appendWeeks(moment().subtract(6, "months"), moment().add(6, "months"));
-          for(var i=0; i<calendar.events.length; i++){
-            calendar.actions.postEvent(calendar.events[i]);
-          }
+          calendar.actions.appendWeeks(moment().subtract(calendar.buffer, "months"), moment().add(calendar.buffer, "months"));
+          calendar.actions.scrollToDate(new Date(), true);
+          var mom = moment();
+          calendar.days[mom.year()][mom.month()][mom.date()-1].attr("id", "cal-day-selected");
+          setTimeout(function(){
+            for(var i=0; i<calendar.events.length; i++){
+              calendar.actions.postEvent(calendar.events[i]);
+            }
+          }, 50);
         },
         postEvent: function(event){
           var d = moment(event.start),
@@ -130,7 +118,7 @@ require(["moment"], function (moment) {
         },
         appendWeeks: function(start, end){
           var s = moment(start).startOf("week"),
-            e = moment(end).endOf("week"), y, m, d;
+            e = moment(end).endOf("week"), y, m, d, day;
           while(s <= e){
             y = s.year(); m = s.month(); d = s.date();
             if(s.day() === calendar.firstOfWeek){
@@ -138,32 +126,34 @@ require(["moment"], function (moment) {
             }
             calendar.days[y] = calendar.days[y] || [];
             calendar.days[y][m] = calendar.days[y][m] || [];
-            calendar.days[y][m][d] =
-              $(templates.parse(calendar.templates.day, {
-                number: d,
-                darkmonth: m%2 ? "dark-month" : ""
-              })).appendTo(calendar.calDays.find("tr:last-child"))
-                .data("date", s.toISOString());
+            day = calendar.parse(calendar.templates.day, {
+              number: d,
+              darkmonth: m%2 ? "dark-month" : ""
+            });
+            day = $(day).appendTo(calendar.calDays.find("tr:last-child"))
+              .data("date", s.toISOString());
             s.add(1, "day");
+            calendar.days[y][m][d-1] = day;
           }
         },
         prependWeeks: function(start, end){
           var s = moment(start).startOf("week"),
-            e = moment(end).endOf("week"), y, m, d;
+            e = moment(end).endOf("week"), y, m, d, day;
           while(s <= e){
             y = e.year(); m = e.month(); d = e.date();
-            if(e.day() === calendar.firstOfWeek){
+            if(e.day() === (calendar.firstOfWeek+6)%7){
               calendar.calDays.prepend("<tr>");
             }
             calendar.days[y] = calendar.days[y] || [];
             calendar.days[y][m] = calendar.days[y][m] || [];
-            calendar.days[y][m][d-1] =
-              $(templates.parse(calendar.templates.day, {
-                number: d,
-                darkmonth: m%2 ? "dark-month" : ""
-              })).prependTo(calendar.calDays.find("tr:first-child"))
-                .data("date", e.toISOString());
+            day = calendar.parse(calendar.templates.day, {
+              number: d,
+              darkmonth: m%2 ? "dark-month" : ""
+            });
+            $(day).prependTo(calendar.calDays.find("tr:first-child"))
+              .data("date", e.toISOString());
             e.subtract(1, "day");
+            calendar.days[y][m][d-1] = day;
           }
         },
         getEvents: function(start, end, callback){
@@ -196,38 +186,38 @@ require(["moment"], function (moment) {
             }
           }
         },
-        scrollToDate: function(date, instant){
+        scrollToDate: function(date, instant, callback){
           date = moment(date);
           function scrollIn($obj, cb){
             var o = $obj.parent().parent().parent().parent().scrollTop();
             $obj[0].scrollIntoView();
+            var x = $obj.parent().parent().parent().parent().scrollTop() - 120;
             if(!instant){
-              var x = $obj.parent().parent().parent().parent().scrollTop();
               $obj.parent().parent().parent().parent().scrollTop(o);
               $obj.parent().parent().parent().parent().animate({
                 scrollTop: x
               }, 500, cb);
             } else {
+              $obj.parent().parent().parent().parent().scrollTop(x);
               cb();
             }
           }
-          var obj, firstOfMonth, y = date.year(), m = date.month(),
-            d = date.date();
+          var firstOfMonth, lastOfMonth,
+            y = date.year(), m = date.month();
           try {
-            console.log("y: ", y, " m: ", m, " d: ", d);
-            obj = calendar.days[y][m][d-1];
+            //console.log("y: ", y, " m: ", m, " d: ", d);
+            lastOfMonth = calendar.days[y][m][27];
             firstOfMonth = calendar.days[y][m][0];
           } catch (err) {
-            return console.error(err);
+            //return console.error(err);
             calendar.actions.build(date);
-            obj = calendar.days[y][m][d-1];
+            lastOfMonth = calendar.days[y][m][27];
             firstOfMonth = calendar.days[y][m][0];
           }
-          console.log("obj: ", obj, " firstOfMonth: ", firstOfMonth);
-          if(!obj.visible(calendar.calDaysContainer)){
-            scrollIn(obj, function(){
-
-            });
+          // console.log("obj: ", obj, " firstOfMonth: ", firstOfMonth);
+          if(!firstOfMonth.visible(calendar.calDaysContainer) ||
+            !lastOfMonth.visible(calendar.calDaysContainer)){
+            scrollIn(firstOfMonth, callback || function(){});
           }
         },
         build: function(date){
@@ -236,15 +226,16 @@ require(["moment"], function (moment) {
             sixafter = moment(date).add(6, "month"),
             last = moment(calendar.lastDay().data("date")),
             first = moment(calendar.firstDay().data("date"));
+            // console.log("first", calendar.firstDay());
           if(sixafter > last){
             calendar.actions.appendWeeks(last.add(1, "day"), sixafter);
           } else if(sixbefore < first){
-            calendar.actions.prependWeeks(sixbefore, first.subtract(1, "day"));
+            calendar.actions.prependWeeks(sixbefore, first.subtract(3, "day"));
           } else {
             return;
           }
           last = moment(calendar.lastDay().data("date"));
-          first = moment(calendar.firstday().data("date"));
+          first = moment(calendar.firstDay().data("date"));
 
           calendar.actions.getEvents(first, last, function(events){
             calendar.events = events;
@@ -252,7 +243,53 @@ require(["moment"], function (moment) {
               calendar.actions.postEvent(calendar.events[i]);
             }
           });
-        }
+        },
+        onscroll: function(){
+          var offset = calendar.calDaysContainer.offset();
+          offset.left += calendar.calDaysContainer.width() / 2;
+          offset.top += calendar.calDaysContainer.height() / 2;
+          var date, nextMonth, nextYear, prevMonth, prevYear;
+          if(document.elementFromPoint){
+            date = $(document.elementFromPoint(offset.left, offset.top));
+            if(date.is("span")){
+              date = date.parent();
+            }
+            date = date.data("date");
+            //console.log(document.elementFromPoint(offset.left, offset.top));
+          } else {
+            calendar.incompatible();
+          }
+          date = moment(date);
+          nextYear = prevYear = calendar.currentMonth.year = date.year();
+          nextMonth = prevMonth = calendar.currentMonth.month = date.month();
+
+          nextMonth+=6;
+          if(nextMonth - 12 >= 0){
+            nextMonth -= 12;
+            nextYear++;
+          }
+
+          if(!Array.isArray(calendar.days[nextYear]) ||
+          !Array.isArray(calendar.days[nextYear][nextMonth])){
+            calendar.actions.build(date.add(6, "months"));
+          }
+
+          prevMonth -= 6;
+          if(prevMonth < 0){
+            prevMonth += 12;
+            prevYear--;
+          }
+
+          if(!Array.isArray(calendar.days[prevYear]) ||
+          !Array.isArray(calendar.days[prevYear][prevMonth])){
+            var scroll = calendar.calDaysContainer.scrollTop();
+            calendar.actions.build(date.subtract(6, "months"));
+            calendar.calDaysContainer.scrollTop(scroll);
+          }
+        },
+        addevent: function(){
+          
+        },
       },
       days: {
         // years
@@ -260,6 +297,15 @@ require(["moment"], function (moment) {
             // days
       },
       templates: {},
+      parse: function(template, data){
+        var x, out = template + "";
+        for(x in data){
+          if(data.hasOwnProperty(x)){
+            out = out.replace(new RegExp('\\{\\s*'+x.toString()+'\\s*\\}', 'g'), data[x]);
+          }
+        }
+        return out;
+      },
       lastDay: function(){ return calendar.calDays.find("td").last(); },
       firstDay: function(){ return calendar.calDays.find("td").first(); },
       calDays: $("#cal-days"),
@@ -274,26 +320,32 @@ require(["moment"], function (moment) {
           return this.y;
         },
         set year(val){
-          console.log("val: ", val);
           this.y = val;
           this.yearSelect.val(val);
-          var mom = moment().set("year", calendar.currentMonth.y).set("month", calendar.currentMonth.m);
-          console.log("mom: ", mom.toISOString(), " y: ", calendar.currentMonth.y, " m: ", calendar.currentMonth.m);
-          calendar.actions.scrollToDate(mom); // .startOf("month")
+          // console.log("set year to", val);
         },
         get month(){
           return this.m;
         },
         set month(val){
-          console.log("val: ", val);
-          calendar.currentMonth.m = val;
-          calendar.currentMonth.monthSelect.attr("data-value", val);
+          this.m = val;
+          this.monthSelect.attr("data-value", val);
+          $("#cal-month-select li a").filter(function(){
+            if(+$(this).parent().attr("data-value") === val){
+              calendar.currentMonth.monthSelect.html(this.innerHTML);
+            }
+          });
+          // console.log("set month to", val);
+        },
+        go: function(){
+          calendar.actions.onscroll.disabled = true;
           var mom = moment({
             "year": calendar.currentMonth.y,
             "month": calendar.currentMonth.m
           });
-          console.log("mom: ", mom.toISOString(), " y: ", calendar.currentMonth.y, " m: ", calendar.currentMonth.m);
-          calendar.actions.scrollToDate(mom);
+          calendar.actions.scrollToDate(mom, false, function(){
+            calendar.actions.onscroll.disabled = false;
+          });
         }
       }
     };
@@ -302,12 +354,14 @@ require(["moment"], function (moment) {
     calendar.currentMonth.m = calendar.currentMonth.monthSelect.attr("data-value");
 
     calendar.currentMonth.yearSelect.change(function(){
-      calendar.currentMonth.year = this.value;
+      calendar.currentMonth.y = this.value;
+      calendar.currentMonth.go();
     });
 
     $("#cal-month-select li a").click(function(){
       calendar.currentMonth.monthSelect.html(this.innerHTML);
       calendar.currentMonth.month = $(this).parent().attr("data-value");
+      calendar.currentMonth.go();
     });
 
     $("#cal-toolbar .left .arrows").children().click(function(){
@@ -316,6 +370,7 @@ require(["moment"], function (moment) {
       } else {
         calendar.currentMonth.year = +calendar.currentMonth.yearSelect.val() - 1;
       }
+      calendar.currentMonth.go();
     });
 
     function loadTemplates(callback){
@@ -330,6 +385,8 @@ require(["moment"], function (moment) {
           callback();
         }
       }
+
+      //console.log(window.ajaxify);
 
       for(i=0; i<templates.length; i++){
         window.ajaxify.loadTemplate("partials/calendar/"+templates[i], todo.bind(templates[i]));
@@ -357,8 +414,6 @@ require(["moment"], function (moment) {
       $(this).children().toggleClass("fa-chevron-up fa-chevron-down");
     });
 
-    window.calendar = calendar;
-
     calendar.templates.iframeStyle = '<style>div[widget-area]{display:none}'+
       '.post-bar.col-xs-12.hide.bottom-post-bar{display:block!important}'+
       '.topic .topic-footer .row{padding:0 10px 0 20px}'+
@@ -374,6 +429,14 @@ require(["moment"], function (moment) {
       '.topic-footer small.pull-right i,.post-tools .quote,'+
       '.post-tools .post_reply{display:none!important}'+
       'body{padding-top:10px!important}.container{width:100%!important}</style>';
+
+    calendar.calDaysContainer.scroll(calendar.actions.onscroll);
+
+    $(".button-today").click(calendar.actions.scrollToDate);
+
+    $(".button-add-event").click(calendar.actions.addEvent);
+
+    window.calendar = calendar;
 
   })(window.jQuery, window.app, window.translator, window.templates, window.socket, moment);
 });

@@ -1,11 +1,11 @@
-#{name}
+[h1]{name}[/h1]
 
-###[[calendar:when]]:
-**[[calendar:starts]]:** [allday={allday} date={start}]  
-**[[calendar:ends]]:** [allday={allday} date={end}]  
+[h3][[calendar:when]]:[/h3]
+[strong][[calendar:starts]]:[/strong] [allday={allday} date={start}]
+[strong][[calendar:ends]]:[/strong] [allday={allday} date={end}]
 
-###[[calendar:where]]:
+[h3][[calendar:where]]:[/h3]
 {place}
 
-###[[calendar:description]]:
+[h3][[calendar:description]]:[/h3]
 {description}

@@ -211,7 +211,8 @@
   {
     "events": {events},
     "canCreate": {canCreate},
-    "whoisin": {whoisin}
+    "whoisin": {whoisin},
+    "buffer": {buffer}
   }
 </div>
 
