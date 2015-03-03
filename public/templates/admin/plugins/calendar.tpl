@@ -100,13 +100,6 @@ var engine = new Bloodhound({
   datumTokenizer: Bloodhound.tokenizers.obj.whitespace,
   queryTokenizer: Bloodhound.tokenizers.whitespace,
   limit: 10,
-  prefetch: {
-    url: '/api/groups',
-    filter: function(list) {
-      var list = list.groups;
-      return list.map(function(group) { return { name: group.name }; });
-    }
-  },
   remote: {
     url: '/api/groups',
     filter: function(list) {

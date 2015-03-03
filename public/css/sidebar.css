@@ -34,6 +34,10 @@
   overflow: hidden;
 }
 
+#cal-sidebar.down {
+  top: 100%;
+}
+
 @media (min-width: 768px) {
   #cal-sidebar .toggle {
     display:none;

@@ -176,20 +176,64 @@
         },
         function(events, next){
           async.each(events, function(event, nxt){
-            async.each(Object.keys(event.responses), function(key, cb){
-              db.users.getInfo(key, function(err, info){
-                if(err){
-                  return cb(err);
-                }
-                event.responses[key] = {
-                  value: event.responses[key],
-                  username: info.username,
-                  userslug: info.userslug,
-                  picture: info.picture
-                };
-                cb();
-              });
-            }, nxt);
+            async.parallel([
+              async.apply(async.each, Object.keys(event.responses), function(key, cb){
+                db.users.getInfo(key, function(err, info){
+                  if(err){
+                    return cb(err);
+                  }
+                  event.responses[key] = {
+                    value: event.responses[key],
+                    username: info.username,
+                    userslug: info.userslug,
+                    picture: info.picture
+                  };
+                  cb();
+                });
+              }),
+              async.apply(async.each, Object.keys(event.editors.users), function(key, cb){
+                db.users.getInfo(key, function(err, info){
+                  if(err){
+                    return cb(err);
+                  }
+                  event.editors.users[key] = {
+                    uid: info.uid,
+                    username: info.username,
+                    userslug: info.userslug,
+                    picture: info.picture
+                  };
+                  cb();
+                });
+              }),
+              async.apply(async.each, Object.keys(event.viewers.users), function(key, cb){
+                db.users.getInfo(key, function(err, info){
+                  if(err){
+                    return cb(err);
+                  }
+                  event.viewers.users[key] = {
+                    uid: info.uid,
+                    username: info.username,
+                    userslug: info.userslug,
+                    picture: info.picture
+                  };
+                  cb();
+                });
+              }),
+              async.apply(async.each, Object.keys(event.blocked), function(key, cb){
+                db.users.getInfo(key, function(err, info){
+                  if(err){
+                    return cb(err);
+                  }
+                  event.blocked[key] = {
+                    uid: info.uid,
+                    username: info.username,
+                    userslug: info.userslug,
+                    picture: info.picture
+                  };
+                  cb();
+                });
+              }),
+            ], nxt);
           }, function(err){
             if(err){
               return next(err);

@@ -32,6 +32,7 @@
 require.config({
   paths: {
     "moment": "https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment-with-locales.min",
+    "datetimepicker": "/plugins/nodebb-plugin-calendar/public/bootstrap-datetimepicker.min"
   },
   config: {
     moment: {
@@ -39,12 +40,10 @@ require.config({
     }
   }
 });
-require(["moment"], function (moment) {
+require(["moment", "datetimepicker"], function (moment) {
   "use strict";
 
-  window.moment = moment;
-
-  (function($, app, translator, templates, socket, moment){
+  (function($, app, translator, templates, socket){
 
     $.fn.visible = function($container, partial){
       try {
@@ -68,6 +67,19 @@ require(["moment"], function (moment) {
     var calendar = {
       events: loaded.events,
       buffer: loaded.buffer,
+      socket: {
+        getEvents: function(start, end, callback){
+          socket.emit("calendar.getEvents", {
+            start: start,
+            end: end
+          }, function(err, response){
+            if(err){
+              return app.alertError();
+            }
+            callback(response.events);
+          });
+        },
+      },
       actions: {
         init: function(){
           calendar.actions.appendWeeks(moment().subtract(calendar.buffer, "months"), moment().add(calendar.buffer, "months"));
@@ -156,17 +168,6 @@ require(["moment"], function (moment) {
             calendar.days[y][m][d-1] = day;
           }
         },
-        getEvents: function(start, end, callback){
-          socket.emit("calendar.getEvents", {
-            start: start,
-            end: end
-          }, function(err, response){
-            if(err){
-              return app.alertError();
-            }
-            callback(response.events);
-          });
-        },
         buildResponses: function(event, callback){
           function todo(out){
             html += out;
@@ -237,7 +238,7 @@ require(["moment"], function (moment) {
           last = moment(calendar.lastDay().data("date"));
           first = moment(calendar.firstDay().data("date"));
 
-          calendar.actions.getEvents(first, last, function(events){
+          calendar.socket.getEvents(first, last, function(events){
             calendar.events = events;
             for(var i=0; i<calendar.events.length; i++){
               calendar.actions.postEvent(calendar.events[i]);
@@ -272,9 +273,147 @@ require(["moment"], function (moment) {
             calendar.days[date.year()][date.month()][0][0].scrollIntoView();
           }
         },
-        editEvent: function(){
+        editEvent: function(isnew){
+          var event = !isnew ? calendar.currentEvent : {
+            start: moment().startOf("h"),
+            end: moment().startOf("h").add(1, "h"),
+            uid: app.uid || app.user.uid,
+            name: "",
+            rawPlace: "",
+            rawDescription: "",
+            place: "",
+            description: "",
+            allday: false,
+            notifications: [],
+            editors: {
+              users: [],
+              groups: []
+            },
+            public: false,
+            viewers: {
+              users: [],
+              groups: []
+            },
+            blocked: []
+          };
 
+          var edit = calendar.editEvent;
+          edit.name.val(event.name);
+          edit.allday.prop("checked", event.allday);
+          edit.start.data("DateTimePicker").date(event.start);
+          edit.end.data("DateTimePicker").date(event.end);
+          edit.place.val(event.rawPlace);
+          edit.editors.tagsinput('removeAll');
+          edit.viewers.tagsinput('removeAll');
+          edit.blocked.tagsinput('removeAll');
+          event.editors.users.forEach(function(user){
+            edit.editors.tagsinput("add", user);
+          });
+          event.editors.groups.forEach(function(group){
+            edit.editors.tagsinput("add", group);
+          });
+          event.viewers.users.forEach(function(user){
+            edit.viewers.tagsinput("add", user);
+          });
+          event.viewers.groups.forEach(function(group){
+            edit.viewers.tagsinput("add", group);
+          });
+          event.blocked.forEach(function(user){
+            edit.blocked.tagsinput("add", user);
+          });
+          edit.public.prop("checked", event.public);
+          edit.notifications.tagsinput('removeAll');
+          event.notifications.forEach(function(date){
+            edit.notifications.tagsinput("add", {
+              show: moment(event.start).diff(date),
+              date: moment(date)
+            });
+          });
+          edit.description.val(event.rawDescription);
+          if(isnew){
+            edit.delete.hide();
+          } else {
+            edit.delete.show();
+          }
+          edit.save.off("click").click(function(){
+            event.name = edit.name.val();
+            event.allday = edit.allday.prop("checked");
+            event.start = edit.start.data("DateTimePicker").date();
+            event.end = edit.end.data("DateTimePicker").date();
+            event.place = edit.place.val();
+            event.public = edit.public.prop("checked");
+            event.description = edit.description.val();
+            event.editors = {
+              users: [],
+              groups: []
+            };
+            event.viewers = {
+              users: [],
+              groups: []
+            };
+            event.blocked = [];
+            var editors = edit.editors.tagsiput("items");
+            var viewers = edit.viewers.tagsinput("items");
+            var blocked = edit.blocked.tagsinput("items");
+            editors.forEach(function(it){
+              if(it.type === "group"){
+                event.editors.groups.push(it.name);
+              } else {
+                event.editors.users.push(it.uid);
+              }
+            });
+            viewers.forEach(function(it){
+              if(it.type === "group"){
+                event.viewers.groups.push(it.name);
+              } else {
+                event.viewers.users.push(it.uid);
+              }
+            });
+            event.blocked = blocked.map(function(it){
+              return it.uid;
+            });
+            event.notifications = edit.notifications.tagsinput("items").map(function(it){
+              if(it.date){
+                return it.date;
+              }
+              var str = it.show;
+              str = str.replace(/(?:([0-9]*)([smhd])[a-zA-Z]*)/g, "$1$2");
+              var date = moment(event.start), match;
+              while(str.length){
+                match = str.match(/([0-9]*)([smhd])/);
+                date.subtract(match[1], match[2]);
+                str = str.replace(/([0-9]*)([smhd])/);
+              }
+              return date;
+            });
+            function next(err, event){
+              if(err){
+                return app.alertError();
+              }
+              calendar.actions.postEvent(event);
+            }
+            if(isnew){
+              calendar.socket.createEvent(event, next);
+            } else {
+              calendar.socket.editEvent(event, next);
+            }
+          });
         },
+      },
+      editEvent: {
+        name: $("#event-name"),
+        allday: $("#event-allday"),
+        start: $("#event-start"),
+        end: $("#event-end"),
+        place: $("#event-place"),
+        editors: $("#event-editors"),
+        viewers: $("#event-viewers"),
+        public: $("#event-public"),
+        blocked: $("#event-blocked"),
+        notifications: $("#event-notifications"),
+        description: $("#event-description"),
+        delete: $("#editEvent button.delete"),
+        save: $("#editEvent button.save")
       },
       days: {
         // years
@@ -332,6 +471,9 @@ require(["moment"], function (moment) {
             calendar.actions.onscroll.disabled = false;
           });
         }
+      },
+      currentEvent: {
+
       }
     };
 
@@ -395,8 +537,7 @@ require(["moment"], function (moment) {
     });
 
     $("#cal-sidebar .toggle").click(function(){
-      $(this).parent().toggleClass("down");
-      $(this).children().toggleClass("fa-chevron-up fa-chevron-down");
+      $(this).parent().toggleClass("down").children().toggleClass("fa-chevron-up fa-chevron-down");
     });
 
     calendar.templates.iframeStyle = '<style>div[widget-area]{display:none}'+
@@ -419,9 +560,33 @@ require(["moment"], function (moment) {
 
     $(".button-today").click(calendar.actions.scrollToDate);
 
-    $(".button-add-event").click(calendar.actions.addEvent);
+    $('#editEvent').on('show.bs.modal', function (event) {
+      calendar.actions.editEvent($(event.relatedTarget).hasClass("button-add-event"));
+    });
+
+    (function(edit){
+      edit.start.datetimepicker();
+      edit.end.datetimepicker();
+
+      var engine = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.obj.whitespace,
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        limit: 10,
+        remote: {
+          url: '/api/groups',
+          filter: function(list) {
+            var list = list.groups;
+            return list.map(function(group) { return { name: group.name }; });
+          }
+        },
+      });
+
+      $([edit.editors[0], edit.viewers[0], edit.blocked[0]]).tagsinput({
+
+      });
+    })(calendar.editEvent);
 
     window.calendar = calendar;
 
-  })(window.jQuery, window.app, window.translator, window.templates, window.socket, moment);
+  })(window.jQuery, window.app, window.translator, window.templates, window.socket);
 });
