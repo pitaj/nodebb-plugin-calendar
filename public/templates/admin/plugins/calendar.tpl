@@ -96,24 +96,27 @@ $("#save-button").click(function(){
   });
 });
 
-var engine = new Bloodhound({
-  datumTokenizer: Bloodhound.tokenizers.obj.whitespace,
-  queryTokenizer: Bloodhound.tokenizers.whitespace,
-  limit: 10,
-  remote: {
-    url: '/api/groups',
-    filter: function(list) {
-      var list = list.groups;
-      return list.map(function(group) { return { name: group.name }; });
+function groups(query, callback){
+  socket.emit("groups.search", {
+    query: query
+  }, function(err, data){
+    if(err){
+      return app.alertError();
     }
-  },
-});
-
-engine.initialize();
+    console.log(data);
+    callback(data.map(function(group){
+      group = {
+        name: group.name,
+        slug: group.slug
+      };
+      return group;
+    }));
+  });
+}
 
 $(".creators, .editors, .admins").typeahead(null, {
   name: 'groups',
   displayKey: 'name',
-  source: engine.ttAdapter()
+  source: groups
 });
 </script>

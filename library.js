@@ -89,7 +89,8 @@
           return next();
         }
         var local;
-        async.each(events, function(event, nxt){
+        async.each(Object.keys(events), function(key, nxt){
+          var event = events[key];
           async.parallel({
             edit: async.apply(db.groups.isMemberOfMultiple, uid, event.editors.groups),
             view: async.apply(db.groups.isMemberOfMultiple, uid, event.viewers.groups),
@@ -100,7 +101,7 @@
             local = {
               edit: groupPerms.edit || event.editors.users.indexOf(uid) > -1,
               view: groupPerms.view || event.viewers.users.indexOf(uid) > -1,
-              blocked: event.blocked.indexOf(uid) > -1,
+              blocked: event.blocked ? event.blocked.indexOf(uid) > -1 : false,
               delete: event.uid === uid,
             };
             local.edit = local.edit && !local.blocked;
@@ -152,10 +153,14 @@
       });
     },
     page: function(req, res, callback){
-      var today, evs, settings, can;
+      var today, settings, can;
+
+      //console.log(0);
+
       async.waterfall([
         function(next){
           db.settings.get(next);
+          //console.log(1);
         },
         function(sets, next){
           settings = sets;
@@ -164,100 +169,37 @@
           ago.setMonth(ago.getMonth()-buffer);
           ahead.setMonth(ahead.getMonth()+buffer);
           today = new Date();
-          db.getEventsByDate(ago, ahead, next);
+          eventstuff.getEvents(req.user ? req.user.uid : 0, {
+            start: ago,
+            end: ahead
+          }, next);
+          //console.log(2);
         },
         function(events, next){
-          evs = events;
-          user(req.user ? req.user.uid : 0, events, next);
-        },
-        function(cn, next){
-          can = cn;
-          eventstuff.trim(evs, can, next);
-        },
-        function(events, next){
-          async.each(events, function(event, nxt){
-            async.parallel([
-              async.apply(async.each, Object.keys(event.responses), function(key, cb){
-                db.users.getInfo(key, function(err, info){
-                  if(err){
-                    return cb(err);
-                  }
-                  event.responses[key] = {
-                    value: event.responses[key],
-                    username: info.username,
-                    userslug: info.userslug,
-                    picture: info.picture
-                  };
-                  cb();
-                });
-              }),
-              async.apply(async.each, Object.keys(event.editors.users), function(key, cb){
-                db.users.getInfo(key, function(err, info){
-                  if(err){
-                    return cb(err);
-                  }
-                  event.editors.users[key] = {
-                    uid: info.uid,
-                    username: info.username,
-                    userslug: info.userslug,
-                    picture: info.picture
-                  };
-                  cb();
-                });
-              }),
-              async.apply(async.each, Object.keys(event.viewers.users), function(key, cb){
-                db.users.getInfo(key, function(err, info){
-                  if(err){
-                    return cb(err);
-                  }
-                  event.viewers.users[key] = {
-                    uid: info.uid,
-                    username: info.username,
-                    userslug: info.userslug,
-                    picture: info.picture
-                  };
-                  cb();
-                });
-              }),
-              async.apply(async.each, Object.keys(event.blocked), function(key, cb){
-                db.users.getInfo(key, function(err, info){
-                  if(err){
-                    return cb(err);
-                  }
-                  event.blocked[key] = {
-                    uid: info.uid,
-                    username: info.username,
-                    userslug: info.userslug,
-                    picture: info.picture
-                  };
-                  cb();
-                });
-              }),
-            ], nxt);
-          }, function(err){
-            if(err){
-              return next(err);
-            }
-            next(null, events);
+          //console.log("after", events.length);
+          user(req.user ? req.user.uid : 0, events, function(err, cn){
+            can = cn;
+            //console.log(3, err);
+            next(err, events);
           });
         },
-        function(events){
-          res.render("calendar", {
-            events: JSON.stringify(events),
-            canCreate: can("create"),
-            whoisin: !!(settings.usewhoisin && whoisin),
-            today: {
-              date: today.getDate(),
-              month: today.getMonth(),
-              year: today.getFullYear()
-            },
-            buffer: buffer
-          });
-        }
-      ], function(err){
+      ], function(err, events){
         if(err){
-          callback(err);
+          //console.log(12, err);
+          return callback(err);
         }
+        console.log("events.length: ", events.length);
+        res.render("calendar", {
+          events: JSON.stringify(events),
+          canCreate: can("create"),
+          whoisin: !!(settings.usewhoisin && whoisin),
+          today: {
+            date: today.getDate(),
+            month: today.getMonth(),
+            year: today.getFullYear()
+          },
+          buffer: buffer
+        });
       });
     },
     saveAdmin: function(req, res){
@@ -278,152 +220,161 @@
     }
   };
 
-  var sockets = {
-    emitEventChange: function(event, message, callback){
-      var soks = mainSocket.server.sockets.in("calendar").sockets;
-      async.each(Object.keys(soks), function(x, next){
-        user(soks[x].uid).can("view", event, function(err, bool){
-          if(err){
-            return next(err);
-          }
-          if(bool){
-            mainSocket.server.sockets.socket(soks[x].uid).emit(message, event);
-          }
-        });
-      }, callback);
+  function emitEventChange(event, message, callback){
+    var soks = mainSocket.server.of("calendar").connected;
+    async.each(Object.keys(soks), function(x, next){
+      user(soks[x].uid, [event], function(err, can){
+        if(err){
+          return next(err);
+        }
+        if(can("view", event)){
+          mainSocket.server.sockets.socket(soks[x].uid).emit(message, event);
+        }
+        next();
+      });
+    }, callback);
+  }
+
+  pluginSocket.calendar = {
+    getEvents: function(socket, dates, callback){
+      eventstuff.getEvents(socket.uid, dates, callback);
     },
-    on: {
-      createEvent: function(socket, event, callback){
-        async.waterfall([
-          async.apply(user, socket.uid, null),
-          function(can, next){
+    createEvent: function(socket, event, callback){
+      var settings;
+      async.waterfall([
+        async.apply(user, socket.uid, null),
+        function(can, next){
+          db.settings.get(function(err, sets){
+            if(err){
+              return next(err);
+            }
+            settings = sets;
             if(!can("create")){
               next(new Error("[[calendar:permissions.forbidden.create]]"));
             } else {
               next(null, can);
             }
-          },
-          function(can, next){
-            async.parallel({
-              place: async.apply(parse, event.rawPlace),
-              description: async.apply(parse, event.rawDescription),
-              name: function(next){
-                next(null, sanitize(event.name));
-              },
-            }, next);
-          },
-          function(parsed, next){
-            event = {
-              start: event.start,
-              end: event.end,
-              uid: socket.uid,
-              rawPlace: event.rawPlace,
-              rawDescription: event.rawDescription,
-              place: parsed.place,
-              description: parsed.description,
-              name: parsed.name,
-              allday: event.allday,
-              notifications: event.notifications,
-              editors: event.editors,
-              viewers: event.viewers,
-              blocked: event.blocked
-            };
-            next(null, event);
-          },
-          posts.create,
-          eventstuff.create,
-          function(event, next){
-            sockets.emitEventChange(event, "calendar.event.create", next);
+          });
+        },
+        function(can, next){
+          async.parallel({
+            place: async.apply(parse, event.rawPlace),
+            description: async.apply(parse, event.rawDescription),
+            name: function(next){
+              next(null, sanitize(event.name));
+            },
+          }, next);
+        },
+        function(parsed, next){
+          event = {
+            start: event.start,
+            end: event.end,
+            uid: socket.uid,
+            rawPlace: event.rawPlace,
+            rawDescription: event.rawDescription,
+            place: parsed.place,
+            description: parsed.description,
+            name: parsed.name,
+            allday: event.allday,
+            notifications: event.notifications,
+            editors: event.editors,
+            viewers: event.viewers,
+            blocked: event.blocked,
+            cid: event.cid || settings.category
+          };
+          next(null, event);
+        },
+        posts.create,
+        eventstuff.create,
+        function(event, next){
+          emitEventChange(event, "calendar.event.create", next);
+        }
+      ], callback);
+    },
+    editEvent: function(socket, event, callback){
+      async.waterfall([
+        async.apply(user, socket.uid, null),
+        function(can, next){
+          if(!can("edit", event)){
+            next(new Error("[[calendar:permissions.forbidden.edit]]"));
+          } else {
+            next(null, can);
           }
-        ], callback);
-      },
-      editEvent: function(socket, event, callback){
-        async.waterfall([
-          async.apply(user, socket.uid, null),
-          function(can, next){
-            if(!can("edit", event)){
-              next(new Error("[[calendar:permissions.forbidden.edit]]"));
-            } else {
-              next(null, can);
-            }
-          },
-          function(can, next){
-            async.parallel({
-              place: async.apply(parse, event.rawPlace),
-              description: async.apply(parse, event.rawDescription),
-              name: function(next){
-                next(null, sanitize(event.name));
-              },
-            }, next);
-          },
-          function(parsed, next){
-            db.event.get(event.id, function(err, oldEvent){
-              next(err, { oldEvent: oldEvent, parsed: parsed });
-            });
-          },
-          function(obj, next){
-            event = {
-              id: event.id,
-              start: new Date(event.start).toISOString(),
-              end: new Date(event.end).toISOString(),
-              rawPlace: event.rawPlace,
-              rawDescription: event.rawDescription,
-              place: obj.parsed.place,
-              description: obj.parsed.description,
-              name: obj.parsed.name,
-              allday: !!event.allday,
-              notifications: event.notifications,
-              editors: event.editors,
-              viewers: event.viewers,
-              blocked: event.blocked,
-              pid: event.pid,
-            };
-            next(null, event);
-          },
-          posts.update,
-          eventstuff.edit,
-          function(event, next){
-            sockets.emitEventChange(event, "calendar.event.edit", next);
+        },
+        function(can, next){
+          async.parallel({
+            place: async.apply(parse, event.rawPlace),
+            description: async.apply(parse, event.rawDescription),
+            name: function(next){
+              next(null, sanitize(event.name));
+            },
+          }, next);
+        },
+        function(parsed, next){
+          db.event.get(event.id, function(err, oldEvent){
+            next(err, { oldEvent: oldEvent, parsed: parsed });
+          });
+        },
+        function(obj, next){
+          event = {
+            id: event.id,
+            start: new Date(event.start).toISOString(),
+            end: new Date(event.end).toISOString(),
+            rawPlace: event.rawPlace,
+            rawDescription: event.rawDescription,
+            place: obj.parsed.place,
+            description: obj.parsed.description,
+            name: obj.parsed.name,
+            allday: !!event.allday,
+            notifications: event.notifications,
+            editors: event.editors,
+            viewers: event.viewers,
+            blocked: event.blocked,
+            pid: event.pid,
+          };
+          next(null, event);
+        },
+        posts.update,
+        eventstuff.edit,
+        function(event, next){
+          emitEventChange(event, "calendar.event.edit", next);
+        }
+      ], callback);
+    },
+    deleteEvent: function(socket, event, callback){
+      async.waterfall([
+        async.apply(user, socket.uid, null),
+        function(can, next){
+          if(!can("delete", event)){
+            next(new Error("[[calendar:permissions.forbidden.delete]]"));
+          } else {
+            next(null, can);
           }
-        ], callback);
-      },
-      deleteEvent: function(socket, event, callback){
-        async.waterfall([
-          async.apply(user, socket.uid, null),
-          function(can, next){
-            if(!can("delete", event)){
-              next(new Error("[[calendar:permissions.forbidden.delete]]"));
-            } else {
-              next(null, can);
-            }
-          },
-          posts.delete,
-          eventstuff.delete,
-          function(event, next){
-            event = {
-              id: event.id
-            };
-            sockets.emitEventChange(event, "calendar.event.delete", next);
+        },
+        posts.delete,
+        eventstuff.delete,
+        function(event, next){
+          event = {
+            id: event.id
+          };
+          emitEventChange(event, "calendar.event.delete", next);
+        }
+      ], callback);
+    },
+    respond: function(socket, response, callback){
+      async.waterfall([
+        async.apply(user, response.uid, [response.event]),
+        function(can, next){
+          if(!can("view", response.event)){
+            return next(new Error("[[calendar:permissions.forbidden.view]]"));
           }
-        ], callback);
-      },
-      respond: function(socket, response, callback){
-        async.waterfall([
-          async.apply(user, response.uid, [response.event]),
-          function(can, next){
-            if(!can("view", response.event)){
-              return next(new Error("[[calendar:permissions.forbidden.view]]"));
-            }
-            next();
-          },
-          async.apply(db.event.responses.set, response.event, response.uid, response.value),
-          async.apply(sockets.emitEventChange, response.event, "calendar.event.respond")
-        ], callback);
-      }
+          next();
+        },
+        async.apply(db.event.responses.set, response.event, response.uid, response.value),
+        async.apply(emitEventChange, response.event, "calendar.event.respond")
+      ], callback);
     }
   };
-
-  pluginSocket.calendar = sockets.on;
 
   var eventstuff = {
     edit: function(rawEvent, callback){
@@ -442,6 +393,123 @@
         async.apply(notifications.handle, rawEvent)
       ], function(err, result){
         callback(err, result[0]);
+      });
+    },
+    getEvents: function(uid, dates, callback){
+      var evs, can;
+      async.waterfall([
+        function(next){
+          db.getEventsByDate(new Date(dates.start), new Date(dates.end), next);
+        },
+        function(events, next){
+          evs = events;
+          user(uid, events, next);
+        },
+        function(cn, next){
+          can = cn;
+          eventstuff.trim(evs, can, next);
+        },
+        function(events, next){
+          //console.log("events: ", events);
+          async.each(Object.keys(events), function(key, nxt){
+            var event = events[key];
+            event.responses = event.responses || {};
+            event.editors = event.editors || {};
+            event.editors.users = event.editors.users || [];
+            event.editors.groups = event.editors.groups || [];
+            event.viewers = event.viewers || {};
+            event.viewers.users = event.viewers.users || [];
+            event.viewers.groups = event.viewers.groups || [];
+            event.blocked = event.blocked || [];
+            //console.log(event);
+            async.parallel([
+              function(n){
+                async.each(Object.keys(event.responses), function(key, cb){
+                  db.users.getInfo(key, function(err, info){
+                    if(err){
+                      return cb(err);
+                    }
+                    event.responses[key] = {
+                      value: event.responses[key],
+                      username: info.username,
+                      userslug: info.userslug,
+                      picture: info.picture
+                    };
+                    cb();
+                  });
+                }, n);
+              },
+              function(n){
+                async.each(Object.keys(event.editors.users), function(key, cb){
+                  db.users.getInfo(key, function(err, info){
+                    if(err){
+                      return cb(err);
+                    }
+                    event.editors.users[key] = {
+                      uid: info.uid,
+                      username: info.username,
+                      userslug: info.userslug,
+                      picture: info.picture
+                    };
+                    cb();
+                  });
+                }, n);
+              },
+              function(n){
+                async.each(Object.keys(event.viewers.users), function(key, cb){
+                  db.users.getInfo(key, function(err, info){
+                    if(err){
+                      return cb(err);
+                    }
+                    event.viewers.users[key] = {
+                      uid: info.uid,
+                      username: info.username,
+                      userslug: info.userslug,
+                      picture: info.picture
+                    };
+                    cb();
+                  });
+                }, n);
+              },
+              function(n){
+                async.each(Object.keys(event.blocked), function(key, cb){
+                  db.users.getInfo(key, function(err, info){
+                    if(err){
+                      return cb(err);
+                    }
+                    event.blocked[key] = {
+                      uid: info.uid,
+                      username: info.username,
+                      userslug: info.userslug,
+                      picture: info.picture
+                    };
+                    cb();
+                  });
+                }, n);
+              },
+              function(cb){
+                db.users.getInfo(event.uid, function(err, info){
+                  if(err){
+                    return cb(err);
+                  }
+                  event.user = {
+                    uid: info.uid,
+                    username: info.username,
+                    userslug: info.userslug,
+                    picture: info.picture
+                  };
+                  cb();
+                });
+              },
+            ], nxt);
+          }, function(err){
+            //console.log("after", events, err);
+            next(err, events);
+          });
+        }
+      ], function(err, events){
+        //console.log("after", events.length, err);
+        callback(err, events);
       });
     },
     delete: function(rawEvent, callback){
@@ -496,18 +564,20 @@
       async.waterfall([
         async.apply(async.parallel, [
           async.apply(notifications.clear, event),
-          async.apply(notifications.delete, event)
+          async.apply(db.event.notifications.remove, event)
         ]),
         function(thing, next){
           notifications.save(event, event.notifications, next);
         },
-        function(thing, next){
+        function(next){
           notifications.load([{
             id: event.id,
             notifications: event.notifications
           }], next);
         },
-      ], callback);
+      ], function(err){
+        callback(err);
+      });
     },
     load: function(notifs, callback){
       var x, date, id, i, these;
@@ -543,9 +613,11 @@
       callback();
     },
     clear: function(event, callback){
-      notifications.jobs[event.id].forEach(function(it){
-        it.cancel();
-      });
+      if(notifications.jobs[event.id]){
+        notifications.jobs[event.id].forEach(function(it){
+          it.cancel();
+        });
+      }
       notifications.jobs[event.id] = [];
       callback();
     },
@@ -623,6 +695,9 @@
     obj.router.get('/admin/plugins/calendar', obj.middleware.admin.buildHeader, render.admin);
     obj.router.get('/api/admin/plugins/calendar', render.admin);
     obj.router.post('/api/admin/plugins/calendar/save', render.saveAdmin);
+
+    posts.app = obj.app;
+
     async.parallel([
       function(next){
         db.getNotifications(function(err, data){

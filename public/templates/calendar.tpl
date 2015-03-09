@@ -42,7 +42,7 @@
             </div>
             <div class="form-group">
               <label for="event-editors">[[calendar:editors]]</label>
-              <input id="event-editors" class="form-control" data-role="tagsinput" placeholder="[[calendar:start_typing]]" />
+              <input id="event-editors" class="form-control" placeholder="[[calendar:start_typing]]" />
             </div>
             <div class="checkbox">
               <label>
@@ -51,11 +51,11 @@
             </div>
             <div class="form-group">
               <label for="event-viewers">[[calendar:viewers]]</label>
-              <input id="event-viewers" type="text" class="form-control" data-role="tagsinput" placeholder="[[calendar:start_typing]]" />
+              <input id="event-viewers" type="text" class="form-control" placeholder="[[calendar:start_typing]]" />
             </div>
             <div class="form-group">
               <label for="event-blocked">[[calendar:blocked]]</label>
-              <input id="event-blocked" type="text" class="form-control" data-role="tagsinput" placeholder="[[calendar:start_typing]]" />
+              <input id="event-blocked" type="text" class="form-control" placeholder="[[calendar:start_typing]]" />
             </div>
             <div class="form-group">
               <label for="event-notifications">[[pages:notifications]]</label>
@@ -212,9 +212,9 @@
           <!-- events go here -->
         </div>
       </div>
-      <div class="event topic">
+      <div class="event topic trans">
         <div class="topic-text">
-          <div class="topic-profile-pic hidden-xs text-center">
+          <div class="topic-profile-pic hidden-xs text-center user">
             <a href="/user/{userslug}">
               <img src="{picture}" alt="{username}" class="profile-image user-img" title="" data-original-title="{username}">
             </a>
@@ -224,14 +224,14 @@
           </div>
           <h3 class="topic-title">
             <i class="edit-event-button fa fa-pencil-square-o" data-toggle="modal" data-target="#editEvent"></i>
-            <p class="topic-title" itemprop="name">[[calendar:event_unselected]]</p>
+            <p class="topic-title name" itemprop="name">[[calendar:event_unselected]]</p>
             <hr>
           </h3>
           <div class="post-content" itemprop="text">
             <h3>[[calendar:when]]</h3>
             <p class="dates">
-              <strong>[[calendar:starts]]:</strong> <span class="date-timestamp start" data-allday="{allday}" data-timestamp="{timestamp}" data-onlytime="{onlytime}"></span><br>
-              <strong>[[calendar:ends]]:</strong> <span class="date-timestamp end" data-allday="{allday}" data-timestamp="{timestamp}" data-onlytime="{onlytime}"></span>
+              <strong>[[calendar:starts]]:</strong> <span class="date-timestamp start" data-allday="{allday}" data-timestamp="{timestamp}" data-onlytime="false"></span><br>
+              <strong>[[calendar:ends]]:</strong> <span class="date-timestamp end" data-allday="{allday}" data-timestamp="{timestamp}" data-onlytime="false"></span>
             </p>
             <h3>[[calendar:where]]</h3>
             <p>

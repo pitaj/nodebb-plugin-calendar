@@ -43,7 +43,33 @@ require.config({
 require(["moment", "datetimepicker"], function (moment) {
   "use strict";
 
+  moment.locale(window.config.userLang || "en_GB");
+
   (function($, app, translator, templates, socket){
+
+    function observe(elem, callback){
+
+      if(elem && !callback){
+        try {
+          elem.off("DOMSubtreeModified").data("mutationObserver").disconnect();
+        } catch(e){
+
+        }
+      } else {
+        var Observer = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
+
+        if(MutationObserver){
+          var observer = new Observer(callback);
+          observer.observe(elem, {
+            subtree: true,
+            attributes: true
+          });
+          elem.data("mutationObserver", observer);
+        } else {
+          elem.on("DOMSubtreeModified", callback);
+        }
+      }
+    }
 
     $.fn.visible = function($container, partial){
       try {
@@ -65,20 +91,61 @@ require(["moment", "datetimepicker"], function (moment) {
     var loaded = JSON.parse($("#data_script").html());
 
     var calendar = {
-      events: loaded.events,
+      events: [],
       buffer: loaded.buffer,
+      whoisin: loaded.whoisin,
       socket: {
         getEvents: function(start, end, callback){
-          socket.emit("calendar.getEvents", {
+          socket.emit("plugins.calendar.getEvents", {
             start: start,
             end: end
           }, function(err, response){
             if(err){
+              console.error(err);
               return app.alertError();
             }
-            callback(response.events);
+            console.log("events", response);
+            callback(response);
           });
         },
+        createEvent: function(event, callback){
+          socket.emit("plugins.calendar.createEvent", event, function(err, data){
+            if(err){
+              return app.alertError();
+            }
+            if(data){
+              calendar.actions.postEvent(data);
+              callback(data);
+            } else {
+              app.alertError();
+            }
+          });
+        },
+        editEvent: function(event, callback){
+          socket.emit("plugins.calendar.editEvent", event, function(err, data){
+            if(err){
+              return app.alertError();
+            }
+            if(data){
+              calendar.actions.postEvent(data);
+              callback(data);
+            } else {
+              app.alertError();
+            }
+          });
+        },
+        deleteEvent: function(event, callback){
+          socket.emit("plugins.calendar.deleteEvent", {
+            id: event.id
+          }, function(err, response){
+            if(err){
+              console.error(err);
+              return app.alertError();
+            }
+            console.log("events", response);
+            callback(response);
+          });
+        }
       },
       actions: {
         init: function(){
@@ -86,13 +153,19 @@ require(["moment", "datetimepicker"], function (moment) {
           calendar.actions.scrollToDate(new Date(), true);
           var mom = moment();
           calendar.days[mom.year()][mom.month()][mom.date()-1].attr("id", "cal-day-selected");
+          /*
           setTimeout(function(){
             for(var i=0; i<calendar.events.length; i++){
               calendar.actions.postEvent(calendar.events[i]);
             }
           }, 50);
+          */
         },
         postEvent: function(event){
+          if(!event){
+            return false;
+          }
+          console.log(event);
           var d = moment(event.start),
           l = moment(event.end).endOf("day"), day, y, m, dt;
           while(d <= l){
@@ -102,19 +175,19 @@ require(["moment", "datetimepicker"], function (moment) {
               calendar.days[y][m][dt]){
               day = calendar
                 .days[y][m][dt];
-              day.find('.event[data-id='+event.id+']').remove();
-              day.append(templates.parse(calendar.templates.event, {
+              calendar.calDays.find('.event[data-id='+event.id+']').remove();
+              event = $(calendar.parse(calendar.templates.event, {
                 time: d.toISOString(),
                 name: event.name,
                 id: event.id
-              }));
-              calendar.event.sortDay(day);
+              })).data("event", event).appendTo(day);
+              calendar.actions.sortDay(day);
             }
             d.add(1, "day");
           }
         },
         sortDay: function(day){
-          var evs = day.events.children().detach();
+          var evs = day.children(".event").detach();
           evs.sort(function(a, b){
             var an = new Date($(a).data().timestamp),
             bn = new Date($(b).data().timestamp);
@@ -168,21 +241,23 @@ require(["moment", "datetimepicker"], function (moment) {
             calendar.days[y][m][d-1] = day;
           }
         },
-        buildResponses: function(event, callback){
+        buildResponses: function(responses, callback){
           function todo(out){
             html += out;
             numberDone++;
-            if(numberDone === Object.keys(event.responses).length){
+            if(numberDone === Object.keys(responses).length){
               callback(html);
             }
           }
           var x, html = "", numberDone;
-          for(x in event.responses){
-            if(event.responses.hasOwnProperty(x)){
-              translator.translate(templates.parse(calendar.templates.response, {
-                username: event.responses[x].username,
-                userslug: event.responses[x].userslug,
-                value: event.responses[x].value
+          for(x in responses){
+            if(responses.hasOwnProperty(x) &&
+            responses[x] &&
+            typeof responses[x] === "object"){
+              translator.translate(calendar.parse(calendar.templates.response, {
+                username: responses[x].username,
+                userslug: responses[x].userslug,
+                value: responses[x].value
               }), todo);
             }
           }
@@ -306,6 +381,13 @@ require(["moment", "datetimepicker"], function (moment) {
           edit.editors.tagsinput('removeAll');
           edit.viewers.tagsinput('removeAll');
           edit.blocked.tagsinput('removeAll');
+          if(event.allday){
+            edit.start.data("DateTimePicker").format("LL");
+            edit.end.data("DateTimePicker").format("LL");
+          } else {
+            edit.start.data("DateTimePicker").format("LLL");
+            edit.end.data("DateTimePicker").format("LLL");
+          }
           event.editors.users.forEach(function(user){
             edit.editors.tagsinput("add", user);
           });
@@ -352,7 +434,7 @@ require(["moment", "datetimepicker"], function (moment) {
               groups: []
             };
             event.blocked = [];
-            var editors = edit.editors.tagsiput("items");
+            var editors = edit.editors.tagsinput("items");
             var viewers = edit.viewers.tagsinput("items");
             var blocked = edit.blocked.tagsinput("items");
             editors.forEach(function(it){
@@ -386,11 +468,10 @@ require(["moment", "datetimepicker"], function (moment) {
               }
               return date;
             });
-            function next(err, event){
-              if(err){
-                return app.alertError();
-              }
-              calendar.actions.postEvent(event);
+            function next(event){
+              app.alertSuccess();
+              calendar.actions.viewEvent(event);
+              edit.it.modal("close");
             }
             if(isnew){
               calendar.socket.createEvent(event, next);
@@ -399,8 +480,81 @@ require(["moment", "datetimepicker"], function (moment) {
             }
           });
         },
+        viewEvent: function(event){
+          var view = calendar.viewEvent;
+
+          var aftercnt = 0;
+
+          function after(){
+            aftercnt++;
+            if(aftercnt === 2){
+              view.it.removeClass("trans");
+            }
+          }
+
+          calendar.currentEvent = event;
+
+          view.it.addClass("trans");
+
+          setTimeout(function(){
+            view.user.a.attr("href", "/user/"+event.user.userslug);
+            view.user.smalla.html(event.user.username);
+            view.user.img.attr({
+              src: event.user.picture,
+              alt: event.user.username,
+              "data-original-title": event.user.username
+            });
+            view.user.small.attr("title", event.user.username);
+
+            view.name.html(event.name);
+            view.start.attr("data-timestamp", new Date(event.start).toISOString());
+            view.end.attr("data-timestamp", new Date(event.end).toISOString());
+            window.initTimestamp($([event.start[0], event.end[0]]).attr("data-allday", event.allday));
+            view.place.html(event.place);
+            view.description.html(event.description);
+
+            view.edit[event.canEdit ? "show" : "hide"](0);
+
+            if(window.WhoisinPlugin && event.whoisin && calendar.whoisin){
+              view.whoisin.html(event.whoisin).show(0);
+              window.WhoisinPlugin.setup();
+              after();
+            } else {
+              var clone = event.responses.slice(0);
+              clone[app.uid] = null;
+              calendar.actions.buildResponses(clone, function(html){
+                var my = view.myResponse.detach();
+                view.responses.html(html).prepend(my);
+                after();
+              });
+              view.myResponse.find("small > a")
+                .attr("href", "/user/"+event.user.userslug)
+                .html(event.user.username);
+              view.myResponse.find(".selected").removeClass("selected");
+              view.myResponse.find("."+(event.responses[app.uid] ?
+                event.responses[app.uid].value : "invited"));
+            }
+
+            if(view.comments.contents()[0]){
+              observe(view.comments.contents(), false);
+            }
+
+            view.comments.off("load").on("load", function(){
+              var self = $(this);
+              self.contents().find("head")
+                .append(calendar.templates.iframestyle);
+
+              observe(self.contents(), function(){
+                self.height(self.contents().find("#content").height()+20);
+              });
+
+              after();
+            }).attr("src", event.url);
+          }, 250);
+        },
       },
       editEvent: {
+        it: $('#editEvent'),
         name: $("#event-name"),
         allday: $("#event-allday"),
         start: $("#event-start"),
@@ -414,6 +568,23 @@ require(["moment", "datetimepicker"], function (moment) {
         description: $("#event-description"),
         delete: $("#editEvent button.delete"),
         save: $("#editEvent button.save")
+      },
+      viewEvent: {
+        it: $("#cal-sidebar .content > .event")
+        // user
+          // a
+          // smalla
+          // img
+          // small
+        // name
+        // start
+        // end
+        // place
+        // description
+        // responses
+        // myResponse
+        // whoisin
+        // comments
       },
       days: {
         // years
@@ -433,7 +604,7 @@ require(["moment", "datetimepicker"], function (moment) {
       lastDay: function(){ return calendar.calDays.find("td").last(); },
       firstDay: function(){ return calendar.calDays.find("td").first(); },
       calDays: $("#cal-days"),
-      firstOfWeek: 0, // 0 for Sunday, 1 for Monday
+      firstOfWeek: 1, // 0 for Sunday, 1 for Monday
       calDaysContainer: $("#cal-days-container"),
       currentMonth: {
         monthSelect: $("#cal-month-select .month"),
@@ -454,7 +625,7 @@ require(["moment", "datetimepicker"], function (moment) {
         set month(val){
           this.m = val;
           this.monthSelect.attr("data-value", val);
-          $("#cal-month-select li a").filter(function(){
+          $("#cal-month-select li a").each(function(){
             if(+$(this).parent().attr("data-value") === val){
               calendar.currentMonth.monthSelect.html(this.innerHTML);
             }
@@ -476,21 +647,39 @@ require(["moment", "datetimepicker"], function (moment) {
 
       }
     };
+    (function(view){
+      var it = view.it;
+      $.extend(view, {
+        user: {
+          a: it.find(".topic-profile-pic a"),
+          smalla: it.find(".topic-profile-pic small > a"),
+          img: it.find(".topic-profile-pic img"),
+          small: it.find(".topic-profile-pic small")
+        },
+        name: it.find(".topic-title.name"),
+        start: it.find(".dates .start"),
+        end: it.find(".dates .end"),
+        place: it.find(".place"),
+        description: it.find(".description"),
+        responses: it.find(".responses"),
+        myResponse: it.find(".responses .my-response"),
+        whoisin: it.find(".cal-whoisin"),
+        comments: it.find(".comments"),
+        edit: it.find(".edit-event-button")
+      });
+    })(calendar.viewEvent);
 
     calendar.currentMonth.y = calendar.currentMonth.yearSelect.val();
     calendar.currentMonth.m = calendar.currentMonth.monthSelect.attr("data-value");
-
     calendar.currentMonth.yearSelect.change(function(){
       calendar.currentMonth.y = this.value;
       calendar.currentMonth.go();
     });
-
     $("#cal-month-select li a").click(function(){
       calendar.currentMonth.monthSelect.html(this.innerHTML);
       calendar.currentMonth.month = $(this).parent().attr("data-value");
       calendar.currentMonth.go();
     });
-
     $("#cal-toolbar .left .arrows").children().click(function(){
       if($(this).hasClass("fa-chevron-circle-up")){
         calendar.currentMonth.year = +calendar.currentMonth.yearSelect.val() + 1;
@@ -499,29 +688,63 @@ require(["moment", "datetimepicker"], function (moment) {
       }
       calendar.currentMonth.go();
     });
+    $(".button-today").click(calendar.actions.scrollToDate);
 
-    function loadTemplates(callback){
-      var templates = ["day", "event", "profilePic", "response", "viewEvent"];
-      var n = 0, i;
-
-      function todo(template){
-        calendar.templates[this] = template;
-        //console.log("template "+this+" loaded");
-        n++;
-        if(n === templates.length){
-          callback();
+    function contains(string, arr){
+      string = string.toLowerCase();
+      for(var i=0, l = arr.length; i<l; i++){
+        if(string.indexOf(arr[i]) > -1){
+          return arr[i];
         }
-      }
-
-      //console.log(window.ajaxify);
-
-      for(i=0; i<templates.length; i++){
-        window.ajaxify.loadTemplate("partials/calendar/"+templates[i], todo.bind(templates[i]));
       }
     }
 
-    $(function(){ // window).on('action:ajaxify.end',
-      //console.log("ajaxify.end fired");
+
+    var tr = $("#cal-headers").find("tr");
+    if(contains(window.config.userLang, ["ca", "us", "mx", "cn", "jp"])){
+      calendar.firstOfWeek = 0;
+    } else if(contains(window.config.userLang, ["ar", "fa"])){
+      calendar.firstOfWeek = 6;
+      tr.children().last().detach().prependTo(tr);
+    } else {
+      calendar.firstOfWeek = 1;
+      tr.children().first().detach().appendTo(tr);
+    }
+
+    $(function(){
+      function loadTemplates(callback){
+        var templates = ["day", "event", "profilePic", "response", "viewEvent"];
+        var n = 0, i;
+
+        function todo(template){
+          calendar.templates[this] = template;
+          //console.log("template "+this+" loaded");
+          n++;
+          if(n === templates.length){
+            callback();
+          }
+        }
+        for(i=0; i<templates.length; i++){
+          window.ajaxify.loadTemplate("partials/calendar/"+templates[i], todo.bind(templates[i]));
+        }
+      }
+
+      calendar.templates.iframeStyle = '<style>div[widget-area]{display:none}'+
+        '.post-bar.col-xs-12.hide.bottom-post-bar{display:block!important}'+
+        '.topic .topic-footer .row{padding:0 10px 0 20px}'+
+        '.topic ul li{margin-bottom:5px}.btn-sm{line-height:1}'+
+        '.topic .topic-footer .pull-right{line-height:14px}'+
+        '.topic .post-bar{padding:6px}.btn.btn-primary.post_reply{float:right}'+
+        '.topic-main-buttons.pull-right.inline-block{display:block;width:100%}'+
+        '#header-menu,.overlay-container,.alert-window,'+
+        '#post-container li.post-row:first-child,#post-container li.post-bar,'+
+        '.upvote,.downvote,.votes,.share-dropdown,.move,.breadcrumb,'+
+        '.post-bar.bottom-post-bar div:first-child,'+
+        '.post-bar.bottom-post-bar .thread-tools,#footer,'+
+        '.topic-footer small.pull-right i,.post-tools .quote,'+
+        '.post-tools .post_reply{display:none!important}'+
+        'body{padding-top:10px!important}.container{width:100%!important}</style>';
+
       loadTemplates(function(){
         translator.load(window.config.userLang, "calendar", function(){
           calendar.actions.init();
@@ -535,58 +758,116 @@ require(["moment", "datetimepicker"], function (moment) {
         $("#cal-sidebar .content > .day").toggleClass("active");
       }
     });
-
     $("#cal-sidebar .toggle").click(function(){
       $(this).parent().toggleClass("down").children().toggleClass("fa-chevron-up fa-chevron-down");
     });
 
-    calendar.templates.iframeStyle = '<style>div[widget-area]{display:none}'+
-      '.post-bar.col-xs-12.hide.bottom-post-bar{display:block!important}'+
-      '.topic .topic-footer .row{padding:0 10px 0 20px}'+
-      '.topic ul li{margin-bottom:5px}.btn-sm{line-height:1}'+
-      '.topic .topic-footer .pull-right{line-height:14px}'+
-      '.topic .post-bar{padding:6px}.btn.btn-primary.post_reply{float:right}'+
-      '.topic-main-buttons.pull-right.inline-block{display:block;width:100%}'+
-      '#header-menu,.overlay-container,.alert-window,'+
-      '#post-container li.post-row:first-child,#post-container li.post-bar,'+
-      '.upvote,.downvote,.votes,.share-dropdown,.move,.breadcrumb,'+
-      '.post-bar.bottom-post-bar div:first-child,'+
-      '.post-bar.bottom-post-bar .thread-tools,#footer,'+
-      '.topic-footer small.pull-right i,.post-tools .quote,'+
-      '.post-tools .post_reply{display:none!important}'+
-      'body{padding-top:10px!important}.container{width:100%!important}</style>';
-
     calendar.calDaysContainer.scroll(calendar.actions.onscroll);
 
-    $(".button-today").click(calendar.actions.scrollToDate);
-
-    $('#editEvent').on('show.bs.modal', function (event) {
-      calendar.actions.editEvent($(event.relatedTarget).hasClass("button-add-event"));
-    });
-
     (function(edit){
-      edit.start.datetimepicker();
-      edit.end.datetimepicker();
 
-      var engine = new Bloodhound({
-        datumTokenizer: Bloodhound.tokenizers.obj.whitespace,
-        queryTokenizer: Bloodhound.tokenizers.whitespace,
-        limit: 10,
-        remote: {
-          url: '/api/groups',
-          filter: function(list) {
-            var list = list.groups;
-            return list.map(function(group) { return { name: group.name }; });
-          }
-        },
+      edit.it.on('show.bs.modal', function(event) {
+        calendar.actions.editEvent($(event.relatedTarget).hasClass("button-add-event"));
       });
 
-      $([edit.editors[0], edit.viewers[0], edit.blocked[0]]).tagsinput({
+      var options = {
+        icons: {
+          time: "fa fa-clock-o",
+          date: "fa fa-calendar",
+          up: "fa fa-arrow-up",
+          down: "fa fa-arrow-down",
+          previous: "fa fa-arrow-left",
+          next: "fa fa-arrow-right"
+        }
+      };
 
+      edit.start.datetimepicker(options).on("dp.change", function(e){
+        edit.end.data("DateTimePicker").minDate(e.date);
+      });
+      edit.end.datetimepicker(options).on("dp.change", function(e){
+        edit.start.data("DateTimePicker").maxDate(e.date);
+      });
+
+      edit.allday.change(function(){
+        if(this.checked){
+          edit.start.data("DateTimePicker").format("LL");
+          edit.end.data("DateTimePicker").format("LL");
+        } else {
+          edit.start.data("DateTimePicker").format("LLL");
+          edit.end.data("DateTimePicker").format("LLL");
+        }
+      });
+
+      function groups(query, callback){
+        socket.emit("groups.search", {
+          query: query
+        }, function(err, data){
+          if(err){
+            return app.alertError();
+          }
+          callback(data.map(function(group){
+            group = {
+              name: group.name,
+              slug: group.slug
+            };
+            return group;
+          }));
+        });
+      }
+      function users(query, callback){
+        socket.emit("user.search", {
+          query: query
+        }, function(err, data){
+          if(err){
+            return app.alertError();
+          }
+          callback(data.users);
+        });
+      }
+
+      $([edit.editors[0], edit.viewers[0]]).tagsinput({
+        itemText: function(item){
+          return item.username || item.name;
+        },
+        itemValue: function(item){
+          return item.uid || item.name;
+        },
+        confirmKeys: [32, 44],
+        freeInput: false,
+        typeaheadjs: [
+          {
+            name: 'users',
+            displayKey: 'username',
+            source: users
+          },
+          {
+            name: 'groups',
+            displayKey: 'name',
+            source: groups
+          }
+        ]
+      });
+      edit.blocked.tagsinput({
+        itemText: function(item){
+          return item.username || item.name;
+        },
+        itemValue: function(item){
+          return item.uid || item.name;
+        },
+        confirmKeys: [32, 44],
+        freeInput: false,
+        typeaheadjs: {
+          name: 'users',
+          displayKey: 'username',
+          source: users
+        }
       });
     })(calendar.editEvent);
 
+    app.enterRoom("calendar");
+
     window.calendar = calendar;
+    window.moment = moment;
 
   })(window.jQuery, window.app, window.translator, window.templates, window.socket);
 });

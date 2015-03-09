@@ -254,3 +254,12 @@
 #editEvent .modal-body .bootstrap-tagsinput {
   display: block;
 }
+
+#cal-sidebar .content > .event > div {
+  opacity: 1;
+  transition: opacity .25s ease;
+}
+
+#cal-sidebar .content > .event.trans > div {
+  opacity: 0;
+}

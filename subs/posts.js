@@ -10,6 +10,7 @@ var posts = module.exports = {
   create: function(event, callback){
     posts.compile(event, function(err, raw){
       if(err){
+        console.error(err);
         return callback(err);
       }
       topics.post({
@@ -19,6 +20,7 @@ var posts = module.exports = {
         content: raw
       }, function(err, data){
         if(err){
+          console.error(err);
           return callback(err);
         }
         event.url = "/category/"+event.cid+"/"+data.topicData.slug;
@@ -31,6 +33,7 @@ var posts = module.exports = {
   update: function(event, callback){
     posts.compile(event, function(err, raw){
       if(err){
+        console.error(err);
         return callback(err);
       }
       posttools.edit({
@@ -44,13 +47,14 @@ var posts = module.exports = {
   delete: function(event, callback){
     postsModule.getPostField(event.pid, 'tid', function(err, tid) {
       if (err) {
+        console.error(err);
         return callback(err);
       }
       topics.delete(tid, callback);
     });
   },
   compile: function(event, callback){
-    app.render('partials/calendar/post', {
+    posts.app.render('partials/calendar/post', {
       start: event.start,
       end: event.end,
       place: event.rawPlace,

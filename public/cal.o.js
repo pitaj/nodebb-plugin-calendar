@@ -906,6 +906,14 @@ require(["moment", "remarkable"], function (moment, remarkable) {
 
         }
 
+        if(iframe.contents()[0]){
+          observe(iframe.contents()[0], false);
+        }
+
+        function adjustiFrame(ifr){
+          ifr.height(ifr.contents().find("#content").height()+20);
+        }
+
         iframe
           .attr("src", event.url)
           .on("load", function(){

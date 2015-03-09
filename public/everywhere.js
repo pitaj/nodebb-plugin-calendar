@@ -1,22 +1,34 @@
-/* global moment */
-
-window.initTimestamp = function(){
-  "use strict";
-  $(".date-timestamp").each(function(){
-    var $this = $(this), data = $this.data(), utc;
-    if(data.onlytime){
-      $this.html(moment(data.timestamp).format("LT"));
-      utc = moment.utc(data.timestamp).format("LT");
-    } else if(data.allday) {
-      $this.html(moment(data.timestamp).format("LL"));
-      utc = moment.utc(data.timestamp).format("LL");
-    } else {
-      $this.html(moment(data.timestamp).format("LLL"));
-      utc = moment.utc(data.timestamp).format("LLL");
+require.config({
+  paths: {
+    "moment": "https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment-with-locales.min",
+    "datetimepicker": "/plugins/nodebb-plugin-calendar/public/bootstrap-datetimepicker.min"
+  },
+  config: {
+    moment: {
+      noGlobal: true
     }
-    utc += "UTC";
-    $this.attr("data-original-title", utc).tooltip();
+  }
+});
+require(["moment"], function(moment) {
+  "use strict";
+  window.initTimestamp = function(elems){
+    elems.each(function(){
+      var $this = $(this), data = $this.data(), utc;
+      if(data.onlytime){
+        $this.html(moment(data.timestamp).format("LT"));
+        utc = moment.utc(data.timestamp).format("LT");
+      } else if(data.allday) {
+        $this.html(moment(data.timestamp).format("LL"));
+        utc = moment.utc(data.timestamp).format("LL");
+      } else {
+        $this.html(moment(data.timestamp).format("LLL"));
+        utc = moment.utc(data.timestamp).format("LLL");
+      }
+      utc += "UTC";
+      $this.attr("data-original-title", utc).tooltip();
+    });
+  };
+  $(window).on('action:ajaxify.end', function(){
+    window.initTimestamp($(".date-timestamp"));
   });
-};
-
-$(window).on('action:ajaxify.end', window.initTimestamp);
+});

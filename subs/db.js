@@ -4,7 +4,19 @@
 
 var database = module.parent.parent.require("./database"),
   async = require("async"),
-  groups = module.parent.parent.require("./groups");
+  groups = module.parent.parent.require("./groups"),
+  user = module.parent.parent.require("./user");
+
+  var setAdd = database.setAdd;
+  database.setAdd = function(key, value, callback){
+    if(Array.isArray(value)){
+      async.each(value, function(it){
+        setAdd(key, it, callback);
+      }, callback);
+    } else {
+      setAdd(key, value, callback);
+    }
+  };
 
 var db = module.exports = {
   event: {
@@ -14,15 +26,19 @@ var db = module.exports = {
         if(err){
           return callback(err);
         }
+        console.log("event.add");
         event.id = last+1;
         async.waterfall([
           async.apply(async.parallel, [
-            async.apply(database.sortedSetAdd, "plugins:calendar:events", event.start.valueOf(), "plugins:calendar:events:"+event.id),
-            async.apply(database.setObjectKey, "plugins:calendar:eventsByTid", event.tid, event.id),
+            async.apply(database.sortedSetAdd, "plugins:calendar:events", new Date(event.start).valueOf(), "plugins:calendar:events:"+event.id),
+            async.apply(database.setObjectField, "plugins:calendar:eventsByTid", event.tid, event.id),
             async.apply(db.event.edit, event)
           ]),
-          async.apply(database.increment, "plugins:calendar:events:last"),
+          function(prev, next){
+            database.increment("plugins:calendar:events:last", next);
+          }
         ], function(err){
+          console.log("event.add2", err);
           callback(err, event);
         });
       });
@@ -55,6 +71,7 @@ var db = module.exports = {
     },
     permissions: {
       set: function(event, callback){
+        console.log("permissions.set");
         async.parallel([
           async.apply(database.delete, "plugins:calendar:events:"+event.id+":viewers:users"),
           async.apply(database.delete, "plugins:calendar:events:"+event.id+":viewers:groups"),
@@ -72,6 +89,7 @@ var db = module.exports = {
             async.apply(database.setAdd, "plugins:calendar:events:"+event.id+":editors:users", event.editors.users),
             async.apply(database.setAdd, "plugins:calendar:events:"+event.id+":editors:groups", event.editors.groups)
           ], function(err){
+            console.log("permissions.set2", err);
             callback(err, event);
           });
         });
@@ -108,13 +126,17 @@ var db = module.exports = {
         async.parallel([
           async.apply(database.setAdd, "plugins:calendar:events:"+event.id+":notifications", dates),
           async.apply(database.setAdd, "plugins:calendar:notifications", "plugins:calendar:events:"+event.id+":notifications"),
-        ], callback);
+        ], function(err){
+          callback(err);
+        });
       },
       remove: function(event, callback){
         async.parallel([
-          async.apply(database.setRemove, "plugins:calendar:notifications", event.id, callback),
+          async.apply(database.setRemove, "plugins:calendar:notifications", event.id),
           async.apply(database.delete, "plugins:calendar:events:"+event.id+":notifications")
-        ], callback);
+        ], function(err){
+          callback(err);
+        });
       },
       removeOne: function(event, date, callback){
         database.setRemove("plugins:calendar:events:"+event.id+":notifications", date.toISOString(), callback);
@@ -206,7 +228,7 @@ var db = module.exports = {
   },
   users: {
     getInfo: function(uid, callback){
-      database.getUserFields(uid, ["uid", "username", "userslug", "picture"], callback);
+      user.getUserFields(uid, ["uid", "username", "userslug", "picture"], callback);
     }
   }
 };

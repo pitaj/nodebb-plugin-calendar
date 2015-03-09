@@ -18,7 +18,7 @@
         "hook": "filter:admin.header.build", "method": "addAdminNavigation"
       },
       {
-        "hook": "filter:post.parse", "method": "postParse"
+        "hook": "filter:post.raw", "method": "postParse"
       },
       {
         "hook": "filter:topic.get", "method": "topicFilter"
