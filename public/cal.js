@@ -60,7 +60,7 @@ require(["moment", "datetimepicker"], function (moment) {
 
         if(MutationObserver){
           var observer = new Observer(callback);
-          observer.observe(elem, {
+          observer.observe(elem[0], {
             subtree: true,
             attributes: true
           });
@@ -104,7 +104,6 @@ require(["moment", "datetimepicker"], function (moment) {
               console.error(err);
               return app.alertError();
             }
-            console.log("events", response);
             callback(response);
           });
         },
@@ -123,15 +122,11 @@ require(["moment", "datetimepicker"], function (moment) {
         },
         editEvent: function(event, callback){
           socket.emit("plugins.calendar.editEvent", event, function(err, data){
-            if(err){
+            if(err || data){
               return app.alertError();
             }
-            if(data){
-              calendar.actions.postEvent(data);
-              callback(data);
-            } else {
-              app.alertError();
-            }
+            calendar.actions.postEvent(data);
+            callback(data);
           });
         },
         deleteEvent: function(event, callback){
@@ -142,7 +137,6 @@ require(["moment", "datetimepicker"], function (moment) {
               console.error(err);
               return app.alertError();
             }
-            console.log("events", response);
             callback(response);
           });
         }
@@ -152,7 +146,13 @@ require(["moment", "datetimepicker"], function (moment) {
           calendar.actions.appendWeeks(moment().subtract(calendar.buffer, "months"), moment().add(calendar.buffer, "months"));
           calendar.actions.scrollToDate(new Date(), true);
           var mom = moment();
-          calendar.days[mom.year()][mom.month()][mom.date()-1].attr("id", "cal-day-selected");
+          var day = calendar.days[mom.year()][mom.month()][mom.date()-1].attr("id", "cal-day-selected");
+
+          for(var i=0; i<calendar.events.length; i++){
+            calendar.actions.postEvent(calendar.events[i]);
+          }
+          calendar.actions.viewDay(day);
+
           /*
           setTimeout(function(){
             for(var i=0; i<calendar.events.length; i++){
@@ -165,7 +165,6 @@ require(["moment", "datetimepicker"], function (moment) {
           if(!event){
             return false;
           }
-          console.log(event);
           var d = moment(event.start),
           l = moment(event.end).endOf("day"), day, y, m, dt;
           while(d <= l){
@@ -242,25 +241,19 @@ require(["moment", "datetimepicker"], function (moment) {
           }
         },
         buildResponses: function(responses, callback){
-          function todo(out){
-            html += out;
-            numberDone++;
-            if(numberDone === Object.keys(responses).length){
-              callback(html);
-            }
-          }
-          var x, html = "", numberDone;
+          var x, html = "";
           for(x in responses){
-            if(responses.hasOwnProperty(x) &&
-            responses[x] &&
-            typeof responses[x] === "object"){
-              translator.translate(calendar.parse(calendar.templates.response, {
+            if(responses.hasOwnProperty(x)
+            && typeof responses[x] === "object"
+            && +x !== +app.uid){
+              html += calendar.parse(calendar.templates.response, {
                 username: responses[x].username,
                 userslug: responses[x].userslug,
                 value: responses[x].value
-              }), todo);
+              });
             }
           }
+          callback(html);
         },
         scrollToDate: function(date, instant, callback){
           date = moment(date);
@@ -487,7 +480,7 @@ require(["moment", "datetimepicker"], function (moment) {
 
           function after(){
             aftercnt++;
-            if(aftercnt === 2){
+            if(aftercnt >= 2){
               view.it.removeClass("trans");
             }
           }
@@ -509,7 +502,7 @@ require(["moment", "datetimepicker"], function (moment) {
             view.name.html(event.name);
             view.start.attr("data-timestamp", new Date(event.start).toISOString());
             view.end.attr("data-timestamp", new Date(event.end).toISOString());
-            window.initTimestamp($([event.start[0], event.end[0]]).attr("data-allday", event.allday));
+            window.initTimestamp($([view.start[0], view.end[0]]).attr("data-allday", event.allday));
             view.place.html(event.place);
             view.description.html(event.description);
 
@@ -520,9 +513,7 @@ require(["moment", "datetimepicker"], function (moment) {
               window.WhoisinPlugin.setup();
               after();
             } else {
-              var clone = event.responses.slice(0);
-              clone[app.uid] = null;
-              calendar.actions.buildResponses(clone, function(html){
+              calendar.actions.buildResponses(event.responses, function(html){
                 var my = view.myResponse.detach();
                 view.responses.html(html).prepend(my);
                 after();
@@ -531,18 +522,20 @@ require(["moment", "datetimepicker"], function (moment) {
                 .attr("href", "/user/"+event.user.userslug)
                 .html(event.user.username);
               view.myResponse.find(".selected").removeClass("selected");
-              view.myResponse.find("."+(event.responses[app.uid] ?
-                event.responses[app.uid].value : "invited"));
+              view.myResponse
+                .find("."+(event.responses[app.uid] ?
+                  event.responses[app.uid].value : "invited"))
+                .addClass("selected");
             }
 
-            if(view.comments.contents()[0]){
+            if(view.comments.contents()){
               observe(view.comments.contents(), false);
             }
 
             view.comments.off("load").on("load", function(){
               var self = $(this);
               self.contents().find("head")
-                .append(calendar.templates.iframestyle);
+                .append(calendar.templates.iframeStyle);
 
               observe(self.contents(), function(){
                 self.height(self.contents().find("#content").height()+20);
@@ -551,6 +544,34 @@ require(["moment", "datetimepicker"], function (moment) {
               after();
             }).attr("src", event.url);
           }, 250);
+        },
+        viewDay: function(day){
+          $("#cal-day-selected").attr("id", "");
+          day.attr("id", "cal-day-selected");
+
+          calendar.sidebarDay.find(".date").html(moment(day.data("date")).format("LL"));
+
+          var events = calendar.sidebarDay.children(".events").empty();
+
+          day.find(".event").each(function(){
+            var event = calendar.events[$(this).attr("data-id")],
+            onlytime = moment(event.start).date() !== moment(event.end).date();
+            var elem = calendar.parse(calendar.templates.dayEvent, {
+              start: event.start,
+              end: event.end,
+              allday: event.allday,
+              onlytime: onlytime,
+              place: event.place,
+              name: event.name,
+              id: event.id
+            });
+            elem = $(elem);
+            if(event.allday && onlytime){
+              elem.find("p.time").html("all day");
+            }
+            elem.appendTo(events);
+          });
+          window.initTimestamp(events.find(".date-timestamp"));
         },
       },
       editEvent: {
@@ -570,7 +591,7 @@ require(["moment", "datetimepicker"], function (moment) {
         save: $("#editEvent button.save")
       },
       viewEvent: {
-        it: $("#cal-sidebar .content > .event")
+        it: $("#cal-sidebar > .content > div > .event")
         // user
           // a
           // smalla
@@ -606,6 +627,7 @@ require(["moment", "datetimepicker"], function (moment) {
       calDays: $("#cal-days"),
       firstOfWeek: 1, // 0 for Sunday, 1 for Monday
       calDaysContainer: $("#cal-days-container"),
+      sidebarDay: $("#cal-sidebar > .content > div > .day"),
       currentMonth: {
         monthSelect: $("#cal-month-select .month"),
         yearSelect: $("#cal-year-select"),
@@ -643,9 +665,7 @@ require(["moment", "datetimepicker"], function (moment) {
           });
         }
       },
-      currentEvent: {
-
-      }
+      currentEvent: {}
     };
     (function(view){
       var it = view.it;
@@ -699,7 +719,6 @@ require(["moment", "datetimepicker"], function (moment) {
       }
     }
 
-
     var tr = $("#cal-headers").find("tr");
     if(contains(window.config.userLang, ["ca", "us", "mx", "cn", "jp"])){
       calendar.firstOfWeek = 0;
@@ -713,7 +732,7 @@ require(["moment", "datetimepicker"], function (moment) {
 
     $(function(){
       function loadTemplates(callback){
-        var templates = ["day", "event", "profilePic", "response", "viewEvent"];
+        var templates = ["day", "event", "profilePic", "response", "viewEvent", "dayEvent"];
         var n = 0, i;
 
         function todo(template){
@@ -752,10 +771,10 @@ require(["moment", "datetimepicker"], function (moment) {
       });
     });
 
-    $("#cal-sidebar ul.nav > li").click(function(){
-      if(!$(this).children().hasClass("active")){
-        $(this).siblings().add(this).children().toggleClass("active");
-        $("#cal-sidebar .content > .day").toggleClass("active");
+    $("#cal-sidebar .panel-heading button").click(function(){
+      if(!$(this).hasClass("active")){
+        $("#cal-sidebar .panel-heading button").toggleClass("active");
+        $("#cal-sidebar .content").children().toggleClass("active");
       }
     });
     $("#cal-sidebar .toggle").click(function(){
@@ -866,8 +885,59 @@ require(["moment", "datetimepicker"], function (moment) {
 
     app.enterRoom("calendar");
 
+    $("#cal-sidebar .content .day .events").on("click", ".event", function(){
+      calendar.actions.viewEvent(calendar.events[$(this).attr("data-id")]);
+    });
+
+    calendar.calDays.on("click", function(e){
+      var t = $(e.target);
+      if(!t.hasClass("event")){
+        t = t.parents(".event");
+      }
+      if(t.length){
+        calendar.actions.viewEvent(calendar.events[t.attr("data-id")]);
+      } else {
+        t = $(e.target);
+      }
+      if(!t.is("td")){
+        t = t.parents("td");
+      }
+      if(t.length){
+        calendar.actions.viewDay(t);
+      }
+    });
+
     window.calendar = calendar;
     window.moment = moment;
 
   })(window.jQuery, window.app, window.translator, window.templates, window.socket);
+});
+
+require(["moment"], function(moment) {
+  "use strict";
+  window.initTimestamp = function(elems){
+    elems.each(function(){
+      var $this = $(this), data = $this.data(), utc;
+      if(data.onlytime && data.allday){
+        $this.html("all day");
+        return;
+      } else if(data.onlytime){
+        $this.html(moment(data.timestamp).format("LT"));
+        utc = moment.utc(data.timestamp).format("LT");
+      } else if(data.allday) {
+        $this.html(moment(data.timestamp).format("LL"));
+        utc = moment.utc(data.timestamp).format("LL");
+      } else {
+        $this.html(moment(data.timestamp).format("LLL"));
+        utc = moment.utc(data.timestamp).format("LLL");
+      }
+      utc += "UTC";
+      $this.popover({
+        content: utc
+      });
+    });
+  };
+  $(window).on('action:ajaxify.end', function(){
+    window.initTimestamp($(".date-timestamp"));
+  });
 });

@@ -1,7 +1,6 @@
 require.config({
   paths: {
     "moment": "https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment-with-locales.min",
-    "datetimepicker": "/plugins/nodebb-plugin-calendar/public/bootstrap-datetimepicker.min"
   },
   config: {
     moment: {
@@ -14,7 +13,10 @@ require(["moment"], function(moment) {
   window.initTimestamp = function(elems){
     elems.each(function(){
       var $this = $(this), data = $this.data(), utc;
-      if(data.onlytime){
+      if(data.onlytime && data.allday){
+        $this.html("all day");
+        return;
+      } else if(data.onlytime){
         $this.html(moment(data.timestamp).format("LT"));
         utc = moment.utc(data.timestamp).format("LT");
       } else if(data.allday) {
@@ -25,7 +27,9 @@ require(["moment"], function(moment) {
         utc = moment.utc(data.timestamp).format("LLL");
       }
       utc += "UTC";
-      $this.attr("data-original-title", utc).tooltip();
+      $this.popover({
+        content: utc
+      });
     });
   };
   $(window).on('action:ajaxify.end', function(){

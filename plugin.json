@@ -25,5 +25,6 @@
       }
     ],
     "templates": "public/templates",
-    "languages": "public/translations"
+    "languages": "public/translations",
+    "less": "less/main.less"
 }

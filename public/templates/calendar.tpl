@@ -78,7 +78,7 @@
 
   <div id="errors"></div>
 
-  <div id="cal">
+  <div id="cal" class="panel panel-default">
     <div id="cal-days-container">
       <table id="cal-days">
         <tbody>
@@ -187,83 +187,87 @@
     </div>
   </div>
 
-  <div id="cal-sidebar">
+  <div id="cal-sidebar" class="panel panel-default">
     <div class="toggle">
       <i class="fa fa-chevron-down"></i>
     </div>
-    <ul class="nav">
-      <li role="presentation" class="day">
-        <a href="#" title="" data-original-title="[[calendar:day_title]]" class="active">
-            [[calendar:day_title]]
-          </a>
-      </li>
-      <li role="presentation" class="event">
-        <a href="#" title="" data-original-title="[[calendar:event_title]]">
-            [[calendar:event_title]]
-          </a>
-      </li>
-    </ul>
-    <div class="content">
-      <div class="day active">
-        <div class="date">
-          <!-- date goes here -->
-        </div>
-        <div class="events">
-          <!-- events go here -->
+    <div class="panel-heading row">
+      <div class="col-xs-6">
+        <button class="day btn btn-primary active" href="#" title="" data-original-title="[[calendar:day_title]]">
+          [[calendar:day_title]]
+        </button>
+      </div>
+      <div class="col-xs-6">
+        <button class="event btn btn-primary" href="#" title="" data-original-title="[[calendar:event_title]]">
+          [[calendar:event_title]]
+        </button>
+      </div>
+    </div>
+    <div class="content panel-body row">
+      <div class="col-xs-6 active">
+        <div class="day active panel panel-default">
+          <div class="panel-heading">
+            <h3 class="date"><!-- date goes here --></h3>
+          </div>
+          <div class="events panel-body">
+            <!-- events go here -->
+          </div>
         </div>
       </div>
-      <div class="event topic trans">
-        <div class="topic-text">
-          <div class="topic-profile-pic hidden-xs text-center user">
-            <a href="/user/{userslug}">
-              <img src="{picture}" alt="{username}" class="profile-image user-img" title="" data-original-title="{username}">
-            </a>
-            <small class="username" title="{username}">
-              <a href="/user/{userslug}">{username}</a>
-            </small>
-          </div>
-          <h3 class="topic-title">
-            <i class="edit-event-button fa fa-pencil-square-o" data-toggle="modal" data-target="#editEvent"></i>
-            <p class="topic-title name" itemprop="name">[[calendar:event_unselected]]</p>
-            <hr>
-          </h3>
-          <div class="post-content" itemprop="text">
-            <h3>[[calendar:when]]</h3>
-            <p class="dates">
-              <strong>[[calendar:starts]]:</strong> <span class="date-timestamp start" data-allday="{allday}" data-timestamp="{timestamp}" data-onlytime="false"></span><br>
-              <strong>[[calendar:ends]]:</strong> <span class="date-timestamp end" data-allday="{allday}" data-timestamp="{timestamp}" data-onlytime="false"></span>
-            </p>
-            <h3>[[calendar:where]]</h3>
-            <p>
-              <span class="place"><!-- place goes here --></span>
-            </p>
-            <hr>
-            <p class="description">
-              <!-- description goes here -->
-            </p>
-            <h3>[[calendar:responses_title]]</h3>
-            <div class="responses">
-              <p class="my-response">
-                <small class="username">
-                  <a href="/user/{userslug}">{username}</a>
-                </small>
-                <span class="invited selected">[[calendar:response_invited]]</span>
-                <span class="not-attending">[[calendar:response_not_attending]]</span>
-                <span class="maybe">[[calendar:response_maybe]]</span>
-                <span class="attending">[[calendar:response_attending]]</span>
-              </p>
-              <!-- other responses appended like
-              <p class="response">
-                <small class="username" title="{username}">
-                  <a href="/user/{userslug}">{username}</a>
-                </small>
-                <span class="{value}">[[calendar:response_{value}]]</span>
-              </p>
-              -->
+      <div class="col-xs-6">
+        <div class="event topic trans panel panel-default">
+          <div class="topic-text panel-body">
+            <div class="topic-profile-pic hidden-xs text-center user">
+              <a href="/user/{userslug}">
+                <img src="{picture}" alt="{username}" class="profile-image user-img" title="" data-original-title="{username}">
+              </a>
+              <small class="username" title="{username}">
+                <a href="/user/{userslug}">{username}</a>
+              </small>
             </div>
-            <div class="cal-whoisin" style="display:none;"></div>
-            <h3>[[calendar:comments_title]]</h3>
-            <iframe class="comments" scrolling="no"></iframe>
+            <h3 class="topic-title">
+              <i class="edit-event-button fa fa-pencil-square-o" data-toggle="modal" data-target="#editEvent"></i>
+              <p class="topic-title name" itemprop="name">[[calendar:event_unselected]]</p>
+              <hr>
+            </h3>
+            <div class="post-content" itemprop="text">
+              <h3>[[calendar:when]]</h3>
+              <p class="dates">
+                <strong>[[calendar:starts]]:</strong> <span class="date-timestamp start" data-allday="{allday}" data-timestamp="{timestamp}" data-onlytime="false"></span><br>
+                <strong>[[calendar:ends]]:</strong> <span class="date-timestamp end" data-allday="{allday}" data-timestamp="{timestamp}" data-onlytime="false"></span>
+              </p>
+              <h3>[[calendar:where]]</h3>
+              <p>
+                <span class="place"><!-- place goes here --></span>
+              </p>
+              <hr>
+              <p class="description">
+                <!-- description goes here -->
+              </p>
+              <h3>[[calendar:responses_title]]</h3>
+              <div class="responses">
+                <p class="my-response">
+                  <small class="username">
+                    <a href="/user/{userslug}">{username}</a>
+                  </small>
+                  <span class="invited selected">[[calendar:response_invited]]</span>
+                  <span class="not-attending">[[calendar:response_not_attending]]</span>
+                  <span class="maybe">[[calendar:response_maybe]]</span>
+                  <span class="attending">[[calendar:response_attending]]</span>
+                </p>
+                <!-- other responses appended like
+                <p class="response">
+                  <small class="username" title="{username}">
+                    <a href="/user/{userslug}">{username}</a>
+                  </small>
+                  <span class="{value}">[[calendar:response_{value}]]</span>
+                </p>
+                -->
+              </div>
+              <div class="cal-whoisin" style="display:none;"></div>
+              <h3>[[calendar:comments_title]]</h3>
+              <iframe class="comments" scrolling="no"></iframe>
+            </div>
           </div>
         </div>
       </div>
@@ -271,7 +275,38 @@
   </div>
 
   <style>
-    @import url("/plugins/nodebb-plugin-calendar/public/style.css");
+    @import url("/plugins/nodebb-plugin-calendar/public/css/main.css");
+  </style>
+
+  <style>
+    #content > div.row:last-child {
+      display: none;
+    }
+    body, html {
+      height: 100%;
+      overflow: hidden;
+    }
+    #content,
+    .nodebb-plugin-calendar {
+      height:100%;
+    }
+    #data_script {
+      display:none;
+    }
+    body {
+      padding-bottom: 5px;
+    }
+    .tt-suggestion {
+      padding: 3px 20px;
+      clear: both;
+      font-weight: 400;
+      line-height: 1.42857143;
+      color: #333;
+      white-space: nowrap;
+    }
+    .tt-suggestion.tt-cursor {
+      background-color: #f5f5f5;
+    }
   </style>
 
   <div id="data_script">

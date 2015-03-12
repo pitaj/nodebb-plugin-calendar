@@ -1,10 +1,9 @@
-#cal-sidebar .content > .event {
-  float: left;
-  width: 50%;
+#cal-sidebar .content > div > .event {
   overflow-x: hidden;
   position: relative;
   height: 100%;
 }
+
 /*
 
 #cal-sidebar .content > .event .view iframe.comments {
@@ -184,7 +183,7 @@
 
 */
 
-#cal-sidebar .content > .event .topic-title {
+#cal-sidebar .content > div > .event .topic-title {
   line-height: 1.5em;
   width: auto;
   overflow: hidden;
@@ -195,35 +194,37 @@
   margin:10px;
 }
 
-#cal-sidebar .content > .event .post-content {
+#cal-sidebar .content > div > .event .post-content {
   margin: 10px;
   clear: left;
 }
 
-#cal-sidebar .content > .event .edit-event-button {
+#cal-sidebar .content > div > .event .edit-event-button {
   float: right;
   line-height: 2.25em;
 }
 
-#cal-sidebar .content > .event .topic-text {
+#cal-sidebar .content > div > .event .topic-text {
   font-size: 18px;
   color: #666;
-  overflow: hidden;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
   word-wrap: break-word;
 }
 
-#cal-sidebar .content > .event .topic-profile-pic {
+#cal-sidebar .content > div > .event .topic-profile-pic {
   margin: 15px;
 }
 
-#cal-sidebar .content > .event iframe.comments {
+#cal-sidebar .content > div > .event iframe.comments {
   border: none;
   padding: 0;
   width: 100%;
   min-height: 300px;
 }
 
-#cal-sidebar .content > .event .responses span {
+#cal-sidebar .content > div > .event .responses span {
   border-radius: 3px;
   padding: 2px 5px;
   margin-left: 3px;
@@ -231,23 +232,23 @@
   float: right;
   font-size: 70%;
 }
-#cal-sidebar .content > .event .responses .my-response span.selected {
+#cal-sidebar .content > div > .event .responses .my-response span.selected {
   border: 1px solid black;
   padding: 1px 4px;
 }
-#cal-sidebar .content > .event .responses span.invited {
+#cal-sidebar .content > div > .event .responses span.invited {
   background-color: lightgrey;
 }
-#cal-sidebar .content > .event .responses span.not-attending {
+#cal-sidebar .content > div > .event .responses span.not-attending {
   background-color: pink;
 }
-#cal-sidebar .content > .event .responses span.attending {
+#cal-sidebar .content > div > .event .responses span.attending {
   background: lightgreen;
 }
-#cal-sidebar .content > .event .responses span.maybe {
+#cal-sidebar .content > div > .event .responses span.maybe {
   background: lightblue;
 }
-#cal-sidebar .content > .event .responses .my-response span {
+#cal-sidebar .content > div > .event .responses .my-response span {
   cursor: pointer;
 }
 
@@ -255,11 +256,11 @@
   display: block;
 }
 
-#cal-sidebar .content > .event > div {
+#cal-sidebar .content > div > .event > div {
   opacity: 1;
   transition: opacity .25s ease;
 }
 
-#cal-sidebar .content > .event.trans > div {
+#cal-sidebar .content > div > .event.trans > div {
   opacity: 0;
 }

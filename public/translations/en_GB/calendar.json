@@ -43,5 +43,6 @@
   "when": "When",
   "starts": "Starts",
   "ends": "Ends",
-  "where": "Location"
+  "where": "Location",
+  "add_event": "add event"
 }
