@@ -343,9 +343,9 @@
     },
     deleteEvent: function(socket, event, callback){
       async.waterfall([
-        async.apply(user, socket.uid, null),
+        async.apply(user, null, socket.uid),
         function(can, next){
-          if(!can("delete", event)){
+          if(!can("delete")){
             next(new Error("[[calendar:permissions.forbidden.delete]]"));
           } else {
             next(null, can);

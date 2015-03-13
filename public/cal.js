@@ -167,6 +167,7 @@ require(["moment", "datetimepicker"], function (moment) {
           }
           var d = moment(event.start),
           l = moment(event.end).endOf("day"), day, y, m, dt;
+          calendar.calDays.find('.event[data-id='+event.id+']').remove();
           while(d <= l){
             y = d.year(); m = d.month(); dt = d.date() - 1;
             if(calendar.days[y] &&
@@ -174,7 +175,6 @@ require(["moment", "datetimepicker"], function (moment) {
               calendar.days[y][m][dt]){
               day = calendar
                 .days[y][m][dt];
-              calendar.calDays.find('.event[data-id='+event.id+']').remove();
               event = $(calendar.parse(calendar.templates.event, {
                 time: d.toISOString(),
                 name: event.name,
@@ -365,11 +365,13 @@ require(["moment", "datetimepicker"], function (moment) {
             blocked: []
           };
 
+          console.log(event);
+
           var edit = calendar.editEvent;
           edit.name.val(event.name);
           edit.allday.prop("checked", event.allday);
-          edit.start.data("DateTimePicker").date(event.start);
-          edit.end.data("DateTimePicker").date(event.end);
+          edit.start.data("DateTimePicker").date(new Date(event.start));
+          edit.end.data("DateTimePicker").date(new Date(event.end));
           edit.place.val(event.rawPlace);
           edit.editors.tagsinput('removeAll');
           edit.viewers.tagsinput('removeAll');
@@ -398,7 +400,8 @@ require(["moment", "datetimepicker"], function (moment) {
           });
           edit.public.prop("checked", event.public);
           edit.notifications.tagsinput('removeAll');
-          event.notifications.forEach(function(date){
+          Object.keys(event.notifications).forEach(function(key){
+            var date = event.notifications[key];
             edit.notifications.tagsinput("add", {
               show: moment(event.start).diff(date),
               date: moment(date)
@@ -573,6 +576,10 @@ require(["moment", "datetimepicker"], function (moment) {
           });
           window.initTimestamp(events.find(".date-timestamp"));
         },
+        removeEvent: function(event){
+          calendar.calDays.find('.event[data-id='+event.id+']').remove();
+          calendar.events[event.id] = null;
+        }
       },
       editEvent: {
         it: $('#editEvent'),
@@ -881,6 +888,15 @@ require(["moment", "datetimepicker"], function (moment) {
           source: users
         }
       });
+
+      edit.delete.click(function(){
+        calendar.socket.deleteEvent(calendar.currentEvent, function(){
+          app.alertSuccess();
+          calendar.actions.removeEvent(event);
+          edit.it.modal("close");
+        });
+      });
+
     })(calendar.editEvent);
 
     app.enterRoom("calendar");

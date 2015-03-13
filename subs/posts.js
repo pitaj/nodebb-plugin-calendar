@@ -23,9 +23,9 @@ var posts = module.exports = {
           console.error(err);
           return callback(err);
         }
-        event.url = "/category/"+event.cid+"/"+data.topicData.slug;
         event.pid = data.postData.pid;
         event.tid = data.postData.tid;
+        event.url = "/topic/"+event.tid+"/"+data.topicData.slug;
         callback(null, event);
       });
     });
@@ -41,7 +41,10 @@ var posts = module.exports = {
         pid: event.pid,
         title: event.name,
         content: raw
-      }, callback);
+      }, function(err, data){
+        event.url = "/topic/"+event.tid+"/"+data.topicData.slug;
+        callback(err, event);
+      });
     });
   },
   delete: function(event, callback){
