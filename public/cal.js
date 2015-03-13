@@ -109,15 +109,13 @@ require(["moment", "datetimepicker"], function (moment) {
         },
         createEvent: function(event, callback){
           socket.emit("plugins.calendar.createEvent", event, function(err, data){
-            if(err){
+            if(err || !data){
+              console.error(err, data);
               return app.alertError();
             }
-            if(data){
-              calendar.actions.postEvent(data);
-              callback(data);
-            } else {
-              app.alertError();
-            }
+            calendar.events[data.id] = data;
+            calendar.actions.postEvent(data);
+            callback(data);
           });
         },
         editEvent: function(event, callback){
@@ -365,8 +363,6 @@ require(["moment", "datetimepicker"], function (moment) {
             blocked: []
           };
 
-          console.log(event);
-
           var edit = calendar.editEvent;
           edit.name.val(event.name);
           edit.allday.prop("checked", event.allday);
@@ -467,7 +463,7 @@ require(["moment", "datetimepicker"], function (moment) {
             function next(event){
               app.alertSuccess();
               calendar.actions.viewEvent(event);
-              edit.it.modal("close");
+              edit.it.modal("hide");
             }
             if(isnew){
               calendar.socket.createEvent(event, next);
@@ -785,7 +781,8 @@ require(["moment", "datetimepicker"], function (moment) {
       }
     });
     $("#cal-sidebar .toggle").click(function(){
-      $(this).parent().toggleClass("down").children().toggleClass("fa-chevron-up fa-chevron-down");
+      $(this).children().toggleClass("fa-chevron-up fa-chevron-down");
+      $(this).parent().toggleClass("down");
     });
 
     calendar.calDaysContainer.scroll(calendar.actions.onscroll);
@@ -890,10 +887,10 @@ require(["moment", "datetimepicker"], function (moment) {
       });
 
       edit.delete.click(function(){
-        calendar.socket.deleteEvent(calendar.currentEvent, function(){
+        calendar.socket.deleteEvent(calendar.currentEvent, function(event){
           app.alertSuccess();
           calendar.actions.removeEvent(event);
-          edit.it.modal("close");
+          edit.it.modal("hide");
         });
       });
 

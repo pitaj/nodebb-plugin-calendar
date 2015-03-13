@@ -78,10 +78,9 @@
         }, next);
       },
       function(perms, next){
-        globals.admin = perms.siteAdmin || perms.admin;
+        globals.delete = globals.admin = perms.siteAdmin || perms.admin;
         globals.edit = globals.admin || perms.edit;
         globals.create = globals.edit || perms.create;
-        globals.delete = globals.admin;
         next();
       },
       function(next){
@@ -116,16 +115,15 @@
         return callback(err);
       }
       var can = function(perm, event){
-        //console.log("globals: ", globals);
-        //console.log("locals: ", locals);
+
         if(typeof perm !== "string"){
           return false;
         }
-        if(perm === "admin" || perm === "create" || !event){
-          return globals[perm];
-        }
         if(globals.admin){
           return true;
+        }
+        if(perm === "admin" || perm === "create" || !event){
+          return globals[perm];
         }
         if(globals.edit && (perm === "view" || perm === "edit")){
           return true;
@@ -286,8 +284,12 @@
         },
         posts.create,
         eventstuff.create,
+        eventstuff.getEventStuff,
         function(event, next){
-          emitEventChange(event, "calendar.event.create", next);
+          emitEventChange(event, "calendar.event.create", function(err){
+            event.canEdit = event.canDelete = true;
+            next(err, event);
+          });
         }
       ], callback);
     },
@@ -343,21 +345,27 @@
     },
     deleteEvent: function(socket, event, callback){
       async.waterfall([
-        async.apply(user, null, socket.uid),
+        async.apply(db.event.get, event.id),
+        function(ev, next){
+          event = ev;
+          user(socket.uid, [event], next);
+        },
         function(can, next){
-          if(!can("delete")){
+          console.log("uid: ", socket.uid, "can delete: ", can("delete"));
+          if(!can("delete", event)){
             next(new Error("[[calendar:permissions.forbidden.delete]]"));
           } else {
-            next(null, can);
+            next(null, event);
           }
         },
         posts.delete,
         eventstuff.delete,
         function(event, next){
-          event = {
+          emitEventChange({
             id: event.id
-          };
-          emitEventChange(event, "calendar.event.delete", next);
+          }, "calendar.event.delete", function(err){
+            next(err, event);
+          });
         }
       ], callback);
     },
@@ -413,103 +421,106 @@
           //console.log("events: ", events);
           async.each(Object.keys(events), function(key, nxt){
             var event = events[key];
-            event.responses = event.responses || {};
-            event.editors = event.editors || {};
-            event.editors.users = event.editors.users || [];
-            event.editors.groups = event.editors.groups || [];
-            event.viewers = event.viewers || {};
-            event.viewers.users = event.viewers.users || [];
-            event.viewers.groups = event.viewers.groups || [];
-            event.blocked = event.blocked || [];
-            //console.log(event);
-            async.parallel([
-              function(n){
-                async.each(Object.keys(event.responses), function(key, cb){
-                  db.users.getInfo(key, function(err, info){
-                    if(err){
-                      return cb(err);
-                    }
-                    event.responses[key] = {
-                      value: event.responses[key],
-                      username: info.username,
-                      userslug: info.userslug,
-                      picture: info.picture
-                    };
-                    cb();
-                  });
-                }, n);
-              },
-              function(n){
-                async.each(Object.keys(event.editors.users), function(key, cb){
-                  db.users.getInfo(key, function(err, info){
-                    if(err){
-                      return cb(err);
-                    }
-                    event.editors.users[key] = {
-                      uid: info.uid,
-                      username: info.username,
-                      userslug: info.userslug,
-                      picture: info.picture
-                    };
-                    cb();
-                  });
-                }, n);
-              },
-              function(n){
-                async.each(Object.keys(event.viewers.users), function(key, cb){
-                  db.users.getInfo(key, function(err, info){
-                    if(err){
-                      return cb(err);
-                    }
-                    event.viewers.users[key] = {
-                      uid: info.uid,
-                      username: info.username,
-                      userslug: info.userslug,
-                      picture: info.picture
-                    };
-                    cb();
-                  });
-                }, n);
-              },
-              function(n){
-                async.each(Object.keys(event.blocked), function(key, cb){
-                  db.users.getInfo(key, function(err, info){
-                    if(err){
-                      return cb(err);
-                    }
-                    event.blocked[key] = {
-                      uid: info.uid,
-                      username: info.username,
-                      userslug: info.userslug,
-                      picture: info.picture
-                    };
-                    cb();
-                  });
-                }, n);
-              },
-              function(cb){
-                db.users.getInfo(event.uid, function(err, info){
-                  if(err){
-                    return cb(err);
-                  }
-                  event.user = {
-                    uid: info.uid,
-                    username: info.username,
-                    userslug: info.userslug,
-                    picture: info.picture
-                  };
-                  cb();
-                });
-              },
-            ], nxt);
+            eventstuff.getEventStuff(event, nxt);
           }, function(err){
-            //console.log("after", events, err);
             next(err, events);
           });
         }
-      ], function(err, events){
-        //console.log("after", events.length, err);
-        callback(err, events);
+      ], callback);
+    },
+    getEventStuff: function(event, callback){
+      event.responses = event.responses || {};
+      event.editors = event.editors || {};
+      event.editors.users = event.editors.users || [];
+      event.editors.groups = event.editors.groups || [];
+      event.viewers = event.viewers || {};
+      event.viewers.users = event.viewers.users || [];
+      event.viewers.groups = event.viewers.groups || [];
+      event.blocked = event.blocked || [];
+      async.parallel([
+        function(n){
+          async.each(Object.keys(event.responses), function(key, cb){
+            db.users.getInfo(key, function(err, info){
+              if(err){
+                return cb(err);
+              }
+              event.responses[key] = {
+                value: event.responses[key],
+                username: info.username,
+                userslug: info.userslug,
+                picture: info.picture
+              };
+              cb();
+            });
+          }, n);
+        },
+        function(n){
+          async.each(Object.keys(event.editors.users), function(key, cb){
+            db.users.getInfo(key, function(err, info){
+              if(err){
+                return cb(err);
+              }
+              event.editors.users[key] = {
+                uid: info.uid,
+                username: info.username,
+                userslug: info.userslug,
+                picture: info.picture
+              };
+              cb();
+            });
+          }, n);
+        },
+        function(n){
+          async.each(Object.keys(event.viewers.users), function(key, cb){
+            db.users.getInfo(key, function(err, info){
+              if(err){
+                return cb(err);
+              }
+              event.viewers.users[key] = {
+                uid: info.uid,
+                username: info.username,
+                userslug: info.userslug,
+                picture: info.picture
+              };
+              cb();
+            });
+          }, n);
+        },
+        function(n){
+          async.each(Object.keys(event.blocked), function(key, cb){
+            db.users.getInfo(key, function(err, info){
+              if(err){
+                return cb(err);
+              }
+              event.blocked[key] = {
+                uid: info.uid,
+                username: info.username,
+                userslug: info.userslug,
+                picture: info.picture
+              };
+              cb();
+            });
+          }, n);
+        },
+        function(cb){
+          db.users.getInfo(event.uid, function(err, info){
+            if(err){
+              return cb(err);
+            }
+            event.user = {
+              uid: info.uid,
+              username: info.username,
+              userslug: info.userslug,
+              picture: info.picture
+            };
+            cb();
+          });
+        },
+      ], function(err){
+        if(err){
+          return callback(err);
+        }
+        callback(null, event);
       });
     },
     delete: function(rawEvent, callback){

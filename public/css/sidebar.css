@@ -46,11 +46,17 @@
   top: 100%;
 }
 
+#cal-sidebar .toggle .fa-chevron-up {
+  top: -2px;
+  position: relative;
+}
+
 @media (min-width: 768px) {
   #cal-sidebar .toggle {
     display:none;
   }
-  #cal-sidebar {
+  #cal-sidebar,
+  #cal-sidebar.down {
     position: relative;
     height: 100%;
     overflow: hidden;
@@ -60,7 +66,7 @@
 
 #cal-sidebar > .content > div:first-child {
   margin-left: -100%;
-  transition: margin-left .25s ease; 
+  transition: margin-left .25s ease;
 }
 #cal-sidebar > .content > div:first-child.active {
   margin-left: 0;

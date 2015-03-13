@@ -25,7 +25,7 @@ var posts = module.exports = {
         }
         event.pid = data.postData.pid;
         event.tid = data.postData.tid;
-        event.url = "/topic/"+event.tid+"/"+data.topicData.slug;
+        event.url = "/topic/"+data.topicData.slug;
         callback(null, event);
       });
     });
@@ -42,8 +42,12 @@ var posts = module.exports = {
         title: event.name,
         content: raw
       }, function(err, data){
-        event.url = "/topic/"+event.tid+"/"+data.topicData.slug;
-        callback(err, event);
+        if(err){
+          console.error(err);
+          return callback(err);
+        }
+        event.url = "/topic/"+event.tid+"/"+data.topic.slug;
+        callback(null, event);
       });
     });
   },
@@ -53,7 +57,9 @@ var posts = module.exports = {
         console.error(err);
         return callback(err);
       }
-      topics.delete(tid, callback);
+      topics.delete(tid, function(err){
+        callback(err, event);
+      });
     });
   },
   compile: function(event, callback){
