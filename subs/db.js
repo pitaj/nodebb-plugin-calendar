@@ -27,7 +27,7 @@ var db = module.exports = {
           return callback(err);
         }
         //console.log("event.add");
-        event.id = last+1;
+        event.id = parseInt(last, 10)+1;
         async.waterfall([
           async.apply(async.parallel, [
             async.apply(database.sortedSetAdd, "plugins:calendar:events", new Date(event.start).valueOf(), "plugins:calendar:events:"+event.id),

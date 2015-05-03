@@ -40,6 +40,7 @@ require.config({
     }
   }
 });
+
 require(["moment", "datetimepicker", "translator"], function (moment, dtp, translator) {
   "use strict";
 
@@ -94,12 +95,10 @@ require(["moment", "datetimepicker", "translator"], function (moment, dtp, trans
       }
     };
 
-    var loaded = JSON.parse($("#data_script").html());
-
     var calendar = {
-      events: loaded.events,
-      buffer: loaded.buffer,
-      whoisin: loaded.whoisin,
+      events: [],
+      buffer: 6,
+      whoisin: false,
       socket: {
         getEvents: function(start, end, callback){
           socket.emit("plugins.calendar.getEvents", {
@@ -188,15 +187,23 @@ require(["moment", "datetimepicker", "translator"], function (moment, dtp, trans
       },
       actions: {
         init: function(){
-          calendar.actions.appendWeeks(moment().subtract(calendar.buffer, "months"), moment().add(calendar.buffer, "months"));
+          console.log("Initializing Calendar");
+          var start = moment().subtract(calendar.buffer, "months");
+          var end = moment().add(calendar.buffer, "months");
+          calendar.actions.appendWeeks(start, end);
           calendar.actions.scrollToDate(new Date(), true);
           var mom = moment();
           var day = calendar.days[mom.year()][mom.month()][mom.date()-1].attr("id", "cal-day-selected");
 
-          for(var i=0; i<calendar.events.length; i++){
-            calendar.actions.postEvent(calendar.events[i]);
-          }
-          calendar.actions.viewDay(day);
+          console.log("Initializing Events");
+
+          calendar.socket.getEvents(start, end, function(events){
+            calendar.events = events;
+            for(var i=0; i<calendar.events.length; i++){
+              calendar.actions.postEvent(calendar.events[i]);
+            }
+            calendar.actions.viewDay(day);
+          });
         },
         postEvent: function(event){
           if(!event){
@@ -810,6 +817,16 @@ require(["moment", "datetimepicker", "translator"], function (moment, dtp, trans
     })();
 
     $(function(){
+
+      try {
+        var loaded = JSON.parse($("#data_script").html());
+        calendar.buffer = loaded.buffer;
+        calendar.whoisin = loaded.whoisin;
+        console.log("Successfully loaded initial data");
+      } catch(e){
+        console.error("Failed to load initial data", e);
+      }
+
       function loadTemplates(callback){
         var templates = ["day", "event", "profilePic", "response", "viewEvent", "dayEvent", "frameStyle"];
         var n = 0, i;
@@ -826,26 +843,11 @@ require(["moment", "datetimepicker", "translator"], function (moment, dtp, trans
           window.ajaxify.loadTemplate("partials/calendar/"+templates[i], todo.bind(templates[i]));
         }
       }
-      //
-      // calendar.templates.iframeStyle = '<style>div[widget-area]{display:none}'+
-      //   '.topic .topic-footer .row{padding:0 10px 0 20px}'+
-      //   '.topic ul li{margin-bottom:5px}.btn-sm{line-height:1}'+
-      //   '.topic .topic-footer .pull-right{line-height:14px}'+
-      //   '.topic .post-bar{padding:6px}.btn.btn-primary.post_reply{float:right}'+
-      //   '.topic-main-buttons.pull-right.inline-block{display:block;width:100%}'+
-      //   '#header-menu,.overlay-container,.alert-window,'+
-      //   '#post-container li.post-row:first-child,#post-container .post-bar,'+
-      //   '.upvote,.downvote,.votes,.share-dropdown,.move,.breadcrumb,'+
-      //   '.post-bar.bottom-post-bar div:first-child,'+
-      //   '.post-bar.bottom-post-bar .thread-tools,#footer,'+
-      //   '.topic-footer small.pull-right i,.post-tools .quote,'+
-      //   '.post-tools .post_reply{display:none!important}'+
-      //   'body{padding-top:10px!important}'+
-      //   '.bottom-post-bar{display:block!important}'+
-      //   '.container{width:100%!important}</style>';
 
       loadTemplates(function(){
+        console.log("Calendar templates loaded");
         translator.load(window.config.userLang, "calendar", function(){
+          console.log("Calendar translation loaded");
           calendar.actions.init();
         });
       });

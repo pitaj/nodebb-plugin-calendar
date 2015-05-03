@@ -199,14 +199,31 @@
       });
     },
     page: function(req, res, callback){
+
+      async.parallel({
+        settings: db.settings.get,
+        can: async.apply(user, req.user ? req.user.uid : 0, null)
+      }, function(err, data){
+        if(err){
+          return callback(err);
+        }
+        var today = new Date();
+        res.render("calendar", {
+          canCreate: data.can("create"),
+          whoisin: !!(data.settings.usewhoisin && whoisin),
+          today: {
+            date: today.getDate(),
+            month: today.getMonth(),
+            year: today.getFullYear()
+          },
+          buffer: buffer
+        });
+      });
+      /* old version
       var today, settings, can;
-
-      //console.log(0);
-
       async.waterfall([
         function(next){
           db.settings.get(next);
-          //console.log(1);
         },
         function(sets, next){
           settings = sets;
@@ -219,24 +236,18 @@
             start: ago,
             end: ahead
           }, next);
-          //console.log(2);
         },
         function(events, next){
-          //console.log("after", events.length);
           user(req.user ? req.user.uid : 0, events, function(err, cn){
             can = cn;
-            //console.log(3, err);
             next(err, events);
           });
         },
       ], function(err, events){
         if(err){
-          //console.log(12, err);
           return callback(err);
         }
-        //console.log("events.length: ", events.length);
         res.render("calendar", {
-          events: JSON.stringify(events),
           canCreate: can("create"),
           whoisin: !!(settings.usewhoisin && whoisin),
           today: {
@@ -247,6 +258,7 @@
           buffer: buffer
         });
       });
+      */
     },
     saveAdmin: function(req, res){
       var settings = {
@@ -832,6 +844,9 @@
   };
 
   exports.topicFilter = function(topicData, callback){
+    if(!topicData.topic || !topicData.uid || !topicData.topic.tid){
+      return callback(null, topicData);
+    }
     db.event.getByTid(topicData.topic.tid, function(err, event){
       if(err){
         return callback(err);
