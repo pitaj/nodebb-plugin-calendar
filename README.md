@@ -4,7 +4,7 @@
 
 [**More images here**](http://imgur.com/a/7qQAV)
 
-This plugin adds a site-wide calendar to NodeBB.
+This plugin adds a *super cool* site-wide calendar to NodeBB.
 
 ##Installation
 

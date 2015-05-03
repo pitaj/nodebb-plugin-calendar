@@ -44,6 +44,8 @@ require.config({
 require(["moment", "datetimepicker", "translator"], function (moment, dtp, translator) {
   "use strict";
 
+  translator = translator || window.translator;
+
   moment.locale(window.config.userLang || "en_GB");
 
   (function($, app, templates, socket){
@@ -1018,9 +1020,10 @@ require(["moment", "datetimepicker", "translator"], function (moment, dtp, trans
       }
     });
 
+    calendar.translator = translator;
+    calendar.moment = moment;
+
     window.calendar = calendar;
-    window.moment = moment;
-    window.translator = translator;
 
   })(window.jQuery, window.app, window.templates, window.socket);
 });
