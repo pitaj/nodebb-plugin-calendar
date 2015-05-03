@@ -310,7 +310,11 @@
   </style>
 
   <div id="data_script">
-    {data}
+    {
+      "canCreate": {canCreate},
+      "whoisin": {whoisin},
+      "buffer": {buffer}
+    }
   </div>
   <script src="/plugins/nodebb-plugin-calendar/public/typeahead.bundle.js"></script>
   <script src="/plugins/nodebb-plugin-calendar/public/cal.js"></script>
