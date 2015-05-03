@@ -23,6 +23,7 @@ var posts = module.exports = {
           console.error(err);
           return callback(err);
         }
+        //console.log(data.postData);
         event.pid = data.postData.pid;
         event.tid = data.postData.tid;
         event.url = "/topic/"+data.topicData.slug;
@@ -36,6 +37,7 @@ var posts = module.exports = {
         console.error(err);
         return callback(err);
       }
+      //console.log(JSON.stringify(event, null, 2));
       posttools.edit({
         uid: event.uid,
         pid: event.pid,
@@ -43,10 +45,10 @@ var posts = module.exports = {
         content: raw
       }, function(err, data){
         if(err){
-          console.error(err);
+          //console.error("it:", err, JSON.stringify(event), raw, event.uid);
           return callback(err);
         }
-        event.url = "/topic/"+event.tid+"/"+data.topic.slug;
+        event.url = "/topic/"+data.topic.slug;
         callback(null, event);
       });
     });

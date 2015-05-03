@@ -36,17 +36,65 @@
     //fs = require("fs"),
     schedule = require('node-schedule'),
     sanitize = require('google-caja').sanitize,
-    users = module.parent.require("./user"),
     pluginSocket = module.parent.require("./socket.io/plugins"),
     mainSocket = module.parent.require("./socket.io/index"),
     plugins = module.parent.require('./plugins'),
     winston = module.parent.require("winston"),
+    privileges = module.parent.require("./privileges"),
     Notifications = module.parent.require("./notifications");
     //translator = module.parent.require('../public/src/translator');
 
-  var parse = async.apply(plugins.fireHook, 'filter:parse.raw'),
-    // parse(raw, callback(err, html){})
-    whoisin, buffer = 6;
+
+  // var types = {
+  //   Markdown: String,
+  //   HTML: String,
+  //   Integer: Number,
+  //   URL: String
+  // };
+  //
+  // function assign(input, add){
+  //   for(var keys = Object.keys(input), l = keys.length, i = 0; i < l; i++){
+  //     if(add.hasOwnProperty(keys[i])){
+  //       input[keys[i]] = add[keys[i]];
+  //     }
+  //   }
+  //   return input;
+  // }
+  //
+  // function createEvent(details){
+  //
+  //   var Event = {
+  //     id: types.Integer,
+  //     start: Date(),
+  //     end: Date(),
+  //     uid: types.Integer(),
+  //     name: String(),
+  //     rawPlace: types.Markdown(),
+  //     place: types.HTML(),
+  //     rawDescription: types.Markdown(),
+  //     description: types.HTML(),
+  //     allday: Boolean(),
+  //     notifications: [],
+  //     responses: {},
+  //     url: types.URL(),
+  //     editors: {
+  //       users: [],
+  //       groups: []
+  //     },
+  //     viewers: {
+  //       users: [],
+  //       groups: []
+  //     },
+  //     blocked: []
+  //   };
+  //
+  //   return assign(Object.create(Event), details);
+  // }
+
+  function parse(raw, callback){
+    plugins.fireHook('filter:parse.raw', raw, callback);
+  }
+  var whoisin, buffer = 6;
 
 
   var db = require("./subs/db"),
@@ -71,7 +119,7 @@
       db.settings.get,
       function(settings, next){
         async.parallel({
-          siteAdmin: async.apply(users.isAdministrator, uid),
+          siteAdmin: async.apply(db.users.isAdministrator, uid),
           admin: async.apply(db.groups.isMember, uid, settings.admin),
           edit: async.apply(db.groups.isMember, uid, settings.edit),
           create: async.apply(db.groups.isMember, uid, settings.create)
@@ -186,7 +234,7 @@
           //console.log(12, err);
           return callback(err);
         }
-        console.log("events.length: ", events.length);
+        //console.log("events.length: ", events.length);
         res.render("calendar", {
           events: JSON.stringify(events),
           canCreate: can("create"),
@@ -208,7 +256,13 @@
         category: req.body.category,
         usewhoisin: !!req.body.usewhoisin
       };
-      db.settings.set(settings, function(err){
+      async.waterfall([
+        db.groups.getAll,
+        function(groups, next){
+          async.each(groups, async.apply(privileges.categories.rescind, ['find', 'mods'], settings.category), next);
+        },
+        async.apply(db.settings.set, settings)
+      ], function(err){
         if(err){
           res.json(false);
         } else {
@@ -218,19 +272,33 @@
     }
   };
 
-  function emitEventChange(event, message, callback){
-    var soks = mainSocket.server.of("calendar").connected;
-    async.each(Object.keys(soks), function(x, next){
-      user(soks[x].uid, [event], function(err, can){
-        if(err){
-          return next(err);
-        }
-        if(can("view", event)){
-          mainSocket.server.sockets.socket(soks[x].uid).emit(message, event);
-        }
-        next();
+  function emitEventChange(data, message, callback){
+    var soks = mainSocket.in("calendar").connected;
+
+    async.waterfall([
+      async.apply(db.event.get, data.event.id),
+      eventstuff.getEventStuff
+    ], function(err, event){
+      if(err){
+        return callback(err);
+      }
+      data.event = event;
+
+      async.each(Object.keys(soks), function(x, next){
+        user(soks[x].uid, [event], function(err, can){
+          if(err){
+            return next(err);
+          }
+          if(can("view", event)){
+            mainSocket.server.sockets.connected[x].emit(message, data);
+          }
+          next();
+        });
+      }, function(err){
+        callback(err, data);
       });
-    }, callback);
+
+    });
   }
 
   pluginSocket.calendar = {
@@ -238,6 +306,7 @@
       eventstuff.getEvents(socket.uid, dates, callback);
     },
     createEvent: function(socket, event, callback){
+      //console.log(JSON.stringify(event, null, 2));
       var settings;
       async.waterfall([
         async.apply(user, socket.uid, null),
@@ -274,6 +343,7 @@
             description: parsed.description,
             name: parsed.name,
             allday: event.allday,
+            public: event.public,
             notifications: event.notifications,
             editors: event.editors,
             viewers: event.viewers,
@@ -286,7 +356,9 @@
         eventstuff.create,
         eventstuff.getEventStuff,
         function(event, next){
-          emitEventChange(event, "calendar.event.create", function(err){
+          emitEventChange({
+            event: event
+          }, "calendar.event.create", function(err){
             event.canEdit = event.canDelete = true;
             next(err, event);
           });
@@ -294,14 +366,21 @@
       ], callback);
     },
     editEvent: function(socket, event, callback){
+      var settings;
       async.waterfall([
         async.apply(user, socket.uid, null),
         function(can, next){
-          if(!can("edit", event)){
-            next(new Error("[[calendar:permissions.forbidden.edit]]"));
-          } else {
-            next(null, can);
-          }
+          db.settings.get(function(err, sets){
+            if(err){
+              return next(err);
+            }
+            settings = sets;
+            if(!can("create")){
+              next(new Error("[[calendar:permissions.forbidden.create]]"));
+            } else {
+              next(null, can);
+            }
+          });
         },
         function(can, next){
           async.parallel({
@@ -320,26 +399,34 @@
         function(obj, next){
           event = {
             id: event.id,
+            uid: event.uid,
+            pid: obj.oldEvent.pid,
             start: new Date(event.start).toISOString(),
             end: new Date(event.end).toISOString(),
             rawPlace: event.rawPlace,
             rawDescription: event.rawDescription,
             place: obj.parsed.place,
             description: obj.parsed.description,
+            public: event.public,
             name: obj.parsed.name,
             allday: !!event.allday,
             notifications: event.notifications,
             editors: event.editors,
             viewers: event.viewers,
             blocked: event.blocked,
-            pid: event.pid,
+            cid: event.cid || settings.category
           };
           next(null, event);
         },
         posts.update,
         eventstuff.edit,
         function(event, next){
-          emitEventChange(event, "calendar.event.edit", next);
+          emitEventChange({
+            event: event
+          }, "calendar.event.edit", function(err, data){
+            data.event.canEdit = data.event.canDelete = true;
+            next(err, data.event);
+          });
         }
       ], callback);
     },
@@ -351,7 +438,7 @@
           user(socket.uid, [event], next);
         },
         function(can, next){
-          console.log("uid: ", socket.uid, "can delete: ", can("delete"));
+          //console.log("uid: ", socket.uid, "can delete: ", can("delete"));
           if(!can("delete", event)){
             next(new Error("[[calendar:permissions.forbidden.delete]]"));
           } else {
@@ -362,7 +449,9 @@
         eventstuff.delete,
         function(event, next){
           emitEventChange({
-            id: event.id
+            event: {
+              id: event.id
+            }
           }, "calendar.event.delete", function(err){
             next(err, event);
           });
@@ -379,7 +468,11 @@
           next();
         },
         async.apply(db.event.responses.set, response.event, response.uid, response.value),
-        async.apply(emitEventChange, response.event, "calendar.event.respond")
+        function(next){
+          emitEventChange(response, "calendar.event.respond", function(err){
+            next(err, response);
+          });
+        }
       ], callback);
     }
   };
@@ -390,8 +483,8 @@
         async.apply(db.event.edit, rawEvent),
         async.apply(db.event.permissions.set, rawEvent),
         async.apply(notifications.handle, rawEvent)
-      ], function(err, result){
-        callback(err, result[0]);
+      ], function(err){
+        callback(err, rawEvent);
       });
     },
     create: function(rawEvent, callback){
@@ -429,6 +522,7 @@
       ], callback);
     },
     getEventStuff: function(event, callback){
+      event.allday = event.allday === "true" || event.allday === true;
       event.responses = event.responses || {};
       event.editors = event.editors || {};
       event.editors.users = event.editors.users || [];

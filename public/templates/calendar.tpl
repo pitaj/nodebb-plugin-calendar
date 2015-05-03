@@ -251,7 +251,7 @@
                     <a href="/user/{userslug}">{username}</a>
                   </small>
                   <span class="invited selected">[[calendar:response_invited]]</span>
-                  <span class="not-attending">[[calendar:response_not_attending]]</span>
+                  <span class="not-attending">[[calendar:response_not-attending]]</span>
                   <span class="maybe">[[calendar:response_maybe]]</span>
                   <span class="attending">[[calendar:response_attending]]</span>
                 </p>

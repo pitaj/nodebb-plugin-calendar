@@ -1,8 +1,8 @@
 #nodebb-plugin-calendar
 
-![Full page image](http://i.imgur.com/YKdOuTt.png)
-![Mobile image](http://i.imgur.com/jVLgdXC.png)
-![Mobile image with sidebar up](http://i.imgur.com/v3MntGt.png)
+![Full screen image](http://i.imgur.com/k6umK8N.png)
+
+[**More images here**](http://imgur.com/a/7qQAV)
 
 This plugin adds a site-wide calendar to NodeBB.
 
@@ -32,7 +32,6 @@ Note: If you don't know the id# of the category you want the events to be posted
 * Response system for easy user responses
 * Click a day on the calendar to select it, and show its events in the sidebar
 * Click an event in either the sidebar or the calendar to show its details in the sidebar
-* All events are posted in the events category specified in the ACP *Note: events can only be edited from the Calendar interface*
 * Jump to year and month from the fields above the Calendar
 * Configurable automated notifications for upcoming events
 * Awesome new interface, with mobile support!
@@ -40,7 +39,6 @@ Note: If you don't know the id# of the category you want the events to be posted
 
 ####In The Works
 
-* Automate category permissions
 * iCal export
 * Event permalinks on calendar page
 

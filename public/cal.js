@@ -40,35 +40,41 @@ require.config({
     }
   }
 });
-require(["moment", "datetimepicker"], function (moment) {
+require(["moment", "datetimepicker", "translator"], function (moment, dtp, translator) {
   "use strict";
 
   moment.locale(window.config.userLang || "en_GB");
 
-  (function($, app, translator, templates, socket){
+  (function($, app, templates, socket){
 
     function observe(elem, callback){
 
-      if(elem && !callback){
-        try {
-          elem.off("DOMSubtreeModified").data("mutationObserver").disconnect();
-        } catch(e){
+      var Observer = window.MutationObserver ||
+          window.WebKitMutationObserver ||
+          window.MozMutationObserver;
 
-        }
-      } else {
-        var Observer = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
-
-        if(MutationObserver){
+      if(Observer){
+        if(elem && !callback){
+          var data = elem.data("mutationObserver");
+          if(data){
+            data.disconnect();
+          }
+        } else {
           var observer = new Observer(callback);
           observer.observe(elem[0], {
             subtree: true,
             attributes: true
           });
           elem.data("mutationObserver", observer);
+        }
+      } else {
+        if(elem && !callback){
+          elem.off("DOMSubtreeModified");
         } else {
           elem.on("DOMSubtreeModified", callback);
         }
       }
+
     }
 
     $.fn.visible = function($container, partial){
@@ -91,7 +97,7 @@ require(["moment", "datetimepicker"], function (moment) {
     var loaded = JSON.parse($("#data_script").html());
 
     var calendar = {
-      events: [],
+      events: loaded.events,
       buffer: loaded.buffer,
       whoisin: loaded.whoisin,
       socket: {
@@ -113,17 +119,16 @@ require(["moment", "datetimepicker"], function (moment) {
               console.error(err, data);
               return app.alertError();
             }
-            calendar.events[data.id] = data;
-            calendar.actions.postEvent(data);
             callback(data);
           });
         },
         editEvent: function(event, callback){
           socket.emit("plugins.calendar.editEvent", event, function(err, data){
-            if(err || data){
+            if(err || !data){
+              console.error(err);
               return app.alertError();
             }
-            calendar.actions.postEvent(data);
+            //console.log("received", data);
             callback(data);
           });
         },
@@ -137,6 +142,48 @@ require(["moment", "datetimepicker"], function (moment) {
             }
             callback(response);
           });
+        },
+        respond: function(event, response, callback){
+          socket.emit("plugins.calendar.respond", {
+            uid: response.uid,
+            value: response.value,
+            event: event
+          }, function(err, response){
+            if(err || !response){
+              console.error(err);
+              return app.alertError();
+            }
+            callback(response);
+          });
+        },
+        update: {
+          deleteEvent: function(data){
+            calendar.events[data.event.id] = null;
+            $(".event[data-id="+data.event.id+"]").remove();
+          },
+          createEvent: function(data){
+            calendar.events[data.event.id] = data.event;
+            calendar.actions.postEvent(data.event);
+          },
+          editEvent: function(data){
+            $.extend(calendar.events[data.event.id], data.event);
+            $(".event[data-id="+data.event.id+"]").remove();
+            calendar.actions.postEvent(data.event);
+            calendar.actions.viewDay($("#cal-day-selected"));
+            if(calendar.currentEvent.id === data.event.id){
+              calendar.actions.viewEvent(data.event);
+            }
+          },
+          response: function(response){
+            //console.log("event recieved: ", response);
+            calendar.events[response.event.id].responses[response.uid].value = response.value;
+            var data = calendar.events[response.event.id].responses[response.uid];
+            data.uid = response.uid;
+            var html = calendar.parse(calendar.templates.response, data);
+            translator.translate(html, function(trans){
+              calendar.viewEvent.responses.find('[data-uid="'+response.uid+'"]').replaceWith(trans);
+            });
+          }
         }
       },
       actions: {
@@ -150,30 +197,21 @@ require(["moment", "datetimepicker"], function (moment) {
             calendar.actions.postEvent(calendar.events[i]);
           }
           calendar.actions.viewDay(day);
-
-          /*
-          setTimeout(function(){
-            for(var i=0; i<calendar.events.length; i++){
-              calendar.actions.postEvent(calendar.events[i]);
-            }
-          }, 50);
-          */
         },
         postEvent: function(event){
           if(!event){
             return false;
           }
           var d = moment(event.start),
-          l = moment(event.end).endOf("day"), day, y, m, dt;
+          l = moment(event.end), day, y, m, dt;
           calendar.calDays.find('.event[data-id='+event.id+']').remove();
           while(d <= l){
             y = d.year(); m = d.month(); dt = d.date() - 1;
             if(calendar.days[y] &&
-              calendar.days[y][m] &&
-              calendar.days[y][m][dt]){
-              day = calendar
-                .days[y][m][dt];
-              event = $(calendar.parse(calendar.templates.event, {
+                calendar.days[y][m] &&
+                calendar.days[y][m][dt]){
+              day = calendar.days[y][m][dt];
+              $(calendar.parse(calendar.templates.event, {
                 time: d.toISOString(),
                 name: event.name,
                 id: event.id
@@ -239,16 +277,23 @@ require(["moment", "datetimepicker"], function (moment) {
           }
         },
         buildResponses: function(responses, callback){
-          var x, html = "";
+          var x, html = "", sub;
+
+          function thing(sub){
+            html += sub;
+          }
+
           for(x in responses){
             if(responses.hasOwnProperty(x)
             && typeof responses[x] === "object"
-            && +x !== +app.uid){
-              html += calendar.parse(calendar.templates.response, {
+            && +x !== +app.user.uid){
+              sub = calendar.parse(calendar.templates.response, {
                 username: responses[x].username,
                 userslug: responses[x].userslug,
-                value: responses[x].value
+                value: responses[x].value,
+                uid: x
               });
+              translator.translate(sub, thing);
             }
           }
           callback(html);
@@ -343,7 +388,7 @@ require(["moment", "datetimepicker"], function (moment) {
           var event = !isnew ? calendar.currentEvent : {
             start: moment().startOf("h"),
             end: moment().startOf("h").add(1, "h"),
-            uid: app.uid || app.user.uid,
+            uid: app.user.uid,
             name: "",
             rawPlace: "",
             rawDescription: "",
@@ -414,9 +459,9 @@ require(["moment", "datetimepicker"], function (moment) {
             event.allday = edit.allday.prop("checked");
             event.start = edit.start.data("DateTimePicker").date();
             event.end = edit.end.data("DateTimePicker").date();
-            event.place = edit.place.val();
+            event.rawPlace = edit.place.val();
             event.public = edit.public.prop("checked");
-            event.description = edit.description.val();
+            event.rawDescription = edit.description.val();
             event.editors = {
               users: [],
               groups: []
@@ -454,15 +499,14 @@ require(["moment", "datetimepicker"], function (moment) {
               str = str.replace(/(?:([0-9]*)([smhd])[a-zA-Z]*)/g, "$1$2");
               var date = moment(event.start), match;
               while(str.length){
-                match = str.match(/([0-9]*)([smhd])/);
+                match = str.match(/([0-9]+)([smhd])/);
                 date.subtract(match[1], match[2]);
-                str = str.replace(/([0-9]*)([smhd])/);
+                str = str.replace(/([0-9]+)([smhd])/);
               }
               return date;
             });
-            function next(event){
+            function next(){
               app.alertSuccess();
-              calendar.actions.viewEvent(event);
               edit.it.modal("hide");
             }
             if(isnew){
@@ -477,11 +521,12 @@ require(["moment", "datetimepicker"], function (moment) {
 
           var aftercnt = 0;
 
-          function after(){
+          function after(/*mess*/){
             aftercnt++;
             if(aftercnt >= 2){
               view.it.removeClass("trans");
             }
+            //console.log(mess, aftercnt, aftercnt >= 2);
           }
 
           calendar.currentEvent = event;
@@ -499,9 +544,15 @@ require(["moment", "datetimepicker"], function (moment) {
             view.user.small.attr("title", event.user.username);
 
             view.name.html(event.name);
-            view.start.attr("data-timestamp", new Date(event.start).toISOString());
-            view.end.attr("data-timestamp", new Date(event.end).toISOString());
-            window.initTimestamp($([view.start[0], view.end[0]]).attr("data-allday", event.allday));
+            view.start.attr({
+              "data-timestamp": new Date(event.start).toISOString(),
+              "data-allday": event.allday
+            });
+            view.end.attr({
+              "data-timestamp": new Date(event.end).toISOString(),
+              "data-allday": event.allday
+            });
+            window.initTimestamp($([view.start[0], view.end[0]]));
             view.place.html(event.place);
             view.description.html(event.description);
 
@@ -515,16 +566,21 @@ require(["moment", "datetimepicker"], function (moment) {
               calendar.actions.buildResponses(event.responses, function(html){
                 var my = view.myResponse.detach();
                 view.responses.html(html).prepend(my);
-                after();
+                after("responses");
               });
-              view.myResponse.find("small > a")
-                .attr("href", "/user/"+event.user.userslug)
-                .html(event.user.username);
-              view.myResponse.find(".selected").removeClass("selected");
-              view.myResponse
-                .find("."+(event.responses[app.uid] ?
-                  event.responses[app.uid].value : "invited"))
-                .addClass("selected");
+
+              if(!app.user.uid){
+                view.myResponse.css("display", "none");
+              } else {
+                view.myResponse.find("small > a")
+                  .attr("href", "/user/"+app.user.userslug)
+                  .html(app.user.username);
+                view.myResponse.find(".selected").removeClass("selected");
+                view.myResponse
+                  .find("."+(event.responses[app.user.uid] ?
+                    event.responses[app.user.uid].value : "invited"))
+                  .addClass("selected");
+              }
             }
 
             if(view.comments.contents()){
@@ -534,13 +590,12 @@ require(["moment", "datetimepicker"], function (moment) {
             view.comments.off("load").on("load", function(){
               var self = $(this);
               self.contents().find("head")
-                .append(calendar.templates.iframeStyle);
-
+                .append(calendar.templates.frameStyle);
               observe(self.contents(), function(){
-                self.height(self.contents().find("#content").height()+20);
+                self.height(self.contents().find("body").height()+20);
               });
 
-              after();
+              after("comments");
             }).attr("src", event.url);
           }, 250);
         },
@@ -554,7 +609,7 @@ require(["moment", "datetimepicker"], function (moment) {
 
           day.find(".event").each(function(){
             var event = calendar.events[$(this).attr("data-id")],
-            onlytime = moment(event.start).date() !== moment(event.end).date();
+            onlytime = moment(event.start).date() === moment(event.end).date();
             var elem = calendar.parse(calendar.templates.dayEvent, {
               start: event.start,
               end: event.end,
@@ -668,7 +723,7 @@ require(["moment", "datetimepicker"], function (moment) {
           });
         }
       },
-      currentEvent: {}
+      currentEvent: {},
     };
     (function(view){
       var it = view.it;
@@ -689,6 +744,25 @@ require(["moment", "datetimepicker"], function (moment) {
         whoisin: it.find(".cal-whoisin"),
         comments: it.find(".comments"),
         edit: it.find(".edit-event-button")
+      });
+
+      view.myResponse.children("span").click(function(){
+        var $this = $(this);
+        if(!$this.hasClass("selected")){
+          calendar.socket.respond(calendar.currentEvent, {
+            uid: app.user.uid,
+            value: this.className.split(" ").filter(function(val){
+              return val === "attending" ||
+                  val === "maybe" ||
+                  val === "not-attending" ||
+                  val === "invited";
+            })[0]
+          }, function(){
+            $this.parent().children().removeClass("selected");
+            $this.addClass("selected");
+            app.alertSuccess();
+          });
+        }
       });
     })(calendar.viewEvent);
 
@@ -713,29 +787,31 @@ require(["moment", "datetimepicker"], function (moment) {
     });
     $(".button-today").click(calendar.actions.scrollToDate);
 
-    function contains(string, arr){
-      string = string.toLowerCase();
-      for(var i=0, l = arr.length; i<l; i++){
-        if(string.indexOf(arr[i]) > -1){
-          return arr[i];
+    (function(){
+      function contains(string, arr){
+        string = string.toLowerCase();
+        for(var i = 0, l = arr.length; i<l; i++){
+          if(string.indexOf(arr[i]) > -1){
+            return arr[i];
+          }
         }
       }
-    }
 
-    var tr = $("#cal-headers").find("tr");
-    if(contains(window.config.userLang, ["ca", "us", "mx", "cn", "jp"])){
-      calendar.firstOfWeek = 0;
-    } else if(contains(window.config.userLang, ["ar", "fa"])){
-      calendar.firstOfWeek = 6;
-      tr.children().last().detach().prependTo(tr);
-    } else {
-      calendar.firstOfWeek = 1;
-      tr.children().first().detach().appendTo(tr);
-    }
+      var tr = $("#cal-headers").find("tr");
+      if(contains(window.config.userLang, ["ca", "us", "mx", "cn", "jp"])){
+        calendar.firstOfWeek = 0;
+      } else if(contains(window.config.userLang, ["ar", "fa"])){
+        calendar.firstOfWeek = 6;
+        tr.children().last().detach().prependTo(tr);
+      } else {
+        calendar.firstOfWeek = 1;
+        tr.children().first().detach().appendTo(tr);
+      }
+    })();
 
     $(function(){
       function loadTemplates(callback){
-        var templates = ["day", "event", "profilePic", "response", "viewEvent", "dayEvent"];
+        var templates = ["day", "event", "profilePic", "response", "viewEvent", "dayEvent", "frameStyle"];
         var n = 0, i;
 
         function todo(template){
@@ -750,22 +826,23 @@ require(["moment", "datetimepicker"], function (moment) {
           window.ajaxify.loadTemplate("partials/calendar/"+templates[i], todo.bind(templates[i]));
         }
       }
-
-      calendar.templates.iframeStyle = '<style>div[widget-area]{display:none}'+
-        '.post-bar.col-xs-12.hide.bottom-post-bar{display:block!important}'+
-        '.topic .topic-footer .row{padding:0 10px 0 20px}'+
-        '.topic ul li{margin-bottom:5px}.btn-sm{line-height:1}'+
-        '.topic .topic-footer .pull-right{line-height:14px}'+
-        '.topic .post-bar{padding:6px}.btn.btn-primary.post_reply{float:right}'+
-        '.topic-main-buttons.pull-right.inline-block{display:block;width:100%}'+
-        '#header-menu,.overlay-container,.alert-window,'+
-        '#post-container li.post-row:first-child,#post-container li.post-bar,'+
-        '.upvote,.downvote,.votes,.share-dropdown,.move,.breadcrumb,'+
-        '.post-bar.bottom-post-bar div:first-child,'+
-        '.post-bar.bottom-post-bar .thread-tools,#footer,'+
-        '.topic-footer small.pull-right i,.post-tools .quote,'+
-        '.post-tools .post_reply{display:none!important}'+
-        'body{padding-top:10px!important}.container{width:100%!important}</style>';
+      //
+      // calendar.templates.iframeStyle = '<style>div[widget-area]{display:none}'+
+      //   '.topic .topic-footer .row{padding:0 10px 0 20px}'+
+      //   '.topic ul li{margin-bottom:5px}.btn-sm{line-height:1}'+
+      //   '.topic .topic-footer .pull-right{line-height:14px}'+
+      //   '.topic .post-bar{padding:6px}.btn.btn-primary.post_reply{float:right}'+
+      //   '.topic-main-buttons.pull-right.inline-block{display:block;width:100%}'+
+      //   '#header-menu,.overlay-container,.alert-window,'+
+      //   '#post-container li.post-row:first-child,#post-container .post-bar,'+
+      //   '.upvote,.downvote,.votes,.share-dropdown,.move,.breadcrumb,'+
+      //   '.post-bar.bottom-post-bar div:first-child,'+
+      //   '.post-bar.bottom-post-bar .thread-tools,#footer,'+
+      //   '.topic-footer small.pull-right i,.post-tools .quote,'+
+      //   '.post-tools .post_reply{display:none!important}'+
+      //   'body{padding-top:10px!important}'+
+      //   '.bottom-post-bar{display:block!important}'+
+      //   '.container{width:100%!important}</style>';
 
       loadTemplates(function(){
         translator.load(window.config.userLang, "calendar", function(){
@@ -785,7 +862,22 @@ require(["moment", "datetimepicker"], function (moment) {
       $(this).parent().toggleClass("down");
     });
 
-    calendar.calDaysContainer.scroll(calendar.actions.onscroll);
+    var raf = window.requestAnimationFrame ||
+          window.mozRequestAnimationframe ||
+          window.webkitRequestAnimationFrame;
+
+    function rpt(){
+      calendar.actions.onscroll();
+      raf(rpt);
+    }
+    raf(rpt);
+
+    (function(update){
+      socket.on("calendar.event.delete", update.deleteEvent);
+      socket.on("calendar.event.edit", update.editEvent);
+      socket.on("calendar.event.create", update.createEvent);
+      socket.on("calendar.event.respond", update.response);
+    })(calendar.socket.update);
 
     (function(edit){
 
@@ -805,10 +897,14 @@ require(["moment", "datetimepicker"], function (moment) {
       };
 
       edit.start.datetimepicker(options).on("dp.change", function(e){
-        edit.end.data("DateTimePicker").minDate(e.date);
+        if(edit.end.data("DateTimePicker").date() < e.date){
+          edit.end.data("DateTimePicker").date(e.date);
+        }
       });
       edit.end.datetimepicker(options).on("dp.change", function(e){
-        edit.start.data("DateTimePicker").maxDate(e.date);
+        if(edit.start.data("DateTimePicker").date() > e.date){
+          edit.start.data("DateTimePicker").date(e.date);
+        }
       });
 
       edit.allday.change(function(){
@@ -922,15 +1018,21 @@ require(["moment", "datetimepicker"], function (moment) {
 
     window.calendar = calendar;
     window.moment = moment;
+    window.translator = translator;
 
-  })(window.jQuery, window.app, window.translator, window.templates, window.socket);
+  })(window.jQuery, window.app, window.templates, window.socket);
 });
 
 require(["moment"], function(moment) {
   "use strict";
   window.initTimestamp = function(elems){
     elems.each(function(){
-      var $this = $(this), data = $this.data(), utc;
+      var $this = $(this), data = {
+        onlytime: $this.attr("data-onlytime") === "true",
+        allday: $this.attr("data-allday") === "true",
+        timestamp: $this.attr("data-timestamp")
+      }, utc;
+
       if(data.onlytime && data.allday){
         $this.html("all day");
         return;
@@ -945,7 +1047,7 @@ require(["moment"], function(moment) {
         utc = moment.utc(data.timestamp).format("LLL");
       }
       utc += "UTC";
-      $this.popover({
+      $this.tooltip({
         content: utc
       });
     });

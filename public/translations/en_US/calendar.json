@@ -1,6 +1,4 @@
 {
-  "today": "today",
-  "add_event": "add event",
   "month_0": "January",
   "month_1": "February",
   "month_2": "March",
@@ -13,7 +11,6 @@
   "month_9": "October",
   "month_10": "November",
   "month_11": "December",
-  "month": "Month",
   "day_0": "Sun",
   "day_1": "Mon",
   "day_2": "Tue",
@@ -21,16 +18,15 @@
   "day_4": "Thu",
   "day_5": "Fri",
   "day_6": "Sat",
-  "year": "Year",
   "day_title": "Day",
   "event_title": "Event",
   "event_unselected": "No Event Selected",
+  "responses_title": "Responses",
   "response_invited": "No response",
-  "response_not_attending": "Not attending",
+  "response_not-attending": "Not attending",
   "response_maybe": "Maybe",
   "response_attending": "Attending",
   "comments_title": "Comments",
-  "cancel": "Cancel",
   "edit_event": "Edit Event",
   "event_name": "Event name",
   "all_day": "All day",
@@ -47,5 +43,6 @@
   "when": "When",
   "starts": "Starts",
   "ends": "Ends",
-  "where": "Location"
+  "where": "Location",
+  "add_event": "add event"
 }
