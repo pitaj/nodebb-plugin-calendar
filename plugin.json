@@ -17,15 +17,13 @@
       {
         "hook": "filter:admin.header.build", "method": "addAdminNavigation"
       },
-  		{
-  			"hook": "filter:widgets.getAreas", "method": "setWidgetAreas"
-  		}
+      {
+        "hook": "filter:post.raw", "method": "postParse"
+      },
+      {
+        "hook": "filter:topic.get", "method": "topicFilter"
+      }
     ],
     "templates": "public/templates",
-    "scripts": [
-      "public/datetimepicker/jquery.datetimepicker.min.js"
-    ],
-    "css": [
-      "public/datetimepicker/jquery.datetimepicker.min.css"
-    ]
+    "languages": "public/translations"
 }

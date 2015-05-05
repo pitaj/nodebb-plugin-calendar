@@ -1,0 +1,31 @@
+#cal-sidebar .content > .day .date {
+  text-align: center;
+  font-size: 20px;
+  padding: 10px;
+}
+
+#cal-sidebar .content > .day .event {
+  cursor: pointer;
+}
+
+#cal-sidebar .content > .day .event:hover {
+
+}
+
+#cal-sidebar .content .day h3.date {
+  margin: 0;
+}
+
+#cal-sidebar .content .day .events {
+  position: absolute;
+  top: 47px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+}
+
+#cal-sidebar .content .day .event {
+  cursor: pointer;
+  
+}
