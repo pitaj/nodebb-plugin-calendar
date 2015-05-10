@@ -457,8 +457,6 @@
             next(null, event);
           }
         },
-        posts.delete,
-        eventstuff.delete,
         function(event, next){
           emitEventChange({
             event: {
@@ -467,7 +465,9 @@
           }, "calendar.event.delete", function(err){
             next(err, event);
           });
-        }
+        },
+        posts.delete,
+        eventstuff.delete
       ], callback);
     },
     respond: function(socket, response, callback){

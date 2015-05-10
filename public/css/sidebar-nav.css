@@ -1,41 +1,6 @@
 #cal-sidebar .panel-heading button {
   width: 100%;
 }
-/*
-#cal-sidebar .panel-heading button {
-  color: white;
-  background-color: #5b94de;
-  border-color: #5b94de;
-  font-weight: 500;
-  margin-bottom: 0;
-  text-align: center;
-  vertical-align: middle;
-  cursor: pointer;
-  background-image: none;
-  border: 1px solid transparent;
-  white-space: nowrap;
-  font-size: 14px;
-  line-height: 1.42857143;
-  border-radius: 0;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-#cal-sidebar .panel-heading button:active,
-#cal-sidebar .panel-heading button.active {
-  background-color: #397ed7;
-  border-color: #2a73d2;
-  outline: 0;
-  -webkit-box-shadow: inset 0 3px 5px rgba(0,0,0,0.125);
-  -moz-box-shadow: inset 0 3px 5px rgba(0,0,0,0.125);
-  box-shadow: inset 0 3px 5px rgba(0,0,0,0.125);
-}
-#cal-sidebar .panel-heading button:hover,
-#cal-sidebar .panel-heading button:focus {
-  background-color: #397ed7;
-}
-*/
 
 @media (min-width:1100px), (min-width: 650px) and (max-width: 768px){
   #cal-sidebar .panel-heading button {

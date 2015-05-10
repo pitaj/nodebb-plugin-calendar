@@ -161,10 +161,14 @@ require(["moment", "datetimepicker", "translator"], function (moment, dtp, trans
           deleteEvent: function(data){
             calendar.events[data.event.id] = null;
             $(".event[data-id="+data.event.id+"]").remove();
+            if(calendar.currentEvent.id === data.event.id){
+              calendar.viewEvent.it.addClass("trans");
+            }
           },
           createEvent: function(data){
             calendar.events[data.event.id] = data.event;
             calendar.actions.postEvent(data.event);
+            calendar.actions.viewEvent(data.event);
           },
           editEvent: function(data){
             $.extend(calendar.events[data.event.id], data.event);
@@ -359,10 +363,8 @@ require(["moment", "datetimepicker", "translator"], function (moment, dtp, trans
           first = moment(calendar.firstDay().data("date"));
 
           calendar.socket.getEvents(first, last, function(events){
-            calendar.events = events;
-            for(var i=0; i<calendar.events.length; i++){
-              calendar.actions.postEvent(calendar.events[i]);
-            }
+            $.extend(calendar.events, events);
+            events.forEach(calendar.actions.postEvent);
           });
         },
         onscroll: function(){
@@ -636,10 +638,6 @@ require(["moment", "datetimepicker", "translator"], function (moment, dtp, trans
           });
           window.initTimestamp(events.find(".date-timestamp"));
         },
-        removeEvent: function(event){
-          calendar.calDays.find('.event[data-id='+event.id+']').remove();
-          calendar.events[event.id] = null;
-        }
       },
       editEvent: {
         it: $('#editEvent'),
@@ -656,23 +654,6 @@ require(["moment", "datetimepicker", "translator"], function (moment, dtp, trans
         description: $("#event-description"),
         delete: $("#editEvent button.delete"),
         save: $("#editEvent button.save")
-      },
-      viewEvent: {
-        it: $("#cal-sidebar > .content > div > .event")
-        // user
-          // a
-          // smalla
-          // img
-          // small
-        // name
-        // start
-        // end
-        // place
-        // description
-        // responses
-        // myResponse
-        // whoisin
-        // comments
       },
       days: {
         // years
@@ -734,9 +715,12 @@ require(["moment", "datetimepicker", "translator"], function (moment, dtp, trans
       },
       currentEvent: {},
     };
-    (function(view){
-      var it = view.it;
-      $.extend(view, {
+
+    (function(){
+      var it = $("#cal-sidebar > .content > div > .event");
+
+      calendar.viewEvent = {
+        it: $("#cal-sidebar > .content > div > .event"),
         user: {
           a: it.find(".topic-profile-pic a"),
           smalla: it.find(".topic-profile-pic small > a"),
@@ -753,9 +737,9 @@ require(["moment", "datetimepicker", "translator"], function (moment, dtp, trans
         whoisin: it.find(".cal-whoisin"),
         comments: it.find(".comments"),
         edit: it.find(".edit-event-button")
-      });
+      };
 
-      view.myResponse.children("span").click(function(){
+      calendar.viewEvent.myResponse.children("span").click(function(){
         var $this = $(this);
         if(!$this.hasClass("selected")){
           calendar.socket.respond(calendar.currentEvent, {
@@ -773,7 +757,7 @@ require(["moment", "datetimepicker", "translator"], function (moment, dtp, trans
           });
         }
       });
-    })(calendar.viewEvent);
+    })();
 
     calendar.currentMonth.y = calendar.currentMonth.yearSelect.val();
     calendar.currentMonth.m = calendar.currentMonth.monthSelect.attr("data-value");
@@ -816,44 +800,17 @@ require(["moment", "datetimepicker", "translator"], function (moment, dtp, trans
         calendar.firstOfWeek = 1;
         tr.children().first().detach().appendTo(tr);
       }
+
+      var raf = window.requestAnimationFrame ||
+            window.mozRequestAnimationframe ||
+            window.webkitRequestAnimationFrame;
+
+      function rpt(){
+        calendar.actions.onscroll();
+        raf(rpt);
+      }
+      raf(rpt);
     })();
-
-    $(function(){
-
-      try {
-        var loaded = JSON.parse($("#data_script").html());
-        calendar.buffer = loaded.buffer;
-        calendar.whoisin = loaded.whoisin;
-        console.log("Successfully loaded initial data");
-      } catch(e){
-        console.error("Failed to load initial data", e);
-      }
-
-      function loadTemplates(callback){
-        var templates = ["day", "event", "profilePic", "response", "viewEvent", "dayEvent", "frameStyle"];
-        var n = 0, i;
-
-        function todo(template){
-          calendar.templates[this] = template;
-          //console.log("template "+this+" loaded");
-          n++;
-          if(n === templates.length){
-            callback();
-          }
-        }
-        for(i=0; i<templates.length; i++){
-          window.ajaxify.loadTemplate("partials/calendar/"+templates[i], todo.bind(templates[i]));
-        }
-      }
-
-      loadTemplates(function(){
-        console.log("Calendar templates loaded");
-        translator.load(window.config.userLang, "calendar", function(){
-          console.log("Calendar translation loaded");
-          calendar.actions.init();
-        });
-      });
-    });
 
     $("#cal-sidebar .panel-heading button").click(function(){
       if(!$(this).hasClass("active")){
@@ -866,15 +823,7 @@ require(["moment", "datetimepicker", "translator"], function (moment, dtp, trans
       $(this).parent().toggleClass("down");
     });
 
-    var raf = window.requestAnimationFrame ||
-          window.mozRequestAnimationframe ||
-          window.webkitRequestAnimationFrame;
 
-    function rpt(){
-      calendar.actions.onscroll();
-      raf(rpt);
-    }
-    raf(rpt);
 
     (function(update){
       socket.on("calendar.event.delete", update.deleteEvent);
@@ -987,9 +936,8 @@ require(["moment", "datetimepicker", "translator"], function (moment, dtp, trans
       });
 
       edit.delete.click(function(){
-        calendar.socket.deleteEvent(calendar.currentEvent, function(event){
+        calendar.socket.deleteEvent(calendar.currentEvent, function(){
           app.alertSuccess();
-          calendar.actions.removeEvent(event);
           edit.it.modal("hide");
         });
       });
@@ -1024,6 +972,42 @@ require(["moment", "datetimepicker", "translator"], function (moment, dtp, trans
     calendar.moment = moment;
 
     window.calendar = calendar;
+
+    $(document).ready(function(){
+      try {
+        var loaded = JSON.parse($("#data_script").html());
+        calendar.buffer = loaded.buffer;
+        calendar.whoisin = loaded.whoisin;
+        console.log("Successfully loaded initial data");
+      } catch(e){
+        console.error("Failed to load initial data", e);
+      }
+
+      function loadTemplates(callback){
+        var templates = ["day", "event", "profilePic", "response", "viewEvent", "dayEvent", "frameStyle"];
+        var n = 0, i;
+
+        function todo(template){
+          calendar.templates[this] = template;
+          //console.log("template "+this+" loaded");
+          n++;
+          if(n === templates.length){
+            callback();
+          }
+        }
+        for(i=0; i<templates.length; i++){
+          window.ajaxify.loadTemplate("partials/calendar/"+templates[i], todo.bind(templates[i]));
+        }
+      }
+
+      loadTemplates(function(){
+        console.log("Calendar templates loaded");
+        translator.load(window.config.userLang, "calendar", function(){
+          console.log("Calendar translation loaded");
+          calendar.actions.init();
+        });
+      });
+    });
 
   })(window.jQuery, window.app, window.templates, window.socket);
 });
