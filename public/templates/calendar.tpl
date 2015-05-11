@@ -76,13 +76,11 @@
     </div>
   </div>
 
-  <div id="errors"></div>
-
   <div id="cal" class="panel panel-default">
     <div id="cal-days-container">
       <table id="cal-days">
         <tbody>
-
+          <!-- day cells go here -->
         </tbody>
       </table>
     </div>
@@ -276,37 +274,6 @@
 
   <style>
     @import url("/plugins/nodebb-plugin-calendar/public/css/main.css");
-  </style>
-
-  <style>
-    #content > div.row:last-child {
-      display: none;
-    }
-    body, html {
-      height: 100%;
-      overflow: hidden;
-    }
-    #content,
-    .nodebb-plugin-calendar {
-      height:100%;
-    }
-    #data_script {
-      display:none;
-    }
-    body {
-      padding-bottom: 5px;
-    }
-    .tt-suggestion {
-      padding: 3px 20px;
-      clear: both;
-      font-weight: 400;
-      line-height: 1.42857143;
-      color: #333;
-      white-space: nowrap;
-    }
-    .tt-suggestion.tt-cursor {
-      background-color: #f5f5f5;
-    }
   </style>
 
   <div id="data_script">
