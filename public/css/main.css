@@ -37,3 +37,7 @@ body, html {
 .nodebb-plugin-calendar {
   height:100%;
 }
+
+.nodebb-plugin-calendar ~ .row {
+  display: none;
+}
