@@ -25,25 +25,16 @@
   display:none;
 }
 
-#content > div > div[widget-area=footer] {
-  display: none;
-}
-
 body, html {
   height: 100%;
   overflow: hidden;
 }
 
 #content,
-#content > .row,
 .nodebb-plugin-calendar {
   height:100%;
 }
 
 #content {
   width: initial;
-}
-
-.nodebb-plugin-calendar ~ .row {
-  display: none;
 }

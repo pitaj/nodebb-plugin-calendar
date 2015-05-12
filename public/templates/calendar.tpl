@@ -1,4 +1,4 @@
-<div class="nodebb-plugin-calendar">
+<div class="nodebb-plugin-calendar" id="nodebb-plugin-calendar">
   <div id="editEvent" class="modal fade">
     <div class="modal-dialog">
       <div class="modal-content">

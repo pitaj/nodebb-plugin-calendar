@@ -329,16 +329,13 @@ require(["moment", "datetimepicker", "translator"], function (moment, dtp, trans
           }
           var firstOfMonth, lastOfMonth,
             y = date.year(), m = date.month();
-          try {
-            //console.log("y: ", y, " m: ", m, " d: ", d);
-            lastOfMonth = calendar.days[y][m][27];
-            firstOfMonth = calendar.days[y][m][0];
-          } catch (err) {
-            //return console.error(err);
+
+          if(!calendar.days[y] || !calendar.days[y][m] ||
+              !calendar.days[y][m][0] || !calendar.days[y][m][27]){
             calendar.actions.build(date);
-            lastOfMonth = calendar.days[y][m][27];
-            firstOfMonth = calendar.days[y][m][0];
           }
+          lastOfMonth = calendar.days[y][m][27];
+          firstOfMonth = calendar.days[y][m][0];
           //console.log("firstOfMonth: ", firstOfMonth, "lastofmonth: ", lastOfMonth);
           if(!firstOfMonth.visible(calendar.calDaysContainer) ||
             !lastOfMonth.visible(calendar.calDaysContainer)){
@@ -974,6 +971,7 @@ require(["moment", "datetimepicker", "translator"], function (moment, dtp, trans
     window.calendar = calendar;
 
     $(document).ready(function(){
+
       try {
         var loaded = JSON.parse($("#data_script").html());
         calendar.buffer = loaded.buffer;
@@ -1007,6 +1005,9 @@ require(["moment", "datetimepicker", "translator"], function (moment, dtp, trans
           calendar.actions.init();
         });
       });
+
+      var cal = $("#nodebb-plugin-calendar").detach();
+      $("#content").empty().append(cal);
     });
 
   })(window.jQuery, window.app, window.templates, window.socket);
