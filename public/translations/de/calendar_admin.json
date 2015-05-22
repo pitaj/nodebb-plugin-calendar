@@ -1,0 +1,21 @@
+{
+  "title": "Kalender Rechteverwaltung",
+  "intro": "Auf dieser Seite kann der Administrator festlegen, welche Gruppen Ereignisse erstellen, editieren und verwalten können.",
+  "explanation_header": "Erklärung",
+  "explanation_creation_rights": "Benutzer mit Erstell-Rechten können eigene Ereignisse anlegen und editieren. Die Ereignisse anderer Benutzer können hingegen nicht verändert werden.",
+  "explanation_edit_rights": "Benutzer mit Edit-Rechten können eigene Ereignisse editieren und löschen. Fremde Ereignisse können nur editiert, aber nicht gelöscht werden.",
+  "explanation_admin_rights": "Benutzer mit Admin-Rechten können Ereignisse erstellen, als auch eigene und fremde Ereignisse editieren und löschen. NodeBB-Admins bekommen dieses Recht automatisch zugewiesen und müssen nicht explizit der Admin-Gruppe zugewiesen werden.",
+  "explanation_hierarchy": "Höhere Rechte-Level erhalten automatisch alle Rechte der niedrigeren Rechte-Level (Admin-Rechte > Editier-Rechte > Erstell-Rechte)",
+  "explanation_one_group": "Gib jeweils eine Gruppe in den dafür vorgesehenen Eingabefeldern ein.",
+  "explanation_global_note": "Bitte beachte, dass es sich hierbei um globale/systemweite Rechte handelt und diese implizit für jedes Ereignis gelten.",
+  "explanation_individual_rights": "Individuelle Editier- und Anzeige-Rechte für Ereignisse können im Kalender selbst vorgenommen werden.",
+  "creation_rights": "Creators (Erstell-Rechte)",
+  "creation_placeholder": "Creator-Gruppe",
+  "edit_rights": "Editors (Editier-Rechte)",
+  "edit_placeholder": "Editor-Gruppe",
+  "admin_rights": "Admins (Admin-Rechte)",
+  "admin_placeholder": "Administrator-Gruppe",
+  "category_label": "Die zugehörige Kategorie in der Einträge zu Ereignissen angelegt werden.",
+  "category_placeholder": "Gib eine Kategorie-Nummer an",
+  "use_whoisin_label": "Benutze das whoisin Plugin anstelle des mitgelieferten Teilnahme-Systems?"
+}
