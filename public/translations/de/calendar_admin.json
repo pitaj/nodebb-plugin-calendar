@@ -15,7 +15,7 @@
   "edit_placeholder": "Editor-Gruppe",
   "admin_rights": "Admins (Admin-Rechte)",
   "admin_placeholder": "Administrator-Gruppe",
-  "category_label": "Die zugehörige Kategorie in der Einträge zu Terminen angelegt werden.",
+  "category_label": "Die zugehörige Kategorie, in der Einträge zu Terminen angelegt werden sollen",
   "category_placeholder": "Gib eine Kategorie-Nummer an",
-  "use_whoisin_label": "Benutze das whoisin Plugin anstelle des mitgelieferten Teilnahme-Systems?"
+  "use_whoisin_label": "Benutze das whoisin Plugin anstelle des mitgelieferten Teilnahme-Systems"
 }
