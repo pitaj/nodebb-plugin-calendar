@@ -26,20 +26,18 @@
   font-family: Arial, Sans-serif;
   width: 200%;
   overflow: hidden;
+  box-sizing: content-box;
+  position: absolute;
+  top: 59px;
+  left: 0;
+  bottom: 0;
+  right: 0;
 }
 
 #cal-sidebar > .content > div,
 #cal-sidebar > .content > div > div {
   height: 100%;
   position: relative;
-}
-
-#cal-sidebar .content {
-  position: absolute;
-  top: 59px;
-  left: 0;
-  right: 0;
-  bottom: 0;
 }
 
 #cal-sidebar.down {
