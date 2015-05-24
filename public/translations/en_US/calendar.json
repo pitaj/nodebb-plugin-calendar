@@ -44,5 +44,6 @@
   "starts": "Starts",
   "ends": "Ends",
   "where": "Location",
-  "add_event": "add event"
+  "add_event": "add event",
+  "today": "today"
 }

@@ -44,5 +44,6 @@
   "starts": "Beginn",
   "ends": "Ende",
   "where": "Ort",
-  "add_event": "Termin eintragen"
+  "add_event": "Termin eintragen",
+  "today": "heute"
 }
