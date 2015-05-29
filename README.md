@@ -10,10 +10,23 @@ This plugin adds a *super cool* site-wide calendar to NodeBB.
 
 ##Installation
 
-Two options:
+[Guide for NodeBB versions 0.6.x and 0.7.x](https://community.nodebb.org/topic/4401/nodebb-plugin-calendar-fully-featured-calendar-plugin-for-nodebb-testers-needed/10): 
 
- 1.  Install the plugin through the ACP (if it ever gets added to the list *cough cough*)
+1. Open a command window in the NodeBB directory 
+2. Run `npm remove nodebb-plugin-calendar`
+2. Navigate to the node_modules directory (cd node_modules)
+3. Delete the nodebb-plugin-calendar directory with del nodebb-plugin-calendar or rm -r nodebb-plugin-calendar
+4. Clone the master branch of the git repository git clone https://github.com/pitaj/nodebb-plugin-calendar
+5. Navigate to the nodebb-plugin-calendar directory with cd nodebb-plugin-calendar
+6. Install npm dependencies with the command npm install
+Those commands should install it correctly. It should then be visible in the ACP (maybe after a restart) to be activated.
+
+Other options (only for older NodeBB versions):
+
+ 1.  Install the plugin through the ACP
  2.  Run `npm install nodebb-plugin-calendar` in the root directory of the NodeBB install
+
+I haven't added the newest version to npm yet because I'm still ironing out some bugs.
 
 Don't forget to restart after installing the plugin. After installing, a calendar icon should appear next to the rest in the header menu
 
