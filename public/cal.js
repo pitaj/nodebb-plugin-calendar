@@ -31,7 +31,7 @@
 */
 require.config({
   paths: {
-    "moment": "https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment-with-locales.min",
+    "moment": "/plugins/nodebb-plugin-calendar/public/moment-with-locales.min",
     "datetimepicker": "/plugins/nodebb-plugin-calendar/public/bootstrap-datetimepicker.min"
   },
   config: {
@@ -46,7 +46,7 @@ require(["moment", "datetimepicker", "translator"], function (moment, dtp, trans
 
   translator = translator || window.translator;
 
-  moment.locale(window.config.userLang || "en_GB");
+  (moment.locale || moment.lang)(window.config.userLang || "en_GB");
 
   (function($, app, templates, socket){
 
@@ -1006,9 +1006,30 @@ require(["moment", "datetimepicker", "translator"], function (moment, dtp, trans
         });
       });
 
-      var cal = $("#nodebb-plugin-calendar").detach();
-      $("#content").empty().append(cal);
+      var cal = $("#nodebb-plugin-calendar");
+      if(cal.length){
+        console.log("Init fixing content styling...");
+        $("#content").fadeTo(200, 0, function(){
+          cal = cal.detach();
+          $("#content").empty().append(cal);
+          $("#content").fadeTo(200, 1);
+        });
+      }
+
     });
+    /*
+    $(window).on("action:ajaxify.end", function(){
+      var cal = $("#nodebb-plugin-calendar");
+      if(cal.length){
+        console.log("Fixing content styling...");
+        $("#content").fadeTo(200, 0, function(){
+          cal = cal.detach();
+          $("#content").empty().append(cal);
+          $("#content").fadeTo(200, 1);
+        });
+      }
+    });
+    */
 
   })(window.jQuery, window.app, window.templates, window.socket);
 });
