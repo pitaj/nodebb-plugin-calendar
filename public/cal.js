@@ -44,6 +44,8 @@ require.config({
 require(["moment", "datetimepicker", "translator"], function (moment, dtp, translator) {
   "use strict";
 
+  window.moment = moment;
+
   translator = translator || window.translator;
 
   (moment.locale || moment.lang)(window.config.userLang || "en_GB");
@@ -819,8 +821,6 @@ require(["moment", "datetimepicker", "translator"], function (moment, dtp, trans
       $(this).children().toggleClass("fa-chevron-up fa-chevron-down");
       $(this).parent().toggleClass("down");
     });
-
-
 
     (function(update){
       socket.on("calendar.event.delete", update.deleteEvent);
