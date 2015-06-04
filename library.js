@@ -801,7 +801,9 @@
       route: "/calendar",
       name: "Calendar",
       title: "Calendar",
-      text: '<i class="fa fa-fw fa-calendar"></i><span class="visible-xs-inline"> Calendar</span>'
+      icon: 'fa-calendar',
+      text: 'Calendar',
+      textClass: 'visible-xs-inline'
     });
     callback(null, header);
   };
