@@ -31,8 +31,8 @@
 */
 require.config({
   paths: {
-    "moment": "/plugins/nodebb-plugin-calendar/public/moment-with-locales.min",
-    "datetimepicker": "/plugins/nodebb-plugin-calendar/public/bootstrap-datetimepicker.min"
+    "moment": config.relative_path + "/plugins/nodebb-plugin-calendar/public/moment-with-locales.min",
+    "datetimepicker": config.relative_path + "/plugins/nodebb-plugin-calendar/public/bootstrap-datetimepicker.min"
   },
   config: {
     moment: {
@@ -544,7 +544,7 @@ require(["moment", "datetimepicker", "translator"], function (moment, dtp, trans
           view.it.addClass("trans");
 
           setTimeout(function(){
-            view.user.a.attr("href", "/user/"+event.user.userslug);
+            view.user.a.attr("href", config.relative_path + "/user/"+event.user.userslug);
             view.user.smalla.html(event.user.username);
             view.user.img.attr({
               src: event.user.picture,
@@ -583,7 +583,7 @@ require(["moment", "datetimepicker", "translator"], function (moment, dtp, trans
                 view.myResponse.css("display", "none");
               } else {
                 view.myResponse.find("small > a")
-                  .attr("href", "/user/"+app.user.userslug)
+                  .attr("href", config.relative_path + "/user/"+app.user.userslug)
                   .html(app.user.username);
                 view.myResponse.find(".selected").removeClass("selected");
                 view.myResponse

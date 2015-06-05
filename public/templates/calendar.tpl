@@ -216,11 +216,11 @@
         <div class="event topic trans panel panel-default">
           <div class="topic-text panel-body">
             <div class="topic-profile-pic hidden-xs text-center user">
-              <a href="/user/{userslug}">
+              <a href="{config.relative_path}/user/{userslug}">
                 <img src="{picture}" alt="{username}" class="profile-image user-img" title="" data-original-title="{username}">
               </a>
               <small class="username" title="{username}">
-                <a href="/user/{userslug}">{username}</a>
+                <a href="{config.relative_path}/user/{userslug}">{username}</a>
               </small>
             </div>
             <h3 class="topic-title">
@@ -246,7 +246,7 @@
               <div class="responses">
                 <p class="my-response">
                   <small class="username">
-                    <a href="/user/{userslug}">{username}</a>
+                    <a href="{config.relative_path}/user/{userslug}">{username}</a>
                   </small>
                   <span class="invited selected">[[calendar:response_invited]]</span>
                   <span class="not-attending">[[calendar:response_not-attending]]</span>
@@ -256,7 +256,7 @@
                 <!-- other responses appended like
                 <p class="response">
                   <small class="username" title="{username}">
-                    <a href="/user/{userslug}">{username}</a>
+                    <a href="{config.relative_path}/user/{userslug}">{username}</a>
                   </small>
                   <span class="{value}">[[calendar:response_{value}]]</span>
                 </p>
@@ -273,7 +273,14 @@
   </div>
 
   <style>
-    @import url("/plugins/nodebb-plugin-calendar/public/css/main.css");
+    @import url("{config.relative_path}/plugins/nodebb-plugin-calendar/public/css/toolbar.css");
+    @import url("{config.relative_path}/plugins/nodebb-plugin-calendar/public/css/cal.css");
+    @import url("{config.relative_path}/plugins/nodebb-plugin-calendar/public/css/sidebar-nav.css");
+    @import url("{config.relative_path}/plugins/nodebb-plugin-calendar/public/css/sidebar-event.css");
+    @import url("{config.relative_path}/plugins/nodebb-plugin-calendar/public/css/sidebar-day.css");
+    @import url("{config.relative_path}/plugins/nodebb-plugin-calendar/public/css/sidebar.css");
+    @import url("{config.relative_path}/plugins/nodebb-plugin-calendar/public/css/bootstrap-datetimepicker.min.css");
+    @import url("{config.relative_path}/plugins/nodebb-plugin-calendar/public/css/main.css");
   </style>
 
   <div id="data_script">
@@ -283,6 +290,6 @@
       "buffer": {buffer}
     }
   </div>
-  <script src="/plugins/nodebb-plugin-calendar/public/typeahead.bundle.js"></script>
-  <script src="/plugins/nodebb-plugin-calendar/public/cal.js"></script>
+  <script src="{config.relative_path}/plugins/nodebb-plugin-calendar/public/typeahead.bundle.js"></script>
+  <script src="{config.relative_path}/plugins/nodebb-plugin-calendar/public/cal.js"></script>
 </div>
