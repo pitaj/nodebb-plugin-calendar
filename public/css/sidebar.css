@@ -1,7 +1,3 @@
-@import url("/plugins/nodebb-plugin-calendar/public/css/sidebar-nav.css");
-@import url("/plugins/nodebb-plugin-calendar/public/css/sidebar-event.css");
-@import url("/plugins/nodebb-plugin-calendar/public/css/sidebar-day.css");
-
 #cal-sidebar {
   position: fixed;
   top: 85px;

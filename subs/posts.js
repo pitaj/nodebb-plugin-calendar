@@ -4,7 +4,8 @@
 
 var posttools = module.parent.parent.require("./postTools"),
   topics = module.parent.parent.require("./topics"),
-  postsModule = module.parent.parent.require("./posts");
+  postsModule = module.parent.parent.require("./posts"),
+  config = module.parent.parent.require('./meta').config;
 
 var posts = module.exports = {
   create: function(event, callback){
@@ -48,7 +49,7 @@ var posts = module.exports = {
           //console.error("it:", err, JSON.stringify(event), raw, event.uid);
           return callback(err);
         }
-        event.url = "/topic/"+data.topic.slug;
+        event.url = config.relative_path + "/topic/"+data.topic.slug;
         callback(null, event);
       });
     });

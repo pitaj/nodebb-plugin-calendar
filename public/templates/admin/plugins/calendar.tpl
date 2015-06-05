@@ -78,10 +78,10 @@
   background-color: #f5f5f5;
 }
 </style>
-<script src="/plugins/nodebb-plugin-calendar/public/typeahead.bundle.js"></script>
+<script src="{config.relative_path}/plugins/nodebb-plugin-calendar/public/typeahead.bundle.js"></script>
 <script>
 $("#save-button").click(function(){
-  $.post("/api/admin/plugins/calendar/save", {
+  $.post("{config.relative_path}/api/admin/plugins/calendar/save", {
     create: $(".creators").val(),
     edit: $(".editors").val(),
     admin: $(".admins").val(),
