@@ -1,0 +1,26 @@
+{
+  "name": "NodeBB Calendar plugin",
+  "library": "library.js",
+  "staticDirs": {
+    "public": ""
+  },
+  "hooks": [
+    {
+      "hook": "static:app.load", "method": "init"
+    },
+    {
+      "hook": "filter:navigation.available", "method": "addNavigation"
+    },
+    {
+      "hook": "filter:admin.header.build", "method": "adminMenu"
+    },
+    {
+      "hook": "filter:parse.post", "method": "parsePost"
+    },
+    {
+      "hook": "filter:parse.raw", "method": "parseRaw"
+    }
+  ],
+  "templates": "templates",
+  "languages": "languages"
+}
