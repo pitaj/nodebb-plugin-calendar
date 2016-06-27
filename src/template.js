@@ -1,17 +1,46 @@
-const formatDates = (s, e, allday, lang) => {
+import IntlPolyfill from 'intl';
+Intl.NumberFormat = IntlPolyfill.NumberFormat;
+Intl.DateTimeFormat = IntlPolyfill.DateTimeFormat;
+
+const stringOptions = {
+  date: {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  },
+  time: {
+    hour: 'numeric',
+    minute: 'numeric',
+  },
+  full: {},
+};
+
+stringOptions.full = {
+  ...stringOptions.date,
+  ...stringOptions.time,
+};
+
+stringOptions.UTC = Object.keys(stringOptions).reduce((utc, key) => ({
+  ...utc,
+  [key]: {
+    ...stringOptions[key],
+    timeZone: 'UTC',
+    timeZoneName: 'short',
+  },
+}), {});
+
+const formatDates = (s, e, allday, lang, utc) => {
   const start = new Date(s);
   const end = new Date(e);
 
-  const formatTime = d => {
-    const y = d.toLocaleTimeString(lang).split(':');
-    return `${y[0]}:${y[1]}${y[2].replace(/[0-9]/g, '')}`;
-  };
+  const options = utc ? stringOptions.UTC : stringOptions;
 
   if (Math.abs(s - e) <= 60 * 1000) {
     if (allday) {
-      return start.toLocaleDateString(lang);
+      return start.toLocaleDateString(lang, options.date);
     }
-    return `${start.toLocaleDateString()} ${formatTime(start)}`;
+    return start.toLocaleString(lang, options.full);
   }
 
   if (
@@ -20,27 +49,32 @@ const formatDates = (s, e, allday, lang) => {
     start.getYear() === end.getYear()
   ) {
     if (allday) {
-      return start.toLocaleDateString(lang);
+      return start.toLocaleDateString(lang, options.date);
     }
-    return `${start.toLocaleDateString(lang)}<br>` +
-      `${formatTime(start)} - ${formatTime(end)}`;
+    return `${start.toLocaleDateString(lang, options.date)}<br>` +
+      `${start.toLocaleTimeString(lang, options.time)}` +
+      ` - ${end.toLocaleTimeString(lang, options.time)}`;
   }
 
   if (allday) {
-    return `${start.toLocaleDateString(lang)} - ${end.toLocaleDateString(lang)}`;
+    return `${start.toLocaleDateString(lang, options.date)}` +
+      ` - ${end.toLocaleDateString(lang, options.date)}`;
   }
-  return `${start.toLocaleDateString(lang)} ${formatTime(start)} - ` +
-    `${end.toLocaleDateString(lang)} ${formatTime(end)}`;
+  return `${start.toLocaleString(lang, options.full)} - ` +
+    `${end.toLocaleString(lang, options.full)}`;
 };
 
 const postTemplate = (event, lang) => {
+  const dateString = formatDates(event.startDate, event.endDate, event.allday, lang);
+  const dateStringUTC = formatDates(event.startDate, event.endDate, event.allday, lang, true);
+
   const html = `
 <div class="plugin-calendar-event panel panel-default">
   <div class="plugin-calendar-event-name panel-heading">
     ${event.name}
   </div>
   <div class="plugin-calendar-event-date panel-body">
-    ${formatDates(event.startDate, event.endDate, event.allday, lang)}
+    <a title="${dateStringUTC}" data-original-title="${dateStringUTC}">${dateString}</a>
   </div>
   <div class="plugin-calendar-event-location panel-body">
     ${event.location}

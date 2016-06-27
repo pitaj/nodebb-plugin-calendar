@@ -38,11 +38,15 @@ const parse = text => {
   };
 };
 
-parse.templates = {
+const templates = {
   ...regExps,
   event: eventRegExp,
 };
 
 parse.tagTemplate = tagTemplate;
 
-export default parse;
+export {
+  parse as default,
+  tagTemplate,
+  templates,
+};

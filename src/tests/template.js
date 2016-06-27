@@ -98,4 +98,4 @@ const lang = 'en-us';
   },
 ].forEach(x => x());
 
-// postTemplate is simple enough it doesn't need testing
+// postTemplate is just a template, it doesn't need testing

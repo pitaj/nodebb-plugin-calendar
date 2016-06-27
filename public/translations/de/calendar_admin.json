@@ -1,0 +1,21 @@
+{
+  "title": "Kalender Rechteverwaltung",
+  "intro": "Auf dieser Seite kann der Administrator festlegen, welche NodeBB-Gruppen Termine erstellen, editieren und verwalten dürfen.",
+  "explanation_header": "Erklärung",
+  "explanation_creation_rights": "Benutzer mit Erstell-Rechten können eigene Termine anlegen und editieren. Die Termine anderer Benutzer können hingegen nicht verändert werden.",
+  "explanation_edit_rights": "Benutzer mit Edit-Rechten können eigene Termine editieren und löschen. Fremde Termine können nur editiert, aber nicht gelöscht werden.",
+  "explanation_admin_rights": "Benutzer mit Admin-Rechten können Termine erstellen, als auch eigene und fremde Termine editieren und löschen. NodeBB-Admins bekommen dieses Recht automatisch zugewiesen und müssen nicht explizit der Admin-Gruppe zugewiesen werden.",
+  "explanation_hierarchy": "Höhere Rechte-Level erhalten automatisch alle Rechte der niedrigeren Rechte-Level (Admin-Rechte > Editier-Rechte > Erstell-Rechte)",
+  "explanation_one_group": "In den folgenden Eingabefeldern kannst Du Deinen NodeBB-Gruppen die jeweiligen Berechtigungen für den Kalender zuweisen. Trage hierfür die gewünschte NodeBB-Gruppe in dem entsprechenden Eingabefeld ein.",
+  "explanation_global_note": "Bitte beachte, dass es sich hierbei um globale/systemweite Rechte handelt und diese implizit für jeden Termin gelten.",
+  "explanation_individual_rights": "Individuelle Editier- und Anzeige-Rechte für Termine können im Kalender selbst vorgenommen werden.",
+  "creation_rights": "Creators (Erstell-Rechte)",
+  "creation_placeholder": "Creator-Gruppe",
+  "edit_rights": "Editors (Editier-Rechte)",
+  "edit_placeholder": "Editor-Gruppe",
+  "admin_rights": "Admins (Admin-Rechte)",
+  "admin_placeholder": "Administrator-Gruppe",
+  "category_label": "Die zugehörige Kategorie, in der Einträge zu Terminen angelegt werden sollen",
+  "category_placeholder": "Gib eine Kategorie-Nummer an",
+  "use_whoisin_label": "Benutze das whoisin Plugin anstelle des mitgelieferten Teilnahme-Systems"
+}

@@ -19,6 +19,21 @@
     },
     {
       "hook": "filter:parse.raw", "method": "parseRaw"
+    },
+    {
+      "hook": "filter:post.save", "method": "postSave"
+    },
+    {
+      "hook": "filter:privileges.list", "method": "privilegesList"
+    },
+    {
+      "hook": "filter:privileges.groups.list", "method": "privilegesGroupsList"
+    },
+    {
+      "hook": "filter:privileges.list_human", "method": "privilegesListHuman"
+    },
+    {
+      "hook": "filter:privileges.groups.list_human", "method": "privilegesListHuman"
     }
   ],
   "templates": "templates",

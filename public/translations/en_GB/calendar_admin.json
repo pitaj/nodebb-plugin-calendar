@@ -1,0 +1,21 @@
+{
+  "title": "Calendar Permissions configuration",
+  "intro": "This page allows the admin to configure what groups can edit, create, and administrate events.",
+  "explanation_header": "Explanation",
+  "explanation_creation_rights": "Users in the group with creation rights can create their own events and edit their own events. They can't edit others' events, though.",
+  "explanation_edit_rights": "Calendar editors can create their own events and edit other people's events but can't delete other people's events.",
+  "explanation_admin_rights": "Calendar admins can create their own events, edit other people's events, and delete other people's events. Site admins get these rights as well, so there's no need to add them here.",
+  "explanation_hierarchy": "Higher levels get all permissions of lower levels (admins > editors > creation rights)",
+  "explanation_one_group": "Enter one group in each of the following input boxes",
+  "explanation_global_note": "When filling out the following forms, keep in mind that these are global permissions for every single event. They can't be restricted by event-specific negations.",
+  "explanation_individual_rights": "If you want to configure editing and viewing rights for individual events, do that in the Calendar interface itself.",
+  "creation_rights": "Creation rights",
+  "creation_placeholder": "Group that can create events",
+  "edit_rights": "Editors",
+  "edit_placeholder": "Group that can edit events",
+  "admin_rights": "Admins",
+  "admin_placeholder": "Group that is admins",
+  "category_label": "The category where event posts will be created, and the comments of those events will be",
+  "category_placeholder": "Enter a category number",
+  "use_whoisin_label": "Use the whoisin plugin instead of the built in response system?"
+}

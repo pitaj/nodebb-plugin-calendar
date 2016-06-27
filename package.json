@@ -28,7 +28,7 @@
     "babel": "^6.5.2",
     "babel-cli": "^6.8.0",
     "babel-eslint": "^6.0.4",
-    "babel-plugin-transform-async-to-generator": "^6.8.0",
+    "babel-plugin-transform-async-to-module-method": "^6.8.0",
     "babel-plugin-transform-es2015-destructuring": "^6.8.0",
     "babel-plugin-transform-es2015-function-name": "^6.8.0",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.8.0",
@@ -41,6 +41,7 @@
   },
   "dependencies": {
     "bluebird": "^3.4.0",
+    "intl": "^1.2.4",
     "validator": "^5.2.0"
   }
 }

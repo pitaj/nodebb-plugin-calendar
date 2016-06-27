@@ -1,0 +1,21 @@
+{
+  "title": "Configurazione Permessi Calendario",
+  "intro": "Questa pagina permette all'amministratore di configurare quali gruppi possono modificare, creare e gestire gli eventi.",
+  "explanation_header": "Spiegazione",
+  "explanation_creation_rights": "Gli utenti del gruppo con diritti di creazione possono creare i propri eventi e modificarli ma non possono modificare gli eventi degli altri.",
+  "explanation_edit_rights": "Gli Editori del Calendario possono creare i propri eventi e modificare gli eventi di altre persone, ma non possono eliminarli.",
+  "explanation_admin_rights": "Gli Amministratori del Calendario possono creare i propri eventi, modificare gli eventi di altre persone, ed eliminare gli eventi di altre persone. Gli Amministratori del sito ottengono questi diritti e, quindi non c'è bisogno di aggiungerli qui.",
+  "explanation_hierarchy": "I livelli più alti ottengono tutti i permessi dei livelli più bassi (Amministratori > Editori > Diritti di creazione)",
+  "explanation_one_group": "Inserire un gruppo in ciascuna delle seguenti caselle di input.",
+  "explanation_global_note": "Nel compilare i seguenti forms, tenete a mente che si trattano di autorizzazioni globali per ogni singolo evento. Essi non possono essere negati in specifici eventi.",
+  "explanation_individual_rights": "Se si desidera configurare l'editing e la visualizzazione dei permessi per singoli eventi, dovete farla nell'interefaccia del calendario stesso.",
+  "creation_rights": "Diritti di Creazione",
+  "creation_placeholder": "Gruppo che può creare Eventi",
+  "edit_rights": "Editori",
+  "edit_placeholder": "Group che può editare Eventi",
+  "admin_rights": "Amministratori",
+  "admin_placeholder": "Gruppo di Amministratori",
+  "category_label": "La categoria in cui verranno creati i post e i commenti dell' evento.",
+  "category_placeholder": "Inserisci il numero della Categoria.",
+  "use_whoisin_label": "Utilizzare il plugin whoisin invece di quello predefinito?"
+}

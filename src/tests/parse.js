@@ -14,7 +14,8 @@ import assert from 'assert';
       description: 'somewhere else',
     };
     const result = parse(
-      `[event]
+      `other things that make sense
+      [event]
         [name]${data.name}[/name]
         [allday]${data.allday}[/allday]
         [startDate]${data.startDate}[/startDate]
@@ -24,7 +25,8 @@ import assert from 'assert';
         [description]
           ${data.description}
         [/description]
-      [/event]`
+      [/event]
+      and some more *markdown*`
     );
     assert(result && typeof result === 'object', 'Expected Object, got a falsy value');
     assert.strictEqual(data.name, result.name, '`name` field incorrect');
