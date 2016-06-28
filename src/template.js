@@ -1,3 +1,4 @@
+const moment = require('moment');
 import IntlPolyfill from 'intl';
 Intl.NumberFormat = IntlPolyfill.NumberFormat;
 Intl.DateTimeFormat = IntlPolyfill.DateTimeFormat;
@@ -64,23 +65,48 @@ const formatDates = (s, e, allday, lang, utc) => {
     `${end.toLocaleString(lang, options.full)}`;
 };
 
+const diff = (start, notify, lang) => {
+  const text = moment(notify).locale(lang).to(start, true);
+  return text;
+};
+
 const postTemplate = (event, lang) => {
   const dateString = formatDates(event.startDate, event.endDate, event.allday, lang);
-  const dateStringUTC = formatDates(event.startDate, event.endDate, event.allday, lang, true);
+  const dateStringUTC = formatDates(event.startDate, event.endDate, event.allday, lang, true)
+    .replace('<br>', '; ');
+
+  const given = (bool, text) => (bool ? text : '');
 
   const html = `
-<div class="plugin-calendar-event panel panel-default">
+<div class="plugin-calendar-event panel panel-success">
   <div class="plugin-calendar-event-name panel-heading">
     ${event.name}
   </div>
-  <div class="plugin-calendar-event-date panel-body">
-    <a title="${dateStringUTC}" data-original-title="${dateStringUTC}">${dateString}</a>
-  </div>
-  <div class="plugin-calendar-event-location panel-body">
-    ${event.location}
-  </div>
-  <div class="plugin-calendar-event-description panel-body">
-    ${event.description}
+  <div class="panel-body">
+    <div class="plugin-calendar-event-date">
+      <i class="fa fa-clock-o" aria-hidden="true"></i>
+      <a title="${dateStringUTC}" data-original-title="${dateStringUTC}">${dateString}</a>
+    </div>
+    ${given(event.location.length, `
+    <div class="plugin-calendar-event-location">
+      <i class="fa fa-location-arrow" aria-hidden="true"></i>
+      <span>${event.location}<span>
+    </div>
+    `)}
+    ${given(event.description.length, `
+    <div class="plugin-calendar-event-description">
+      <i class="fa fa-info-circle" aria-hidden="true"></i>
+      <span>${event.description}</span>
+    </div>
+    `)}
+    ${given(event.notifications.length, `
+    <div class="plugin-calendar-event-notifications">
+      <i class="fa fa-bell" aria-hidden="true"></i>
+      <ul>
+        ${event.notifications.map(n => `<li>${diff(n, event.startDate, lang)}</li>`).join('\n')}
+      </ul>
+    </div>
+    `)}
   </div>
 </div>`.trim();
 

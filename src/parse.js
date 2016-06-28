@@ -19,7 +19,7 @@ const eventRegExp = tagTemplate('event', full);
 
 const parse = text => {
   const matches = text.match(eventRegExp);
-  if (!matches || matches.length === 0) {
+  if (!matches || !matches.length || !Array.isArray(matches)) {
     return null;
   }
   const match = matches[0];
@@ -27,12 +27,13 @@ const parse = text => {
   Object.keys(regExps).forEach(r => {
     results[r] = match.match(regExps[r])[1].trim();
   });
+
   return {
     name: results.name,
     allday: results.allday === 'true',
     startDate: parseInt(results.startDate, 10),
     endDate: parseInt(results.endDate, 10),
-    notifications: JSON.parse(results.notifications),
+    notifications: JSON.parse(results.notifications).sort((a, b) => b - a),
     location: results.location,
     description: results.description,
   };
@@ -42,8 +43,6 @@ const templates = {
   ...regExps,
   event: eventRegExp,
 };
-
-parse.tagTemplate = tagTemplate;
 
 export {
   parse as default,

@@ -6,11 +6,11 @@ const privilegesPostCan = p(privileges.posts.can);
 const canPostEvent = (pid, uid) => privilegesPostCan('plugin-calendar:event:post', pid, uid);
 
 const privilegesList = (list, callback) =>
-  callback([...list, 'plugin-calendar:event:post']);
+  callback(null, [...list, 'plugin-calendar:event:post']);
 const privilegesGroupsList = (list, callback) =>
-  callback([...list, 'groups:plugin-calendar:event:post']);
+  callback(null, [...list, 'groups:plugin-calendar:event:post']);
 const privilegesListHuman = (list, callback) =>
-  callback([...list, { name: 'Post events' }]);
+  callback(null, [...list, { name: 'Post events' }]);
 
 export {
   canPostEvent,
