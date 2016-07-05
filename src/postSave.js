@@ -49,11 +49,8 @@ const validateEvent = event => {
 };
 
 const postSave = async postData => {
-  console.log('postSave');
   let event = parse(postData.content);
-  console.log('parsed event', !!event);
   event = validateEvent(event);
-  console.log('validated event', !!event);
   if (!event || !(await canPostEvent(postData.pid, postData.uid))) {
     // throw new Error('[[plugin-calendar:no-privileges-post-event]]');
     // return {
@@ -63,24 +60,23 @@ const postSave = async postData => {
     //     '[[plugin-calendar:no-privileges-post-event]]'
     //   ),
     // };
-    console.log('NOT saving event', event, 'cuz canpostevent is ', await canPostEvent(postData.pid, postData.uid));
+    // console.log('NOT saving event', event, 'cuz canpostevent is ',
+    // await canPostEvent(postData.pid, postData.uid));
     return {
       ...postData,
       content: postData.content.replace(
         new RegExp(tagTemplate('event', '[\\w\\W]*')),
-        ''
+        '', // '[[plugin-calendar:failed-post-event]]'
       ),
     };
   }
 
   event.name = validator.escape(event.name);
-
+  event.pid = postData.pid;
   event = (await fireHook('filter:plugin-calendar:event.post', event));
 
-  console.log('saving event', event);
-
   await Promise.all([
-    sortedSetAdd(listKey, event.startDate, event.pid),
+    sortedSetAdd(listKey, event.startDate, `${listKey}:pid:${event.pid}`),
     setObject(`${listKey}:pid:${event.pid}`, event),
   ]);
 
