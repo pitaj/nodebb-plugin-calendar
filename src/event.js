@@ -2,6 +2,7 @@ import init from './init';
 import { parsePostCallback, parseRawCallback } from './parseFilters';
 import { postSaveCallback, postEditCallback } from './postSave';
 import { privilegesList, privilegesGroupsList, privilegesListHuman } from './privileges';
+import './sockets';
 
 const addNavigation = (navs, callback) => {
   navs.push({
@@ -22,6 +23,15 @@ const adminMenu = (header, callback) => {
   callback(null, header);
 };
 
+const composerFormatting = (data, callback) => {
+  data.options.push({
+    name: 'plugin-calendar-event',
+    className: 'fa fa-calendar-o plugin-calendar-composer-edit-event',
+    title: '[[calendar:add_edit_event]]',
+  });
+  callback(null, data);
+};
+
 export {
   init,
   addNavigation,
@@ -33,4 +43,5 @@ export {
   privilegesGroupsList,
   privilegesListHuman,
   postEditCallback as postEdit,
+  composerFormatting,
 };

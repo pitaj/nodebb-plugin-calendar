@@ -1,6 +1,25 @@
 import parse from '../parse';
 import assert from 'assert';
 
+const setEquals = (a, b) => {
+  if (a.length !== b.length) {
+    return false;
+  }
+  for (const x of a) {
+    let found = false;
+    for (const y of b) {
+      if (x === y) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      return false;
+    }
+  }
+  return true;
+};
+
 [
   () => {
     // basic test
@@ -28,12 +47,13 @@ import assert from 'assert';
       [/event]
       and some more *markdown*`
     );
+
     assert(result && typeof result === 'object', 'Expected Object, got a falsy value');
     assert.strictEqual(data.name, result.name, '`name` field incorrect');
     assert.strictEqual(data.allday, result.allday, '`allday` field incorrect');
     assert.strictEqual(data.startDate, result.startDate, '`startDate` field incorrect');
     assert.strictEqual(data.endDate, result.endDate, '`endDate` field incorrect');
-    assert.deepStrictEqual(data.notifications, result.notifications,
+    assert(setEquals(data.notifications, result.notifications),
       '`notifications` field incorrect');
     assert.strictEqual(data.location, result.location, '`location` field incorrect');
     assert.strictEqual(data.description, result.description, '`description` field incorrect');
@@ -67,7 +87,7 @@ import assert from 'assert';
     assert.strictEqual(data.allday, result.allday, '`allday` field incorrect');
     assert.strictEqual(data.startDate, result.startDate, '`startDate` field incorrect');
     assert.strictEqual(data.endDate, result.endDate, '`endDate` field incorrect');
-    assert.deepStrictEqual(data.notifications, result.notifications,
+    assert(setEquals(data.notifications, result.notifications),
       '`notifications` field incorrect');
     assert.strictEqual(data.location, result.location, '`location` field incorrect');
     assert.strictEqual(data.description, result.description, '`description` field incorrect');

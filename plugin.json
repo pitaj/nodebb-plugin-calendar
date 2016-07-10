@@ -2,7 +2,8 @@
   "name": "NodeBB Calendar plugin",
   "library": "library.js",
   "staticDirs": {
-    "public": ""
+    "datetimepicker": "node_modules/eonasdan-bootstrap-datetimepicker/build/js/",
+    "moment": "node_modules/moment/min/"
   },
   "hooks": [
     {
@@ -37,10 +38,19 @@
     },
     {
       "hook": "filter:privileges.groups.list_human", "method": "privilegesListHuman"
+    },
+    {
+      "hook": "filter:composer.formatting", "method": "composerFormatting", "priority": 19
     }
   ],
   "templates": "public/templates",
-  "languages": "languages",
+  "languages": "public/languages",
   "defaultLang": "en_GB",
-  "less": "public/event.less"
+  "less": [
+    "public/event.less",
+    "public/calendar.less"
+  ],
+  "scripts": [
+    "build/client/bundle.js"
+  ]
 }

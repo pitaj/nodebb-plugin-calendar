@@ -2,7 +2,7 @@ const db = require.main.require('./src/database');
 const plugins = require.main.require('./src/plugins');
 import validator from 'validator';
 import Promise from 'bluebird';
-import { default as parse, tagTemplate } from './parse'; // tagTemplate
+import { default as parse } from './parse'; // tagTemplate
 import { canPostEvent } from './privileges';
 
 const p = Promise.promisify;
@@ -52,21 +52,11 @@ const postSave = async postData => {
   let event = parse(postData.content);
   event = validateEvent(event);
   if (!event || !(await canPostEvent(postData.pid, postData.uid))) {
-    // throw new Error('[[plugin-calendar:no-privileges-post-event]]');
-    // return {
-    //   ...postData,
-    //   content: postData.content.replace(
-    //     tagTemplate('event', '[\\w\\W]*'),
-    //     '[[plugin-calendar:no-privileges-post-event]]'
-    //   ),
-    // };
-    // console.log('NOT saving event', event, 'cuz canpostevent is ',
-    // await canPostEvent(postData.pid, postData.uid));
     return {
       ...postData,
       content: postData.content.replace(
-        new RegExp(tagTemplate('event', '[\\w\\W]*')),
-        '', // '[[plugin-calendar:failed-post-event]]'
+        /\[\s*(\/*)\s*event\s*\]/g,
+        '[$1event-invalid]'
       ),
     };
   }
