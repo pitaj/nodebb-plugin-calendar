@@ -12,6 +12,11 @@ const defaultEvent = {
   description: '',
 };
 
+const formats = {
+  timeDate: 'L LT',
+  date: 'L',
+};
+
 const createEventFactory = () => {
   const modal = $('#plugin-calendar-event-editor');
   const inputs = {
@@ -25,6 +30,14 @@ const createEventFactory = () => {
   };
   const notifications = notificationsFactory(inputs.notifications);
 
+  // TODO: allday turns time picking off
+
+  inputs.allday.on('change', () => {
+    const format = inputs.allday.prop('checked') ? formats.date : formats.timeDate;
+    inputs.startDate.data('DateTimePicker').format(format);
+    inputs.endDate.data('DateTimePicker').format(format);
+  });
+
   const setInputs = event => {
     inputs.name.val(event.name);
     inputs.allday.prop('checked', event.allday);
@@ -33,6 +46,10 @@ const createEventFactory = () => {
     notifications.setNotifications(event.notifications);
     inputs.location.val(event.location);
     inputs.description.val(event.description);
+
+    const format = event.allday ? formats.date : formats.timeDate;
+    inputs.startDate.data('DateTimePicker').format(format);
+    inputs.endDate.data('DateTimePicker').format(format);
   };
   const getInputs = () => ({
     name: inputs.name.val(),

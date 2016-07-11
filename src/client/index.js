@@ -52,6 +52,7 @@ $(document).ready(() => {
             .replace(/\[\s*event\s*\][\w\W]*\[\s*\/\s*event\s*\]/g, '') +
             eventTemplate(event)
           );
+          $textarea.trigger('input');
         });
       });
     };

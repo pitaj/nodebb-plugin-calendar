@@ -19,4 +19,7 @@ export default ({ router, middleware }, callback) => {
   getSettings('plugin-calendar').then(settings =>
     setSettings('plugin-calendar', { ...defaults, ...settings })
   ).asCallback(callback);
+
+  // TODO: configuration
+  // TODO: notification scheduler
 };

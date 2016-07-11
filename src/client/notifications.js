@@ -53,11 +53,10 @@ const factory = $ul => {
         return;
       }
 
-      const index = nots.indexOf(n);
       const notifications = nots.filter(not => not !== n);
       $ul.data('value', notifications);
 
-      $ul.find(`li.plugin-calendar-event-editor-notification:nth-of-type(${index + 1})`).remove();
+      $ul.find(`li.plugin-calendar-event-editor-notification[data-value=${n}]`).remove();
     },
   };
 
@@ -101,12 +100,6 @@ const factory = $ul => {
     }
     obj.addNotification(n);
   });
-
-  // customButton.popover({
-  //   content: notificationTemplate,
-  //   html: true,
-  //   container: '#plugin-calendar-event-editor',
-  // });
 
   $ul.on('click', 'li.plugin-calendar-event-editor-notification .remove', e => {
     e.preventDefault();
