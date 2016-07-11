@@ -4,12 +4,20 @@
   i.fa {
     margin: 10px;
     margin-left: 0;
+    margin-top: 5px;
     vertical-align: top;
+  }
+  .form-group i.fa {
+    vertical-align: middle;
+  }
+  .input-group-addon i.fa {
+    margin: 0;
+    vertical-align: middle;
   }
   .plugin-calendar-event-date a,
   .plugin-calendar-event-location span,
   .plugin-calendar-event-description span,
-  .plugin-calendar-event-notifications ul {
+  .plugin-calendar-event-notifications > ul {
     display: inline-block;
   }
   .plugin-calendar-event-date,
@@ -27,6 +35,85 @@
     li {
       list-style-type: none!important;
       margin-left: 0;
+    }
+  }
+
+  .plugin-calendar-event-description {
+    position: relative;
+
+    i.fa {
+      position: absolute;
+    }
+    span {
+      margin-left: 25px;
+      display: inline-block;
+    }
+  }
+}
+
+#plugin-calendar-event-editor {
+  z-index: 10001;
+
+  #plugin-calendar-event-editor-name {
+    font-size: 135%;
+  }
+
+  .plugin-calendar-event-notifications > ul {
+    display: block;
+  }
+
+  .plugin-calendar-event-editor-notification,
+  #plugin-calendar-event-editor-notifications-add {
+    max-width: 200px;
+    padding: 3px 20px;
+    clear: both;
+    font-weight: normal;
+    line-height: 1.42857143;
+    color: #333;
+  }
+
+  .checkbox label {
+    font-weight: bold;
+    padding: 0;
+
+    input[type=checkbox] {
+      margin-right: 11px;
+      float: left;
+      margin-left: 0;
+      position: initial;
+      width: 15px;
+      height: 15px;
+    }
+  }
+
+  .plugin-calendar-event-editor-notification {
+    > a.remove {
+      float: right;
+
+      i.fa-times {
+        margin: 0;
+      }
+    }
+  }
+
+  textarea {
+    margin: 0;
+    max-width: 100%;
+    min-width: 100%;
+  }
+
+  #plugin-calendar-event-editor-notification-custom {
+    margin: 0;
+    text-align: center;
+
+    > .form-group {
+      text-align: left;
+    }
+    #plugin-calendar-event-editor-notification-custom-unit {
+      margin-left: 30px;
+    }
+    .btn .fa {
+      margin: 0;
     }
   }
 }

@@ -16,10 +16,10 @@
       "hook": "filter:admin.header.build", "method": "adminMenu"
     },
     {
-      "hook": "filter:parse.post", "method": "parsePost"
+      "hook": "filter:parse.post", "method": "parsePost", "priority": 6
     },
     {
-      "hook": "filter:parse.raw", "method": "parseRaw"
+      "hook": "filter:parse.raw", "method": "parseRaw", "priority": 6
     },
     {
       "hook": "filter:post.save", "method": "postSave"

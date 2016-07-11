@@ -39,7 +39,7 @@ const validateEvent = event => {
     l(typeof event.allday === 'boolean', 'allday') &&
     l(new Date(event.startDate).getTime() === event.startDate, 'startDate') &&
     l(new Date(event.endDate).getTime() === event.endDate, 'endDate') &&
-    l(isArrayOf(event.notifications, it => new Date(it).getTime() === it), 'notifications') &&
+    l(isArrayOf(event.notifications, 'number'), 'notifications') &&
     l(typeof event.location === 'string', 'location') &&
     l(typeof event.description === 'string', 'description')
   ) {

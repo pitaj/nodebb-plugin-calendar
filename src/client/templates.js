@@ -1,15 +1,44 @@
+import moment from 'moment';
+
 const eventTemplate = event => (
-  `[event]
-    [name]${event.name}[/name]
-    [allday]${event.allday}[/allday]
-    [startDate]${event.startDate}[/startDate]
-    [endDate]${event.endDate}[/endDate]
-    [notifications]${JSON.stringify(event.notifications)}[/notifications]
-    [location]${event.location}[/location]
-    [description]
-      ${event.description}
-    [/description]
-  [/event]`
+  `[event][name]${event.name}[/name][allday]${event.allday}[/allday]` +
+  `[startDate]${event.startDate}[/startDate][endDate]${event.endDate}[/endDate]` +
+  `[notifications]${JSON.stringify(event.notifications)}[/notifications]` +
+  `[location]${event.location}[/location][description]` +
+  `${event.description}[/description][/event]`
+);
+
+const customNotificationTemplate = () => (
+  `<div class="well" id="plugin-calendar-event-editor-notification-custom"
+  style="display:none;">
+    <form class="form-inline">
+      <div class="form-group">
+        <label for="plugin-calendar-event-editor-notification-custom-number">
+          [[calendar:notification_custom_title]]
+        </label>
+        <input type="tel" class="form-control" value="2"
+        id="plugin-calendar-event-editor-notification-custom-number" />
+      </div>
+      <div class="form-group" id="plugin-calendar-event-editor-notification-custom-unit">
+        <label class="radio">
+          <input type="radio" value="mm" name="notification-custom-unit">
+          ${moment.localeData().relativeTime('', true, 'mm')}
+        </label>
+        <label class="radio">
+          <input type="radio" value="hh" name="notification-custom-unit" checked>
+          ${moment.localeData().relativeTime('', true, 'hh')}
+        </label>
+        <label class="radio">
+          <input type="radio" value="dd" name="notification-custom-unit">
+          ${moment.localeData().relativeTime('', true, 'dd')}
+        </label>
+      </div>
+      <button type="button" class="btn btn-primary">
+        <span class="sr-only">[[topic:composer.submit]]</span>
+        <i class="fa fa-check"></i>
+      </button>
+    </form>
+  </div>`
 );
 
 const modalTemplate = () => (
@@ -28,10 +57,86 @@ const modalTemplate = () => (
         </div>
         <div class="modal-body">
           <form>
-            <div class="form-group">
-              <label for="plugin-calendar-event-editor-name">Email address</label>
-              <input type="email" class="form-control" id="plugin-calendar-event-editor-name" 
-              placeholder="Email">
+            <div class="plugin-calendar-event panel panel-success">
+              <div class="plugin-calendar-event-name panel-heading">
+                <input type="text" class="form-control" id="plugin-calendar-event-editor-name"
+                placeholder="[[calendar:event_name]]">
+              </div>
+              <div class="panel-body">
+                <div class="form-group">
+                  <div class="checkbox">
+                    <label>
+                      <input type="checkbox" id="plugin-calendar-event-editor-allday">
+                      [[calendar:all_day]]
+                    </label>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>
+                    <i class="fa fa-clock-o" aria-hidden="true"></i> [[calendar:dates]]
+                  </label>
+                  <div class="input-group date plugin-calendar-event-editor-date"
+                  id="plugin-calendar-event-editor-startDate">
+                    <input type="text" class="form-control" placeholder="[[calendar:start_date]]"/>
+                    <span class="input-group-addon">
+                      <i class="fa fa-hourglass-start"></i>
+                    </span>
+                  </div>
+                  <div class="input-group date plugin-calendar-event-editor-date"
+                  id="plugin-calendar-event-editor-endDate">
+                    <input type="text" class="form-control" placeholder="[[calendar:end_date]]"/>
+                    <span class="input-group-addon">
+                      <i class="fa fa-hourglass-end"></i>
+                    </span>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="plugin-calendar-event-editor-location">
+                    <i class="fa fa-location-arrow"></i> [[calendar:location]]
+                  </label>
+                  <input type="text" class="form-control"
+                  id="plugin-calendar-event-editor-location" />
+                </div>
+                <div class="form-group">
+                  <label for="plugin-calendar-event-editor-description">
+                    <i class="fa fa-info-circle"></i> [[calendar:description]]
+                  </label>
+                  <textarea class="form-control" rows="10"
+                  id="plugin-calendar-event-editor-description"></textarea>
+                </div>
+                <div class="form-group plugin-calendar-event-notifications">
+                  <label for="plugin-calendar-event-editor-notifications">
+                    <i class="fa fa-bell" aria-hidden="true"></i> [[calendar:notifications]]
+                  </label>
+                  <ul id="plugin-calendar-event-editor-notifications">
+                    <div class="dropdown" id="plugin-calendar-event-editor-notifications-add">
+                      <a class="dropdown-toggle" href="#"
+                      id="plugin-calendar-event-editor-notifications-add-button"
+                      data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        [[calendar:add_notification]]
+                        <span class="caret"></span>
+                      </a>
+                      <ul class="dropdown-menu"
+                      aria-labelledby="plugin-calendar-event-editor-notifications-add-button">
+                        <li data-value="${10 * 60 * 1000}">
+                          <a href="#">${moment.localeData().relativeTime(10, true, 'mm')}</a>
+                        </li>
+                        <li data-value="${30 * 60 * 1000}">
+                          <a href="#">${moment.localeData().relativeTime(30, true, 'mm')}</a>
+                        </li>
+                        <li data-value="${60 * 60 * 1000}">
+                          <a href="#">${moment.localeData().relativeTime(1, true, 'h')}</a>
+                        </li>
+                        <li role="separator" class="divider"></li>
+                        <li data-value="custom">
+                          <a href="#">[[calendar:notification_custom]]</a>
+                          ${customNotificationTemplate()}
+                        </li>
+                      </ul>
+                    </div>
+                  </ul>
+                </div>
+              </div>
             </div>
           </form>
         </div>
@@ -39,7 +144,8 @@ const modalTemplate = () => (
           <button type="button" class="btn btn-default" data-dismiss="modal">
             [[global:buttons.close]]
           </button>
-          <button type="button" class="btn btn-primary">[[global:save_changes]]</button>
+          <button type="button" class="btn btn-primary"
+          id="plugin-calendar-event-editor-submit">[[global:save_changes]]</button>
         </div>
       </div>
     </div>
@@ -49,4 +155,5 @@ const modalTemplate = () => (
 export {
   eventTemplate,
   modalTemplate,
+  customNotificationTemplate,
 };

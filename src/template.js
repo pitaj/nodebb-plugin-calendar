@@ -65,9 +65,11 @@ const formatDates = (s, e, allday, lang, utc) => {
     `${end.toLocaleString(lang, options.full)}`;
 };
 
-const diff = (start, notify, lang) => {
-  const text = moment(notify).locale(lang).to(start, true);
-  return text;
+const zero = moment(0);
+
+const makeListElement = n => {
+  const li = `<li data-value="${n}">${zero.to(n, true)}</li>`;
+  return li;
 };
 
 const postTemplate = (event, lang) => {
@@ -103,7 +105,7 @@ const postTemplate = (event, lang) => {
     <div class="plugin-calendar-event-notifications">
       <i class="fa fa-bell" aria-hidden="true"></i>
       <ul>
-        ${event.notifications.map(n => `<li>${diff(n, event.startDate, lang)}</li>`).join('\n')}
+        ${event.notifications.map(makeListElement).join('\n')}
       </ul>
     </div>
     `)}

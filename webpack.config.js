@@ -1,20 +1,20 @@
-const webpack = require('webpack');
+// const webpack = require('webpack');
 const path = require('path');
 
 const nodeEnv = process.env.NODE_ENV || 'development';
 const isProd = nodeEnv === 'production';
 
 module.exports = {
-  devtool: isProd ? 'hidden-source-map' : 'source-map',
+  devtool: isProd ? 'hidden-source-map' : 'inline-source-map',
   context: __dirname,
   entry: './src/client/index.js',
   output: {
     path: path.join(__dirname, './build/client'),
     filename: 'bundle.js',
   },
-  amd: {
-    jQuery: true,
-  },
+  // amd: {
+  //   jQuery: true,
+  // },
   module: {
     loaders: [
       {
@@ -36,7 +36,7 @@ module.exports = {
   resolve: {
     extensions: ['', '.js'],
     modules: [
-      // path.resolve('./src/client/vendor'),
+      path.resolve('./src/client/vendor'),
       // path.resolve('../NodeBB/src'),
       // path.resolve('../NodeBB/public/src'),
       // path.resolve('../NodeBB/node_modules/nodebb-plugin-composer-default/static/lib'),

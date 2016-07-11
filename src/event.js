@@ -27,7 +27,7 @@ const composerFormatting = (data, callback) => {
   data.options.push({
     name: 'plugin-calendar-event',
     className: 'fa fa-calendar-o plugin-calendar-composer-edit-event',
-    title: '[[calendar:add_edit_event]]',
+    title: '[[calendar:edit_event]]',
   });
   callback(null, data);
 };
