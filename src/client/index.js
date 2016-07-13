@@ -1,15 +1,18 @@
 /* global $, config */
 
 import 'bootstrap-datetimepicker';
+import 'bootstrap-calendar';
 import moment from 'moment';
 
 import { eventTemplate, modalTemplate } from './templates';
 import setupComposerButton from './setupComposerButton';
 import createEventFactory from './createEvent';
 import parse from '../parse';
+import { initResponses } from './responses';
 
 const lang = config.userLang || config.defaultLang;
 moment.locale(lang);
+
 window.requirejs([
   'composer',
   'composer/formatting',
@@ -49,7 +52,7 @@ $(document).ready(() => {
           $textarea.val(
             $textarea
             .val()
-            .replace(/\[\s*event\s*\][\w\W]*\[\s*\/\s*event\s*\]/g, '') +
+            .replace(/\[\s*event\s*\][\w\W]*\[\s*\/\s*event\s*\]/g, '\n') +
             eventTemplate(event)
           );
           $textarea.trigger('input');
@@ -58,5 +61,7 @@ $(document).ready(() => {
     };
 
     $(window).on('action:composer.enhanced', prepareFormattingTools);
+
+    initResponses();
   });
 }));

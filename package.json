@@ -5,10 +5,10 @@
   "main": "library.js",
   "scripts": {
     "test": "babel-node ./src/tests",
-    "build": "rm -r ./build/* && babel src --out-dir build",
+    "build": "rm -r ./build/* && babel src --out-dir build --ignore \"src/client,src/test,src/calendar\"",
     "build-production": "npm run build  && NODE_ENV=production webpack --progress",
     "webpack": "webpack --watch",
-    "watch": "rm -r ./build/* && babel src --out-dir build --watch"
+    "watch": "rm -r ./build/* && babel src --out-dir build --ignore \"src/client,src/test,src/calendar\" --watch"
   },
   "repository": {
     "type": "git",
@@ -51,6 +51,7 @@
   },
   "dependencies": {
     "bluebird": "^3.4.0",
+    "bootstrap-calendar": "github:serhioromano/bootstrap-calendar",
     "eonasdan-bootstrap-datetimepicker": "^4.15.35",
     "intl": "^1.2.4",
     "moment": "^2.14.1",

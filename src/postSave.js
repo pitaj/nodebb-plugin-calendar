@@ -39,7 +39,7 @@ const validateEvent = event => {
     l(typeof event.allday === 'boolean', 'allday') &&
     l(new Date(event.startDate).getTime() === event.startDate, 'startDate') &&
     l(new Date(event.endDate).getTime() === event.endDate, 'endDate') &&
-    l(isArrayOf(event.notifications, 'number'), 'notifications') &&
+    l(isArrayOf(event.reminders, 'number'), 'reminders') &&
     l(typeof event.location === 'string', 'location') &&
     l(typeof event.description === 'string', 'description')
   ) {
@@ -50,6 +50,9 @@ const validateEvent = event => {
 
 const postSave = async postData => {
   let event = parse(postData.content);
+
+  // TODO: remove event if no longer in post
+
   event = validateEvent(event);
   if (!event || !(await canPostEvent(postData.pid, postData.uid))) {
     return {
@@ -63,6 +66,8 @@ const postSave = async postData => {
 
   event.name = validator.escape(event.name);
   event.pid = postData.pid;
+  event.tid = postData.tid;
+  event.uid = postData.uid;
   event = (await fireHook('filter:plugin-calendar:event.post', event));
 
   await Promise.all([

@@ -1,4 +1,5 @@
 @import (inline) '../node_modules/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.css';
+@import (inline) '../node_modules/bootstrap-calendar/less/calendar.less';
 
 .plugin-calendar-event {
   i.fa {
@@ -17,17 +18,17 @@
   .plugin-calendar-event-date a,
   .plugin-calendar-event-location span,
   .plugin-calendar-event-description span,
-  .plugin-calendar-event-notifications > ul {
+  .plugin-calendar-event-reminders > ul {
     display: inline-block;
   }
   .plugin-calendar-event-date,
   .plugin-calendar-event-description,
   .plugin-calendar-event-location,
-  .plugin-calendar-event-notifications {
+  .plugin-calendar-event-reminders {
     clear: both;
     margin-bottom: 5px;
   }
-  .plugin-calendar-event-notifications ul {
+  .plugin-calendar-event-reminders ul {
     margin: 0;
     padding: 0;
     list-style: none;
@@ -38,13 +39,15 @@
     }
   }
 
-  .plugin-calendar-event-description {
+  .plugin-calendar-event-description,
+  .plugin-calendar-event-responses,
+  .plugin-calendar-event-reminders {
     position: relative;
 
-    i.fa {
+    > i.fa {
       position: absolute;
     }
-    span {
+    > div, > ul {
       margin-left: 25px;
       display: inline-block;
     }
@@ -58,12 +61,12 @@
     font-size: 135%;
   }
 
-  .plugin-calendar-event-notifications > ul {
+  .plugin-calendar-event-reminders > ul {
     display: block;
   }
 
-  .plugin-calendar-event-editor-notification,
-  #plugin-calendar-event-editor-notifications-add {
+  .plugin-calendar-event-editor-reminder,
+  #plugin-calendar-event-editor-reminders-add {
     max-width: 200px;
     padding: 3px 20px;
     clear: both;
@@ -86,7 +89,7 @@
     }
   }
 
-  .plugin-calendar-event-editor-notification {
+  .plugin-calendar-event-editor-reminder {
     > a.remove {
       float: right;
 
@@ -102,14 +105,14 @@
     min-width: 100%;
   }
 
-  #plugin-calendar-event-editor-notification-custom {
+  #plugin-calendar-event-editor-reminder-custom {
     margin: 0;
     text-align: center;
 
     > .form-group {
       text-align: left;
     }
-    #plugin-calendar-event-editor-notification-custom-unit {
+    #plugin-calendar-event-editor-reminder-custom-unit {
       margin-left: 30px;
     }
     .btn .fa {

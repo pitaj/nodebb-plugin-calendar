@@ -73,11 +73,82 @@ const makeListElement = n => {
 };
 
 const postTemplate = (event, lang) => {
-  const dateString = formatDates(event.startDate, event.endDate, event.allday, lang);
-  const dateStringUTC = formatDates(event.startDate, event.endDate, event.allday, lang, true)
-    .replace('<br>', '; ');
+  const dateString = formatDates(
+    event.startDate,
+    event.endDate,
+    event.allday,
+    lang
+  );
+  const dateStringUTC = formatDates(
+    event.startDate,
+    event.endDate,
+    event.allday,
+    lang,
+    true
+  ).replace('<br>', ' | ');
 
-  const given = (bool, text) => (bool ? text : '');
+  const responsesTemplate = `
+<div class="plugin-calendar-event-responses">
+  <i class="fa fa-question-circle-o" aria-hidden="true"></i>
+  <div>
+    <div class="plugin-calendar-event-responses-user btn-group">
+      <button data-value="no" type="button" class="btn btn-danger active">
+        [[calendar:response_no]]
+      </button>
+      <button data-value="maybe" type="button" class="btn btn-default">
+        [[calendar:response_maybe]]
+      </button>
+      <button data-value="yes" type="button" class="btn btn-success">
+        [[calendar:response_yes]]
+      </button>
+    </div>
+    <h3>[[calendar:responses]]</h3>
+    <div class="panel-group" class="plugin-calendar-event-responses-lists">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a role="button" data-toggle="collapse" href="#" aria-expanded="true">
+              [[calendar:response_yes]]
+            </a>
+          </h4>
+        </div>
+        <div class="panel-body">
+          <ul class="plugin-calendar-event-responses-list-yes">
+            <!-- yes responses go here -->
+          </ul>
+        </div>
+      </div>
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a role="button" data-toggle="collapse" href="#" aria-expanded="true">
+              [[calendar:response_maybe]]
+            </a>
+          </h4>
+        </div>
+        <div class="panel-body">
+          <ul class="plugin-calendar-event-responses-list-maybe">
+            <!-- maybe responses go here -->
+          </ul>
+        </div>
+      </div>
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a role="button" data-toggle="collapse" href="#" aria-expanded="true">
+              [[calendar:response_no]]
+            </a>
+          </h4>
+        </div>
+        <div class="panel-body">
+          <ul class="plugin-calendar-event-responses-list-no">
+            <!-- no responses go here -->
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>`;
 
   const html = `
 <div class="plugin-calendar-event panel panel-success">
@@ -89,26 +160,29 @@ const postTemplate = (event, lang) => {
       <i class="fa fa-clock-o" aria-hidden="true"></i>
       <a title="${dateStringUTC}" data-original-title="${dateStringUTC}">${dateString}</a>
     </div>
-    ${given(event.location.length, `
-    <div class="plugin-calendar-event-location">
+    ${event.location.length ? `
+    <div class="plugin-calendar-even: ''t-location">
       <i class="fa fa-location-arrow" aria-hidden="true"></i>
       <span>${event.location}<span>
     </div>
-    `)}
-    ${given(event.description.length, `
+    ` : ''}
+    ${event.description.length ? `
     <div class="plugin-calendar-event-description">
       <i class="fa fa-info-circle" aria-hidden="true"></i>
-      <span>${event.description}</span>
+      <div>${event.description}</div>
     </div>
-    `)}
-    ${given(event.notifications.length, `
-    <div class="plugin-calendar-event-notifications">
+    ` : ''}
+    ${event.reminders.length ? `
+    <div class="plugin-calendar-event-reminders">
       <i class="fa fa-bell" aria-hidden="true"></i>
       <ul>
-        ${event.notifications.map(makeListElement).join('\n')}
+        ${event.reminders
+          .sort((a, b) => a - b)
+          .map(makeListElement).join('\n')}
       </ul>
     </div>
-    `)}
+    ` : ''}
+    ${responsesTemplate}
   </div>
 </div>`.trim();
 

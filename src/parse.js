@@ -6,7 +6,7 @@ const regExps = {
   allday: 'true|false',
   startDate: '[0-9]+',
   endDate: '[0-9]+',
-  notifications: '\\[[0-9,\\s]*\\]',
+  reminders: '\\[[0-9,\\s]*\\]',
   location: '.*',
   description: '[\\w\\W]*',
 };
@@ -33,7 +33,7 @@ const parse = text => {
     allday: results.allday === 'true',
     startDate: parseInt(results.startDate, 10),
     endDate: parseInt(results.endDate, 10),
-    notifications: JSON.parse(results.notifications).sort((a, b) => b - a),
+    reminders: JSON.parse(results.reminders).sort((a, b) => b - a),
     location: results.location,
     description: results.description,
   };

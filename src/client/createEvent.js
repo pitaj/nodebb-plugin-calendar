@@ -1,13 +1,13 @@
 /* global $ */
 
-import notificationsFactory from './notifications';
+import remindersFactory from './reminders';
 
 const defaultEvent = {
   name: '',
   allday: false,
   startDate: Date.now(),
   endDate: Date.now() + 1000 * 60 * 60,
-  notifications: [],
+  reminders: [],
   location: '',
   description: '',
 };
@@ -24,13 +24,11 @@ const createEventFactory = () => {
     allday: modal.find('#plugin-calendar-event-editor-allday'),
     startDate: modal.find('#plugin-calendar-event-editor-startDate'),
     endDate: modal.find('#plugin-calendar-event-editor-endDate'),
-    notifications: modal.find('#plugin-calendar-event-editor-notifications'),
+    reminders: modal.find('#plugin-calendar-event-editor-reminders'),
     location: modal.find('#plugin-calendar-event-editor-location'),
     description: modal.find('#plugin-calendar-event-editor-description'),
   };
-  const notifications = notificationsFactory(inputs.notifications);
-
-  // TODO: allday turns time picking off
+  const reminders = remindersFactory(inputs.reminders);
 
   inputs.allday.on('change', () => {
     const format = inputs.allday.prop('checked') ? formats.date : formats.timeDate;
@@ -43,7 +41,7 @@ const createEventFactory = () => {
     inputs.allday.prop('checked', event.allday);
     inputs.startDate.data('DateTimePicker').date(new Date(event.startDate));
     inputs.endDate.data('DateTimePicker').date(new Date(event.endDate));
-    notifications.setNotifications(event.notifications);
+    reminders.setReminders(event.reminders);
     inputs.location.val(event.location);
     inputs.description.val(event.description);
 
@@ -51,15 +49,32 @@ const createEventFactory = () => {
     inputs.startDate.data('DateTimePicker').format(format);
     inputs.endDate.data('DateTimePicker').format(format);
   };
-  const getInputs = () => ({
-    name: inputs.name.val(),
-    allday: inputs.allday.prop('checked'),
-    startDate: inputs.startDate.data('DateTimePicker').date().valueOf(),
-    endDate: inputs.endDate.data('DateTimePicker').date().valueOf(),
-    notifications: notifications.getNotifications(),
-    location: inputs.location.val(),
-    description: inputs.description.val(),
-  });
+  const getInputs = () => {
+    const event = {
+      name: inputs.name.val().trim(),
+      allday: inputs.allday.prop('checked'),
+      startDate: inputs.startDate.data('DateTimePicker').date().valueOf(),
+      endDate: inputs.endDate.data('DateTimePicker').date().valueOf(),
+      reminders: reminders.getReminders(),
+      location: inputs.location.val().trim(),
+      description: inputs.description.val().trim(),
+    };
+
+    if (event.allday) {
+      const s = new Date(event.startDate);
+      const e = new Date(event.endDate);
+
+      s.setHours(0, 0, 0, 0);
+      e.setHours(23, 59, 59, 999);
+
+      event.startDate = s.valueOf();
+      event.endDate = e.valueOf();
+    }
+
+    return event;
+  };
+
+  // TODO: input validation
 
   const createEvent = (data, callback) => {
     const event = Object.assign({}, defaultEvent, data);
@@ -67,10 +82,7 @@ const createEventFactory = () => {
     modal.modal('show');
 
     const submit = modal.find('#plugin-calendar-event-editor-submit');
-    const onClick = e => {
-      if (e.target.disabled) {
-        return;
-      }
+    const onClick = () => {
       const newEvent = getInputs();
 
       modal.modal('hide');

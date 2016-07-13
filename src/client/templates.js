@@ -3,33 +3,33 @@ import moment from 'moment';
 const eventTemplate = event => (
   `[event][name]${event.name}[/name][allday]${event.allday}[/allday]` +
   `[startDate]${event.startDate}[/startDate][endDate]${event.endDate}[/endDate]` +
-  `[notifications]${JSON.stringify(event.notifications)}[/notifications]` +
+  `[reminders]${JSON.stringify(event.reminders)}[/reminders]` +
   `[location]${event.location}[/location][description]` +
   `${event.description}[/description][/event]`
 );
 
-const customNotificationTemplate = () => (
-  `<div class="well" id="plugin-calendar-event-editor-notification-custom"
+const customReminderTemplate = () => (
+  `<div class="well" id="plugin-calendar-event-editor-reminder-custom"
   style="display:none;">
     <form class="form-inline">
       <div class="form-group">
-        <label for="plugin-calendar-event-editor-notification-custom-number">
-          [[calendar:notification_custom_title]]
+        <label for="plugin-calendar-event-editor-reminder-custom-number">
+          [[calendar:reminder_custom_title]]
         </label>
         <input type="tel" class="form-control" value="2"
-        id="plugin-calendar-event-editor-notification-custom-number" />
+        id="plugin-calendar-event-editor-reminder-custom-number" />
       </div>
-      <div class="form-group" id="plugin-calendar-event-editor-notification-custom-unit">
+      <div class="form-group" id="plugin-calendar-event-editor-reminder-custom-unit">
         <label class="radio">
-          <input type="radio" value="mm" name="notification-custom-unit">
+          <input type="radio" value="mm" name="reminder-custom-unit">
           ${moment.localeData().relativeTime('', true, 'mm')}
         </label>
         <label class="radio">
-          <input type="radio" value="hh" name="notification-custom-unit" checked>
+          <input type="radio" value="hh" name="reminder-custom-unit" checked>
           ${moment.localeData().relativeTime('', true, 'hh')}
         </label>
         <label class="radio">
-          <input type="radio" value="dd" name="notification-custom-unit">
+          <input type="radio" value="dd" name="reminder-custom-unit">
           ${moment.localeData().relativeTime('', true, 'dd')}
         </label>
       </div>
@@ -104,20 +104,20 @@ const modalTemplate = () => (
                   <textarea class="form-control" rows="10"
                   id="plugin-calendar-event-editor-description"></textarea>
                 </div>
-                <div class="form-group plugin-calendar-event-notifications">
-                  <label for="plugin-calendar-event-editor-notifications">
-                    <i class="fa fa-bell" aria-hidden="true"></i> [[calendar:notifications]]
+                <div class="form-group plugin-calendar-event-reminders">
+                  <label for="plugin-calendar-event-editor-reminders">
+                    <i class="fa fa-bell" aria-hidden="true"></i> [[calendar:reminders]]
                   </label>
-                  <ul id="plugin-calendar-event-editor-notifications">
-                    <div class="dropdown" id="plugin-calendar-event-editor-notifications-add">
+                  <ul id="plugin-calendar-event-editor-reminders">
+                    <div class="dropdown" id="plugin-calendar-event-editor-reminders-add">
                       <a class="dropdown-toggle" href="#"
-                      id="plugin-calendar-event-editor-notifications-add-button"
+                      id="plugin-calendar-event-editor-reminders-add-button"
                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        [[calendar:add_notification]]
+                        [[calendar:add_reminder]]
                         <span class="caret"></span>
                       </a>
                       <ul class="dropdown-menu"
-                      aria-labelledby="plugin-calendar-event-editor-notifications-add-button">
+                      aria-labelledby="plugin-calendar-event-editor-reminders-add-button">
                         <li data-value="${10 * 60 * 1000}">
                           <a href="#">${moment.localeData().relativeTime(10, true, 'mm')}</a>
                         </li>
@@ -129,8 +129,8 @@ const modalTemplate = () => (
                         </li>
                         <li role="separator" class="divider"></li>
                         <li data-value="custom">
-                          <a href="#">[[calendar:notification_custom]]</a>
-                          ${customNotificationTemplate()}
+                          <a href="#">[[calendar:reminder_custom]]</a>
+                          ${customReminderTemplate()}
                         </li>
                       </ul>
                     </div>
@@ -155,5 +155,5 @@ const modalTemplate = () => (
 export {
   eventTemplate,
   modalTemplate,
-  customNotificationTemplate,
+  customReminderTemplate,
 };

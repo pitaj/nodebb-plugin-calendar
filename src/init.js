@@ -6,6 +6,7 @@ const p = Promise.promisify;
 const getSettings = p(meta.settings.get);
 const setSettings = p(meta.settings.set);
 import controllers from './controllers';
+import { initNotifierDaemon } from './reminders';
 
 export default ({ router, middleware }, callback) => {
   controllers(router, middleware);
@@ -21,5 +22,6 @@ export default ({ router, middleware }, callback) => {
   ).asCallback(callback);
 
   // TODO: configuration
-  // TODO: notification scheduler
+
+  initNotifierDaemon();
 };

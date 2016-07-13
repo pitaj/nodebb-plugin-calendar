@@ -1,4 +1,4 @@
-/* global $, socket */
+/* global $, socket, app */
 
 const find = (posts, data) => {
   const uuid = Object.keys(posts).find(key => {

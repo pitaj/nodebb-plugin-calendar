@@ -1,11 +1,13 @@
 /* global $ */
 
+// TODO: rename reminders to reminders
+
 import moment from 'moment';
 
 const zero = moment(0);
 const makeListElement = n => {
   const li = $(
-    `<li class="plugin-calendar-event-editor-notification">
+    `<li class="plugin-calendar-event-editor-reminder">
       ${zero.to(n, true)}
       <a class="remove" href="#">
         <i class="fa fa-times"></i>
@@ -17,52 +19,52 @@ const makeListElement = n => {
 
 const factory = $ul => {
   const addButtons = $ul
-  .find('#plugin-calendar-event-editor-notifications-add li > a');
+  .find('#plugin-calendar-event-editor-reminders-add li > a');
 
   const obj = {
-    setNotifications: notifications => {
-      $ul.find('li.plugin-calendar-event-editor-notification').remove();
-      $ul.data('value', notifications);
-      notifications
+    setReminders: reminders => {
+      $ul.find('li.plugin-calendar-event-editor-reminder').remove();
+      $ul.data('value', reminders);
+      reminders
       .reverse()
       .map(makeListElement)
       .forEach(el => $ul.prepend(el));
     },
-    getNotifications: () => $ul.data('value'),
-    addNotification: n => {
+    getReminders: () => $ul.data('value'),
+    addReminder: n => {
       const nots = $ul.data('value');
       if (nots.includes(n)) {
         return;
       }
 
-      const notifications = [...nots, n].sort((a, b) => b - a);
-      const index = notifications.reverse().indexOf(n);
-      $ul.data('value', notifications);
+      const reminders = [...nots, n].sort((a, b) => b - a);
+      const index = reminders.reverse().indexOf(n);
+      $ul.data('value', reminders);
 
       const li = makeListElement(n);
 
       if (index === 0) {
         $ul.prepend(li);
       } else {
-        $ul.find(`li.plugin-calendar-event-editor-notification:nth-of-type(${index})`).after(li);
+        $ul.find(`li.plugin-calendar-event-editor-reminder:nth-of-type(${index})`).after(li);
       }
     },
-    removeNotification: n => {
+    removeReminder: n => {
       const nots = $ul.data('value');
       if (!nots.includes(n)) {
         return;
       }
 
-      const notifications = nots.filter(not => not !== n);
-      $ul.data('value', notifications);
+      const reminders = nots.filter(not => not !== n);
+      $ul.data('value', reminders);
 
-      $ul.find(`li.plugin-calendar-event-editor-notification[data-value=${n}]`).remove();
+      $ul.find(`li.plugin-calendar-event-editor-reminder[data-value=${n}]`).remove();
     },
   };
 
-  const popup = $('#plugin-calendar-event-editor-notification-custom');
-  const input = popup.find('#plugin-calendar-event-editor-notification-custom-number');
-  const radios = popup.find('#plugin-calendar-event-editor-notification-custom-unit');
+  const popup = $('#plugin-calendar-event-editor-reminder-custom');
+  const input = popup.find('#plugin-calendar-event-editor-reminder-custom-number');
+  const radios = popup.find('#plugin-calendar-event-editor-reminder-custom-unit');
   const button = popup.find('button.btn-primary');
 
   const promptCustom = addNotif => {
@@ -95,16 +97,16 @@ const factory = $ul => {
     if (n === 'custom') {
       e.preventDefault();
       e.stopPropagation();
-      promptCustom(notif => obj.addNotification(notif));
+      promptCustom(notif => obj.addReminder(notif));
       return;
     }
-    obj.addNotification(n);
+    obj.addReminder(n);
   });
 
-  $ul.on('click', 'li.plugin-calendar-event-editor-notification .remove', e => {
+  $ul.on('click', 'li.plugin-calendar-event-editor-reminder .remove', e => {
     e.preventDefault();
     const n = $(e.target).closest('li').data('value');
-    obj.removeNotification(n);
+    obj.removeReminder(n);
   });
 
   return obj;

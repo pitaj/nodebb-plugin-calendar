@@ -28,7 +28,7 @@ const setEquals = (a, b) => {
       allday: true,
       startDate: Date.now() - 3 * 24 * 60 * 60 * 1000,
       endDate: Date.now(),
-      notifications: [0, 10, 20, 50],
+      reminders: [0, 10, 20, 50],
       location: 'here somewhere',
       description: 'somewhere else',
     };
@@ -39,7 +39,7 @@ const setEquals = (a, b) => {
         [allday]${data.allday}[/allday]
         [startDate]${data.startDate}[/startDate]
         [endDate]${data.endDate}[/endDate]
-        [notifications]${JSON.stringify(data.notifications)}[/notifications]
+        [reminders]${JSON.stringify(data.reminders)}[/reminders]
         [location]${data.location}[/location]
         [description]
           ${data.description}
@@ -53,8 +53,8 @@ const setEquals = (a, b) => {
     assert.strictEqual(data.allday, result.allday, '`allday` field incorrect');
     assert.strictEqual(data.startDate, result.startDate, '`startDate` field incorrect');
     assert.strictEqual(data.endDate, result.endDate, '`endDate` field incorrect');
-    assert(setEquals(data.notifications, result.notifications),
-      '`notifications` field incorrect');
+    assert(setEquals(data.reminders, result.reminders),
+      '`reminders` field incorrect');
     assert.strictEqual(data.location, result.location, '`location` field incorrect');
     assert.strictEqual(data.description, result.description, '`description` field incorrect');
   },
@@ -65,7 +65,7 @@ const setEquals = (a, b) => {
       allday: false,
       startDate: Date.now() - 3 * 24 * 60 * 60 * 1000,
       endDate: Date.now(),
-      notifications: [0, 10, 20, 50],
+      reminders: [0, 10, 20, 50],
       location: 'here somewhere',
       description: 'somewhere else',
     };
@@ -75,7 +75,7 @@ const setEquals = (a, b) => {
         [allday]${data.allday}[/allday]
         [startDate]${data.startDate}[/startDate]
         [endDate]${data.endDate}[/endDate]
-        [notifications]${JSON.stringify(data.notifications)}[/notifications]
+        [reminders]${JSON.stringify(data.reminders)}[/reminders]
         [location]${data.location}[/location]
         [description]
           ${data.description}
@@ -87,8 +87,8 @@ const setEquals = (a, b) => {
     assert.strictEqual(data.allday, result.allday, '`allday` field incorrect');
     assert.strictEqual(data.startDate, result.startDate, '`startDate` field incorrect');
     assert.strictEqual(data.endDate, result.endDate, '`endDate` field incorrect');
-    assert(setEquals(data.notifications, result.notifications),
-      '`notifications` field incorrect');
+    assert(setEquals(data.reminders, result.reminders),
+      '`reminders` field incorrect');
     assert.strictEqual(data.location, result.location, '`location` field incorrect');
     assert.strictEqual(data.description, result.description, '`description` field incorrect');
   },
@@ -99,7 +99,7 @@ const setEquals = (a, b) => {
       allday: false,
       startDate: Date.now() - 3 * 24 * 60 * 60 * 1000,
       endDate: 'a string',
-      notifications: [0, 10, 20, 50],
+      reminders: [0, 10, 20, 50],
       location: 'here somewhere',
       description: 'somewhere else',
     };
@@ -109,7 +109,7 @@ const setEquals = (a, b) => {
         [allday]${data.allday}[/allday]
         [startDate]${data.startDate}[/startDate]
         [endDate]${data.endDate}[/endDate]
-        [notifications]${JSON.stringify(data.notifications)}[/notifications]
+        [reminders]${JSON.stringify(data.reminders)}[/reminders]
         [location]${data.location}[/location]
         [description]
           ${data.description}
@@ -119,13 +119,13 @@ const setEquals = (a, b) => {
     assert.strictEqual(null, result, 'Expected null, got something else');
   },
   () => {
-    // test bad notifications failing completely
+    // test bad reminders failing completely
     const data = {
       name: 'a test name',
       allday: false,
       startDate: Date.now() - 3 * 24 * 60 * 60 * 1000,
       endDate: Date.now(),
-      notifications: 'a string',
+      reminders: 'a string',
       location: 'here somewhere',
       description: 'somewhere else',
     };
@@ -135,7 +135,7 @@ const setEquals = (a, b) => {
         [allday]${data.allday}[/allday]
         [startDate]${data.startDate}[/startDate]
         [endDate]${data.endDate}[/endDate]
-        [notifications]${JSON.stringify(data.notifications)}[/notifications]
+        [reminders]${JSON.stringify(data.reminders)}[/reminders]
         [location]${data.location}[/location]
         [description]
           ${data.description}
@@ -151,7 +151,7 @@ const setEquals = (a, b) => {
       allday: false,
       startDate: Date.now() - 3 * 24 * 60 * 60 * 1000,
       endDate: Date.now(),
-      notifications: [0, 10, 20, 50],
+      reminders: [0, 10, 20, 50],
       location: 'here somewhere\nhasbbks',
       description: 'somewhere else',
     };
@@ -161,7 +161,7 @@ const setEquals = (a, b) => {
         [allday]${data.allday}[/allday]
         [startDate]${data.startDate}[/startDate]
         [endDate]${data.endDate}[/endDate]
-        [notifications]${JSON.stringify(data.notifications)}[/notifications]
+        [reminders]${JSON.stringify(data.reminders)}[/reminders]
         [location]${data.location}[/location]
         [description]
           ${data.description}
@@ -177,7 +177,7 @@ const setEquals = (a, b) => {
       allday: false,
       startDate: Date.now() - 3 * 24 * 60 * 60 * 1000,
       endDate: Date.now(),
-      notifications: [0, 10, 20, 50],
+      reminders: [0, 10, 20, 50],
       location: 'here somewhere',
       description: 'somewhere else',
     };
@@ -187,7 +187,7 @@ const setEquals = (a, b) => {
         [allday]${data.allday}[/allday]
         [startDate]${data.startDate}[/startDate]
         [endDate]${data.endDate}[/endDate]
-        [notifications]${JSON.stringify(data.notifications)}[/notifications]
+        [reminders]${JSON.stringify(data.reminders)}[/reminders]
         [location]${data.location}[/location]
         [description]
           ${data.description}
