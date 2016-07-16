@@ -1,11 +1,11 @@
 {
   "calendar": "Calendar",
-  "add_notification": "Add a notification",
+  "add_reminder": "Add a reminder",
   "reminder_custom": "Custom...",
   "reminder_custom_title": "Custom Notification",
   "event_title": "Event",
   "edit_event": "Edit Event",
-  "event_starting": "Event starting $1: $2",
+  "event_starting": "Event starting %1: %2",
   "now": "now",
   "event_name": "Event name",
   "all_day": "All day",
@@ -20,6 +20,11 @@
   "description_ext": "Other event information",
   "location": "Location",
   "location_ext": "Location of event",
-  "reminders": "Notifications",
-  "today": "today"
+  "reminders": "Reminders",
+  "today": "today",
+  "responses_title": "Responses",
+  "response_no": "No",
+  "response_maybe": "Maybe",
+  "response_yes": "Yes",
+  "no_x_responses": "No <b>%1</b> responses yet"
 }

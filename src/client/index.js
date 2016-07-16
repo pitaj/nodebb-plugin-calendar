@@ -7,7 +7,7 @@ import moment from 'moment';
 import { eventTemplate, modalTemplate } from './templates';
 import setupComposerButton from './setupComposerButton';
 import createEventFactory from './createEvent';
-import parse from '../parse';
+import parse from '../lib/parse';
 import { initResponses } from './responses';
 
 const lang = config.userLang || config.defaultLang;
@@ -49,11 +49,12 @@ $(document).ready(() => {
         const $textarea = $(textarea);
         const old = parse($textarea.val());
         createEvent(old || {}, event => {
+          const text = event ? eventTemplate(event) : '';
           $textarea.val(
             $textarea
             .val()
             .replace(/\[\s*event\s*\][\w\W]*\[\s*\/\s*event\s*\]/g, '\n') +
-            eventTemplate(event)
+            text
           );
           $textarea.trigger('input');
         });

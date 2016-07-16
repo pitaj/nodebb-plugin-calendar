@@ -1,4 +1,4 @@
-const moment = require('moment');
+import moment from 'moment';
 import IntlPolyfill from 'intl';
 Intl.NumberFormat = IntlPolyfill.NumberFormat;
 Intl.DateTimeFormat = IntlPolyfill.DateTimeFormat;
@@ -89,61 +89,66 @@ const postTemplate = (event, lang) => {
 
   const responsesTemplate = `
 <div class="plugin-calendar-event-responses">
-  <i class="fa fa-question-circle-o" aria-hidden="true"></i>
+  <i class="fa fa-reply" aria-hidden="true"></i>
   <div>
     <div class="plugin-calendar-event-responses-user btn-group">
-      <button data-value="no" type="button" class="btn btn-danger active">
+      <button data-value="no" type="button" class="btn btn-sm btn-danger active">
         [[calendar:response_no]]
       </button>
-      <button data-value="maybe" type="button" class="btn btn-default">
+      <button data-value="maybe" type="button" class="btn btn-sm btn-default">
         [[calendar:response_maybe]]
       </button>
-      <button data-value="yes" type="button" class="btn btn-success">
+      <button data-value="yes" type="button" class="btn btn-sm btn-success">
         [[calendar:response_yes]]
       </button>
     </div>
-    <h3>[[calendar:responses]]</h3>
-    <div class="panel-group" class="plugin-calendar-event-responses-lists">
-      <div class="panel panel-default">
+    <div class="panel-group plugin-calendar-event-responses-lists" data-loaded="false">
+      <div class="panel panel-default closed">
         <div class="panel-heading">
-          <h4 class="panel-title">
-            <a role="button" data-toggle="collapse" href="#" aria-expanded="true">
-              [[calendar:response_yes]]
-            </a>
-          </h4>
+          <a role="button" data-toggle="collapse" href="#"
+          class="btn btn-sm btn-info" aria-expanded="true">
+            [[calendar:response_yes]]
+            <i class="fa fa-chevron-down pull-right"></i>
+          </a>
         </div>
-        <div class="panel-body">
-          <ul class="plugin-calendar-event-responses-list-yes">
-            <!-- yes responses go here -->
-          </ul>
+        <div class="panel-collapse">
+          <div class="panel-body">
+            <ul class="plugin-calendar-event-responses-list-yes">
+              <!-- yes responses go here -->
+            </ul>
+          </div>
         </div>
       </div>
-      <div class="panel panel-default">
+      <div class="panel panel-default closed">
         <div class="panel-heading">
-          <h4 class="panel-title">
-            <a role="button" data-toggle="collapse" href="#" aria-expanded="true">
-              [[calendar:response_maybe]]
-            </a>
-          </h4>
+          <a role="button" data-toggle="collapse" href="#"
+          class="btn btn-sm btn-link" aria-expanded="true">
+            [[calendar:response_maybe]]
+            <i class="fa fa-chevron-down pull-right"></i>
+          </a>
         </div>
-        <div class="panel-body">
-          <ul class="plugin-calendar-event-responses-list-maybe">
-            <!-- maybe responses go here -->
-          </ul>
+        <div class="panel-collapse">
+          <div class="panel-body">
+            <ul class="plugin-calendar-event-responses-list-maybe">
+              <!-- maybe responses go here -->
+            </ul>
+          </div>
         </div>
       </div>
-      <div class="panel panel-default">
+      <div class="panel panel-default closed">
         <div class="panel-heading">
-          <h4 class="panel-title">
-            <a role="button" data-toggle="collapse" href="#" aria-expanded="true">
-              [[calendar:response_no]]
-            </a>
-          </h4>
+          <a role="button" data-toggle="collapse" href="#"
+          class="btn btn-sm btn-warning" aria-expanded="true">
+            [[calendar:response_no]]
+            <i class="fa fa-chevron-down pull-right"></i>
+          </a>
         </div>
-        <div class="panel-body">
-          <ul class="plugin-calendar-event-responses-list-no">
-            <!-- no responses go here -->
-          </ul>
+        <div class="panel-collapse">
+          <div class="panel-body">
+            <ul class="plugin-calendar-event-responses-list-no">
+              <!-- no responses go here -->
+            </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -161,7 +166,7 @@ const postTemplate = (event, lang) => {
       <a title="${dateStringUTC}" data-original-title="${dateStringUTC}">${dateString}</a>
     </div>
     ${event.location.length ? `
-    <div class="plugin-calendar-even: ''t-location">
+    <div class="plugin-calendar-event-location">
       <i class="fa fa-location-arrow" aria-hidden="true"></i>
       <span>${event.location}<span>
     </div>

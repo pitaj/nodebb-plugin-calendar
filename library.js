@@ -1,1 +1,1 @@
-module.exports = require('./build/event');
+module.exports = require('./build/lib');

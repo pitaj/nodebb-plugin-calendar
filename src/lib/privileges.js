@@ -3,6 +3,7 @@ const p = Promise.promisify;
 
 const privileges = require.main.require('./src/privileges');
 const privilegesPostCan = p(privileges.posts.can);
+const canViewPost = (pid, uid) => privilegesPostCan('read', pid, uid);
 const canPostEvent = (pid, uid) => privilegesPostCan('plugin-calendar:event:post', pid, uid);
 
 const privilegesList = (list, callback) =>
@@ -13,6 +14,7 @@ const privilegesListHuman = (list, callback) =>
   callback(null, [...list, { name: 'Post events' }]);
 
 export {
+  canViewPost,
   canPostEvent,
   privilegesList,
   privilegesGroupsList,

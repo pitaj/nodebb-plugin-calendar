@@ -5,7 +5,7 @@ const nodeEnv = process.env.NODE_ENV || 'development';
 const isProd = nodeEnv === 'production';
 
 module.exports = {
-  devtool: isProd ? 'hidden-source-map' : 'inline-source-map',
+  // devtool: isProd ? 'hidden-source-map' : 'inline-source-map',
   context: __dirname,
   entry: './src/client/index.js',
   output: {

@@ -45,7 +45,7 @@
   ],
   "templates": "public/templates",
   "languages": "public/languages",
-  "defaultLang": "en_GB",
+  "defaultLang": "en_US",
   "less": [
     "public/event.less",
     "public/calendar.less"

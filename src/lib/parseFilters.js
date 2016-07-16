@@ -5,24 +5,39 @@ import { default as parse, tagTemplate } from './parse';
 
 const p = Promise.promisify;
 
+const translator = require.main.require('./public/src/modules/translator');
+const meta = require.main.require('./src/meta');
 // const cls = require.main.require('./src/middleware/cls');
 // const getLang = () => getUserSettings(cls.get('request').uid).then(x => x.userLang);
-const meta = require.main.require('./src/meta');
 const getLang = () => Promise.resolve(meta.config.defaultLang || 'en_GB');
 
 const user = require.main.require('./src/user');
 const getUserSettings = p(user.getSettings);
+const translate = p((text, language, callback) => {
+  translator.translate(text, language, content => callback(null, content));
+  // callback(null, text);
+});
+
+const eventRX = new RegExp(tagTemplate('event', '[\\w\\W]*'));
+const invalidRX = new RegExp(
+  `(${tagTemplate('event-invalid', '[\\w\\W]*')})`
+);
 
 const parseRaw = async (content, userLang) => {
   const event = parse(content);
   if (!event) {
-    return content;
+    return content.replace(invalidRX, '<span class="hide">$1</span>');
   }
   event.name = validator.escape(event.name);
   const lang = await userLang;
+
+  const eventText = await translate(
+    postTemplate(event, lang.split(/[_@]/)[0]),
+    lang
+  );
   const text = content.replace(
-    new RegExp(tagTemplate('event', '[\\w\\W]*')),
-    postTemplate(event, lang.split(/[_@]/)[0])
+    eventRX,
+    eventText
   );
   return text;
 };

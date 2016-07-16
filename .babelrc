@@ -9,9 +9,5 @@
     "transform-object-rest-spread",
     "transform-es2015-destructuring"
   ],
-  "sourceMaps": "inline",
-  "ignore": [
-    "./client/**",
-    "./tests/**"
-  ]
+  "sourceMaps": "inline"
 }

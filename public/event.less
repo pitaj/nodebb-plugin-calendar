@@ -21,17 +21,15 @@
   .plugin-calendar-event-reminders > ul {
     display: inline-block;
   }
-  .plugin-calendar-event-date,
-  .plugin-calendar-event-description,
-  .plugin-calendar-event-location,
-  .plugin-calendar-event-reminders {
+  .panel-body > div {
     clear: both;
     margin-bottom: 5px;
   }
-  .plugin-calendar-event-reminders ul {
+  .plugin-calendar-event-reminders > ul {
     margin: 0;
     padding: 0;
     list-style: none;
+    margin-bottom: 10px;
 
     li {
       list-style-type: none!important;
@@ -50,6 +48,60 @@
     > div, > ul {
       margin-left: 25px;
       display: inline-block;
+    }
+  }
+
+  .plugin-calendar-event-responses {
+    > div {
+      min-width: 300px;
+    }
+
+    .plugin-calendar-event-responses-user {
+      margin-bottom: 10px;
+    }
+
+    .plugin-calendar-event-responses-lists {
+      .panel {
+        .panel-heading .fa-chevron-down {
+          margin: 0;
+          margin-top: 3px;
+          transition: transform .2s ease;
+          transform: rotateX(180deg);
+        }
+        .panel-collapse {
+          overflow: hidden;
+          transition: height .2s ease;
+        }
+      }
+      .panel.closed {
+        .panel-heading .fa-chevron-down {
+          transform: rotateX(0);
+        }
+        .panel-collapse {
+          height: 0 !important;
+        }
+      }
+
+      .panel-heading a {
+        margin: -11px -16px;
+        margin-bottom: -10px;
+        display: block;
+      }
+
+      .panel .panel-body > ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 0 -5px;
+
+        .user-icon {
+          margin: 0;
+        }
+
+        > li {
+          list-style-type: none;
+          margin: 0 5px;
+        }
+      }
     }
   }
 }
@@ -119,4 +171,8 @@
       margin: 0;
     }
   }
+}
+
+.composer .preview .plugin-calendar-event .plugin-calendar-event-responses {
+  display: none;
 }

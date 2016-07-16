@@ -1,13 +1,11 @@
 /* global $ */
 
-// TODO: rename reminders to reminders
-
 import moment from 'moment';
 
 const zero = moment(0);
 const makeListElement = n => {
   const li = $(
-    `<li class="plugin-calendar-event-editor-reminder">
+    `<li class="plugin-calendar-event-editor-reminder" data-value="${n}">
       ${zero.to(n, true)}
       <a class="remove" href="#">
         <i class="fa fa-times"></i>

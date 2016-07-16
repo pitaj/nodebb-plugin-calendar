@@ -82,6 +82,8 @@ const createEventFactory = () => {
     modal.modal('show');
 
     const submit = modal.find('#plugin-calendar-event-editor-submit');
+    const del = modal.find('#plugin-calendar-event-editor-delete');
+
     const onClick = () => {
       const newEvent = getInputs();
 
@@ -90,6 +92,11 @@ const createEventFactory = () => {
       callback(newEvent);
     };
     submit.on('click', onClick);
+    del.one('click', () => {
+      modal.modal('hide');
+      submit.off('click', onClick);
+      callback(null);
+    });
   };
 
   return createEvent;

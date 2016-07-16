@@ -1,17 +1,16 @@
-const db = require.main.require('./src/database');
 const plugins = require.main.require('./src/plugins');
+// const winston = require.main.require('winston');
+
 import validator from 'validator';
 import Promise from 'bluebird';
-import { default as parse } from './parse'; // tagTemplate
+import { default as parse } from './parse';
 import { canPostEvent } from './privileges';
+import { deleteEvent, saveEvent } from './event';
 
+const log = (...args) => console.log(...args);
 const p = Promise.promisify;
 
-const sortedSetAdd = p(db.sortedSetAdd);
-const setObject = p(db.setObject);
 const fireHook = p(plugins.fireHook);
-
-const listKey = 'plugins:calendar:events';
 
 const isArrayOf = (arr, type) => {
   const isType = typeof type === 'function' ? type : it => typeof it === type;
@@ -29,7 +28,7 @@ const isArrayOf = (arr, type) => {
 const validateEvent = event => {
   const l = (bool, message) => {
     if (!bool) {
-      console.warn('Validation failed at ', message);
+      log('[plugin-calendar] Event validation failed at ', message);
     }
     return bool;
   };
@@ -48,17 +47,28 @@ const validateEvent = event => {
   return null;
 };
 
+const regex = new RegExp(
+  '(\\[\\s?event\\s?\\][\\w\\W]*\\[\\s?\\/\\s?event\\s?\\])|' +
+  '(\\[\\s?event\\-invalid?\\s?\\][\\w\\W]*\\[\\s?\\/\\s?event\\-invalid?\\s?\\])'
+);
+
 const postSave = async postData => {
   let event = parse(postData.content);
 
-  // TODO: remove event if no longer in post
+  // delete event if no longer in post
+  if (!postData.content.match(regex)) {
+    await deleteEvent(postData.pid);
+    log(`[plugin-calendar] Event (pid:${postData.pid}) saved`);
+
+    return postData;
+  }
 
   event = validateEvent(event);
   if (!event || !(await canPostEvent(postData.pid, postData.uid))) {
     return {
       ...postData,
       content: postData.content.replace(
-        /\[\s*(\/*)\s*event\s*\]/g,
+        /\[\s?(\/?)\s?event\s?\]/g,
         '[$1event-invalid]'
       ),
     };
@@ -70,10 +80,8 @@ const postSave = async postData => {
   event.uid = postData.uid;
   event = (await fireHook('filter:plugin-calendar:event.post', event));
 
-  await Promise.all([
-    sortedSetAdd(listKey, event.startDate, `${listKey}:pid:${event.pid}`),
-    setObject(`${listKey}:pid:${event.pid}`, event),
-  ]);
+  await saveEvent(event);
+  log(`[plugin-calendar] Event (pid:${event.pid}) saved`);
 
   return postData;
 };

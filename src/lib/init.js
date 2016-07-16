@@ -12,16 +12,14 @@ export default ({ router, middleware }, callback) => {
   controllers(router, middleware);
 
   const defaults = {
-    permissions: {
-      group: 'registered-users', // anyone can post an event
-    },
+    checkingInterval: 1000 * 60 * 5,
   };
 
   getSettings('plugin-calendar').then(settings =>
     setSettings('plugin-calendar', { ...defaults, ...settings })
-  ).asCallback(callback);
+  )
+  .then(() => initNotifierDaemon())
+  .asCallback(callback);
 
   // TODO: configuration
-
-  initNotifierDaemon();
 };
