@@ -24,7 +24,8 @@ const getAll = async () => {
 
   return events;
 };
-const notify = async ({ event, reminder, till }) => {
+
+const notify = async ({ event, reminder, message }) => {
   let uids;
   // if reminder is for the event start
   // notify 'maybe' and 'yes' responders
@@ -45,7 +46,7 @@ const notify = async ({ event, reminder, till }) => {
 
   const content = await getPostField(event.pid, 'content');
   const notif = await createNotif({
-    bodyShort: `[[calendar:event_starting, ${till}, ${event.name}]]`,
+    bodyShort: `[[calendar:event_starting, ${message}, ${event.name}]]`,
     bodyLong: content,
     nid: `plugin-calendar:tid:${event.tid}:pid:${event.pid}:event`,
     pid: event.pid,
@@ -83,12 +84,12 @@ const initNotifierDaemon = async () => {
           return {
             event,
             reminder,
-            till: '[[calendar:now]]',
+            message: '[[calendar:now]]',
           };
         }
         if (reminder) {
-          const till = mom.to(event.startDate);
-          return { event, reminder, till };
+          const message = mom.to(event.startDate);
+          return { event, reminder, message };
         }
         return null;
       })
@@ -103,4 +104,4 @@ const initNotifierDaemon = async () => {
   daemon();
 };
 
-export { initNotifierDaemon };
+export { initNotifierDaemon, notify };

@@ -5,7 +5,7 @@ const nodeEnv = process.env.NODE_ENV || 'development';
 const isProd = nodeEnv === 'production';
 
 module.exports = {
-  // devtool: isProd ? 'hidden-source-map' : 'inline-source-map',
+  devtool: isProd ? 'hidden-source-map' : 'eval-source-map',
   context: __dirname,
   entry: './src/client/index.js',
   output: {
@@ -25,16 +25,24 @@ module.exports = {
         ],
       },
       {
-        test: /\.(js)$/,
+        test: /\.js$/,
         exclude: /node_modules/,
         loaders: [
           'babel-loader',
         ],
       },
+      {
+        test: /\.ts$/,
+        exclude: /node_modules/,
+        loaders: [
+          'babel-loader',
+          'ts-loader',
+        ],
+      },
     ],
   },
   resolve: {
-    extensions: ['', '.js'],
+    extensions: ['', '.js', '.ts'],
     modules: [
       path.resolve('./src/client/vendor'),
       // path.resolve('../NodeBB/src'),

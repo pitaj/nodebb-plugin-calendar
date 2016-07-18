@@ -65,6 +65,13 @@ const factory = $ul => {
   const radios = popup.find('#plugin-calendar-event-editor-reminder-custom-unit');
   const button = popup.find('button.btn-primary');
 
+  radios.find('.btn').on('click', e => {
+    $(e.target)
+    .addClass('active')
+    .siblings()
+    .removeClass('active');
+  });
+
   const promptCustom = addNotif => {
     button.on('click', () => {
       const unit = radios.find(':checked').val();

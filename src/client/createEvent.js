@@ -1,6 +1,7 @@
 /* global $ */
 
 import remindersFactory from './reminders';
+import validateEvent from '../lib/validateEvent';
 
 const defaultEvent = {
   name: '',
@@ -74,11 +75,14 @@ const createEventFactory = () => {
     return event;
   };
 
-  // TODO: input validation
+  const alertFailure = input => {
+    input.closest('.form-group').addClass('has-error');
+  };
 
   const createEvent = (data, callback) => {
     const event = Object.assign({}, defaultEvent, data);
     setInputs(event);
+    modal.find('.form-group').removeClass('has-error');
     modal.modal('show');
 
     const submit = modal.find('#plugin-calendar-event-editor-submit');
@@ -86,17 +90,36 @@ const createEventFactory = () => {
 
     const onClick = () => {
       const newEvent = getInputs();
+      modal.find('.form-group').removeClass('has-error');
+
+      const [failed, failures] = validateEvent(newEvent);
+      if (failed) {
+        failures.map(failure => inputs[failure]).forEach(alertFailure);
+        return;
+      }
 
       modal.modal('hide');
       submit.off('click', onClick);
       callback(newEvent);
     };
     submit.on('click', onClick);
+
     del.one('click', () => {
       modal.modal('hide');
       submit.off('click', onClick);
       callback(null);
     });
+
+    const onChange = () => {
+      const newEvent = getInputs();
+      modal.find('.form-group').removeClass('has-error');
+
+      const [failed, failures] = validateEvent(newEvent);
+      if (failed) {
+        failures.map(failure => inputs[failure]).forEach(alertFailure);
+      }
+    };
+    modal.find('input').on('change', onChange);
   };
 
   return createEvent;

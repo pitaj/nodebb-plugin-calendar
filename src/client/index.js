@@ -22,7 +22,7 @@ $(document).ready(() => {
   translator.translate(modalTemplate(), lang, html => {
     $('body').append(html);
 
-    setupComposerButton(composer);
+    setupComposerButton(composer, translator);
     $('.plugin-calendar-event-editor-date').datetimepicker({
       icons: {
         time: 'fa fa-clock-o',
@@ -37,6 +37,7 @@ $(document).ready(() => {
       },
       allowInputToggle: true,
       locale: lang,
+      sideBySide: true,
     });
     const createEvent = createEventFactory();
 

@@ -4,6 +4,8 @@ import { postSaveCallback, postEditCallback } from './postSave';
 import { privilegesList, privilegesGroupsList, privilegesListHuman } from './privileges';
 import './sockets';
 
+// TODO: repeating events
+
 const addNavigation = (navs, callback) => {
   navs.push({
     route: '/calendar',

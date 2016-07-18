@@ -111,12 +111,11 @@ const initResponses = () => {
       const pid = target.closest('[component=post]').data('pid');
 
       const toggle = () => {
-        const cont = target
-          .closest('.panel')
-          .toggleClass('closed')
-          .find('.panel-collapse');
+        const panel = target.closest('.panel');
+        const cont = panel.find('.panel-collapse');
         const height = cont.children()[0].scrollHeight;
         cont.css('height', `${height}px`);
+        panel.toggleClass('closed');
       };
 
       if (notLoaded) {

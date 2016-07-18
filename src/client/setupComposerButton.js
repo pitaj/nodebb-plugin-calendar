@@ -1,4 +1,4 @@
-/* global $, socket, app */
+/* global $, socket, app, bootbox */
 
 const find = (posts, data) => {
   const uuid = Object.keys(posts).find(key => {
@@ -17,7 +17,12 @@ const find = (posts, data) => {
   return uuid;
 };
 
-export default composer => {
+const regex = new RegExp(
+  '(\\[\\s?event\\s?\\][\\w\\W]*\\[\\s?\\/\\s?event\\s?\\])|' +
+  '(\\[\\s?event\\-invalid?\\s?\\][\\w\\W]*\\[\\s?\\/\\s?event\\-invalid?\\s?\\])'
+);
+
+export default (composer, translator) => {
   const onChange = data => {
     socket.emit('plugins.calendar.canPostEvent', data, (e, canPost) => {
       const uuid = find(composer.posts, data);
@@ -29,24 +34,59 @@ export default composer => {
       );
     });
   };
+
+  const alterSubmit = data => {
+    if (!data.pid) {
+      return;
+    }
+    setTimeout(() => {
+      const uuid = find(composer.posts, data);
+      const comp = $(`#cmp-uuid-${uuid}`);
+      const write = comp.find('.write-container textarea.write');
+      const eventExisted = regex.test(write.val());
+
+      if (eventExisted) {
+        const button = comp.find('.composer-submit:visible');
+        // TODO: terrible hack. Add a new client-side filter hook for aborting submissions
+        // perhaps `filter:posts.submit`
+
+        /* eslint-disable */
+        const orig = $._data(button[0], 'events').click.map(x => x.handler);
+        /* eslint-enable */
+        const trigger = (self, e) => {
+          orig.forEach(handler => {
+            handler.call(self, e);
+          });
+        };
+        button.off('click').on('click', function onClick(e) {
+          const text = write.val();
+          if (!regex.test(text)) {
+            translator.translate('[[calendar:confirm_delete_event]]', question => {
+              bootbox.confirm(question, okay => {
+                if (okay) {
+                  trigger(this, e);
+                }
+              });
+            });
+          } else {
+            trigger(this, e);
+          }
+        });
+      }
+    }, 200);
+  };
+
   $(window).on('action:composer.post.new action:composer.post.edit action:composer.topic.new',
-  (e, { pid, tid, cid }) => {
-    onChange({
-      tid,
-      cid,
-      pid,
-    });
+  (e, data) => {
+    onChange(data);
+    alterSubmit(data);
   });
   $(document.body).on('change', '.composer .category-list', e => {
     const uuid = $(e.target)
       .closest('.composer')
       .attr('id')
       .replace('cmp-uuid-', '');
-    const { pid, tid, cid } = composer.posts[uuid];
-    onChange({
-      tid,
-      cid,
-      pid,
-    });
+    const data = composer.posts[uuid];
+    onChange(data);
   });
 };

@@ -109,17 +109,42 @@
 #plugin-calendar-event-editor {
   z-index: 10001;
 
+  .plugin-calendar-event {
+    margin: -15px;
+  }
+
+  .plugin-calendar-event-name {
+    .form-group, .error-message {
+      margin: 0;
+    }
+  }
+
   #plugin-calendar-event-editor-name {
     font-size: 135%;
   }
 
+  .form-group .error-message {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .2s ease;
+  }
+
+  .form-group.has-error .error-message {
+    max-height: 1.5em;
+  }
+
   .plugin-calendar-event-reminders > ul {
-    display: block;
+    margin: 0;
+  }
+
+  .plugin-calendar-event-editor-dates {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
   }
 
   .plugin-calendar-event-editor-reminder,
   #plugin-calendar-event-editor-reminders-add {
-    max-width: 200px;
     padding: 3px 20px;
     clear: both;
     font-weight: normal;
@@ -127,17 +152,21 @@
     color: #333;
   }
 
-  .checkbox label {
-    font-weight: bold;
-    padding: 0;
+  .checkbox {
+    margin-top: 0;
 
-    input[type=checkbox] {
-      margin-right: 11px;
-      float: left;
-      margin-left: 0;
-      position: initial;
-      width: 15px;
-      height: 15px;
+    label {
+      font-weight: bold;
+      padding: 0;
+
+      input[type=checkbox] {
+        margin-right: 11px;
+        float: left;
+        margin-left: 0;
+        position: initial;
+        width: 15px;
+        height: 15px;
+      }
     }
   }
 
@@ -165,7 +194,15 @@
       text-align: left;
     }
     #plugin-calendar-event-editor-reminder-custom-unit {
-      margin-left: 30px;
+      // margin-left: 30px;
+
+      .btn-group {
+        display: flex;
+
+        .btn {
+          flex-grow: 1;
+        }
+      }
     }
     .btn .fa {
       margin: 0;

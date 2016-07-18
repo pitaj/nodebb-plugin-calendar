@@ -1,12 +1,12 @@
 {
   "calendar": "Calendar",
-  "add_reminder": "Add a reminder",
   "reminder_custom": "Custom...",
-  "reminder_custom_title": "Custom Notification",
+  "reminder_custom_title": "Custom Reminder",
   "event_title": "Event",
   "edit_event": "Edit Event",
   "event_starting": "Event starting %1: %2",
   "now": "now",
+
   "event_name": "Event name",
   "all_day": "All day",
   "dates": "Dates",
@@ -21,10 +21,19 @@
   "location": "Location",
   "location_ext": "Location of event",
   "reminders": "Reminders",
+  "add_reminder": "Add a reminder",
+
   "today": "today",
+
   "responses_title": "Responses",
   "response_no": "No",
   "response_maybe": "Maybe",
   "response_yes": "Yes",
-  "no_x_responses": "No <b>%1</b> responses yet"
+  "no_x_responses": "No <b>%1</b> responses yet",
+
+  "confirm_delete_event": "Are you sure you want to delete the event in this post? This action cannot be undone.",
+
+  "name_too_short": "Event name must be more than five characters long",
+  "invalid_date": "Selected dates are invalid",
+  "invalid_location": "Location can only be one line"
 }
