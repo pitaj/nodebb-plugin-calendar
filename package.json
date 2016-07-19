@@ -49,7 +49,9 @@
     "eslint-import-resolver-webpack": "^0.3.2",
     "eslint-plugin-babel": "^3.2.0",
     "eslint-plugin-import": "^1.7.0",
+    "exports-loader": "^0.6.3",
     "file-loader": "^0.9.0",
+    "imports-loader": "^0.6.5",
     "jsdoc": "^3.4.0",
     "ts-loader": "^0.8.2",
     "typedoc": "^0.4.4",
@@ -63,7 +65,8 @@
     "fullcalendar": "^2.9.0",
     "intl": "^1.2.4",
     "moment": "^2.14.1",
-    "validator": "^5.2.0"
+    "validator": "^5.2.0",
+    "whatwg-fetch": "^1.0.0"
   },
   "nbbpm": {
     "compatibility": "^1.0.3"

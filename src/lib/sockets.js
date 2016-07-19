@@ -1,15 +1,8 @@
 const privileges = require.main.require('./src/privileges');
 const pluginSockets = require.main.require('./src/socket.io/plugins');
-const categories = require.main.require('./src/categories');
 
 import { getAll as getAllResponses, submitResponse, getUserResponse } from './responses';
 import { getEventsByDate, filterByPid, escapeEvent } from './event';
-import Promise from 'bluebird';
-
-const p = Promise.promisify;
-
-const getAllCategoryFields = p(categories.getAllCategoryFields);
-const filterCids = p(privileges.categories.filterCids);
 
 const perm = 'plugin-calendar:event:post';
 
@@ -46,12 +39,12 @@ pluginSockets.calendar.getUserResponse = ({ uid }, pid, cb) => {
   getUserResponse({ uid, pid }).asCallback(cb);
 };
 
-pluginSockets.calendar.getCategoryColors = ({ uid }, cb) => (async () => {
-  const cats = await getAllCategoryFields(['cid', 'bgColor']);
-  const filtered = await filterCids('read', cats.map(c => c.cid), uid);
-
-  return cats.filter(c => filtered.includes(c.cid));
-})().asCallback(cb);
+// pluginSockets.calendar.getCategoryColors = ({ uid }, cb) => (async () => {
+//   const cats = await getAllCategoryFields(['cid', 'bgColor']);
+//   const filtered = await filterCids('read', cats.map(c => c.cid), uid);
+//
+//   return cats.filter(c => filtered.includes(c.cid));
+// })().asCallback(cb);
 
 pluginSockets.calendar.getEventsByDate = ({ uid }, { startDate, endDate }, cb) =>
   (async () => {

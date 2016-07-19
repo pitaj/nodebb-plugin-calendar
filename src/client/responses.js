@@ -77,7 +77,7 @@ const initResponses = () => {
   $(document.body).on('click', '.plugin-calendar-event-responses-user .btn', e => {
     const button = $(e.target);
     const value = button.data('value');
-    const pid = button.closest('[component=post]').data('pid');
+    const pid = button.closest('[data-pid]').data('pid');
 
     socket.emit('plugins.calendar.submitResponse', { pid, value }, err => {
       if (err) {
@@ -99,7 +99,46 @@ const initResponses = () => {
     }
   };
 
-  $(window).on('action:posts.loaded action:ajaxify.end action:posts.edited', checkPosts);
+  $(window).on('action:calendar.event.display', (e, { pid, modal }) => {
+    const buttonCont = modal.find('.plugin-calendar-event-responses-user');
+    socket.emit('plugins.calendar.getUserResponse', pid, (err, value) => {
+      const button = buttonCont.find(`[data-value=${value}]`);
+
+      button.siblings().removeClass('active');
+      button.addClass('active');
+    });
+
+    const $responses = modal.find('.plugin-calendar-event-responses-lists');
+    socket.emit('plugins.calendar.getResponses', pid, (err, responses) => {
+      if (err) {
+        app.alertError(err);
+        return;
+      }
+      if (!responses ||
+      !responses.yes ||
+      !responses.maybe ||
+      !responses.no) {
+        return;
+      }
+
+      const yess = $responses.find('.plugin-calendar-event-responses-list-yes');
+      const maybes = $responses.find('.plugin-calendar-event-responses-list-maybe');
+      const nos = $responses.find('.plugin-calendar-event-responses-list-no');
+
+      const yes = responses.yes.map(userTemplate);
+      const maybe = responses.maybe.map(userTemplate);
+      const no = responses.no.map(userTemplate);
+
+      yess.empty().append(yes.length ? yes : noYesResponses);
+      maybes.empty().append(maybe.length ? maybe : noMaybeResponses);
+      nos.empty().append(no.length ? no : noNoResponses);
+    });
+  });
+
+  $(window).on(
+    'action:posts.loaded action:ajaxify.end action:posts.edited',
+    checkPosts
+  );
   checkPosts(null, ajaxify.data);
 
   $(document.body).on(

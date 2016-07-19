@@ -1,4 +1,4 @@
-// const webpack = require('webpack');
+const webpack = require('webpack');
 const path = require('path');
 
 const nodeEnv = process.env.NODE_ENV || 'development';
@@ -54,26 +54,29 @@ module.exports = {
       path.resolve('./src/client/vendor'),
     ],
   },
-  // plugins: [
-  //   // new webpack.optimize.CommonsChunkPlugin({
-  //   //   name: 'vendor',
-  //   //   minChunks: Infinity,
-  //   //   filename: 'vendor.bundle.js',
-  //   // }),
-  //   new webpack.LoaderOptionsPlugin({
-  //     minimize: isProd,
-  //     debug: !isProd,
-  //   }),
-  //   isProd && new webpack.optimize.UglifyJsPlugin({
-  //     compress: {
-  //       warnings: false,
-  //     },
-  //     output: {
-  //       comments: false,
-  //     },
-  //     sourceMap: false,
-  //   }),
-  // ],
+  plugins: [
+    // new webpack.optimize.CommonsChunkPlugin({
+    //   name: 'vendor',
+    //   minChunks: Infinity,
+    //   filename: 'vendor.bundle.js',
+    // }),
+    // new webpack.LoaderOptionsPlugin({
+    //   minimize: isProd,
+    //   debug: !isProd,
+    // }),
+    // isProd && new webpack.optimize.UglifyJsPlugin({
+    //   compress: {
+    //     warnings: false,
+    //   },
+    //   output: {
+    //     comments: false,
+    //   },
+    //   sourceMap: false,
+    // }),
+    new webpack.ProvidePlugin({
+      fetch: 'imports?this=>global!exports?global.fetch!whatwg-fetch',
+    }),
+  ],
 };
 
 // console.log(module.exports);
