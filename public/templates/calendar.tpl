@@ -1,3 +1,6 @@
-<h1>[[calendar:where]]</h1>
+<h1>[[calendar:calendar]]</h1>
 
-<h2>Calendar stuff displayed here</h2>
+<div id="calendar"></div>
+
+<script>window['plugin-calendar'] = {{cal}};</script>
+<script src="{relative_path}/plugins/nodebb-plugin-calendar/root/calendar.js"></script>

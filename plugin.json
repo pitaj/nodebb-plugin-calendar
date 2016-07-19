@@ -2,8 +2,9 @@
   "name": "NodeBB Calendar plugin",
   "library": "library.js",
   "staticDirs": {
-    "datetimepicker": "node_modules/eonasdan-bootstrap-datetimepicker/build/js/",
-    "moment": "node_modules/moment/min/"
+    "moment-locales": "node_modules/moment/locale/",
+    "fc-langs": "node_modules/fullcalendar/dist/lang/",
+    "root": "build/"
   },
   "hooks": [
     {
@@ -51,6 +52,6 @@
     "public/calendar.less"
   ],
   "scripts": [
-    "build/client/bundle.js"
+    "build/client.js"
   ]
 }

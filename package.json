@@ -60,6 +60,7 @@
     "bluebird": "^3.4.0",
     "bootstrap-calendar": "github:serhioromano/bootstrap-calendar",
     "eonasdan-bootstrap-datetimepicker": "^4.15.35",
+    "fullcalendar": "^2.9.0",
     "intl": "^1.2.4",
     "moment": "^2.14.1",
     "validator": "^5.2.0"

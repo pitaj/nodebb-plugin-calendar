@@ -68,7 +68,6 @@ const postSave = async postData => {
   event.name = validator.escape(event.name);
   event.pid = postData.pid;
   event.tid = postData.tid;
-  event.cid = postData.cid;
   event.uid = postData.uid;
   event = await fireHook('filter:plugin-calendar:event.post', event);
 

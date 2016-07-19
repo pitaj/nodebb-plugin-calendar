@@ -1,7 +1,6 @@
 /* global $, config */
 
 import 'bootstrap-datetimepicker';
-import 'bootstrap-calendar';
 import moment from 'moment';
 
 import { eventTemplate, modalTemplate } from './templates';
