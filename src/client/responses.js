@@ -183,4 +183,4 @@ const initResponses = () => {
   });
 };
 
-export { initResponses };
+export default initResponses;

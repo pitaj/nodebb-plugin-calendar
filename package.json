@@ -65,6 +65,7 @@
     "fullcalendar": "^2.9.0",
     "intl": "^1.2.4",
     "moment": "^2.14.1",
+    "moment-timezone": "^0.5.4",
     "validator": "^5.2.0",
     "whatwg-fetch": "^1.0.0"
   },

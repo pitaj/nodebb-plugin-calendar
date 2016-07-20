@@ -7,7 +7,8 @@ import { eventTemplate, modalTemplate } from './templates';
 import setupComposerButton from './setupComposerButton';
 import createEventFactory from './createEvent';
 import parse from '../lib/parse';
-import { initResponses } from './responses';
+import initResponses from './responses';
+import initTimeDateViews from './timeDateView';
 
 const lang = config.userLang || config.defaultLang;
 moment.locale(lang);
@@ -64,5 +65,6 @@ $(document).ready(() => {
     $(window).on('action:composer.enhanced', prepareFormattingTools);
 
     initResponses();
+    initTimeDateViews();
   });
 }));

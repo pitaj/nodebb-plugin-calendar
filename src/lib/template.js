@@ -73,12 +73,12 @@ const makeListElement = n => {
 };
 
 const postTemplate = (event, lang) => {
-  const dateString = formatDates(
-    event.startDate,
-    event.endDate,
-    event.allday,
-    lang
-  );
+  // const dateString = formatDates(
+  //   event.startDate,
+  //   event.endDate,
+  //   event.allday,
+  //   lang
+  // );
   const dateStringUTC = formatDates(
     event.startDate,
     event.endDate,
@@ -163,7 +163,15 @@ const postTemplate = (event, lang) => {
   <div class="panel-body">
     <div class="plugin-calendar-event-date">
       <i class="fa fa-clock-o" aria-hidden="true"></i>
-      <a title="${dateStringUTC}" data-original-title="${dateStringUTC}">${dateString}</a>
+      <a
+        data-parsed="false"
+        data-allday="${event.allday}"
+        data-startDate="${event.startDate}"
+        data-endDate="${event.endDate}"
+        title="${dateStringUTC}"
+        data-original-title="${dateStringUTC}"
+        class="plugin-calendar-time-date-view"
+      >Hover for UTC date</a>
     </div>
     ${event.location.length ? `
     <div class="plugin-calendar-event-location">
@@ -195,4 +203,4 @@ const postTemplate = (event, lang) => {
 };
 
 export default postTemplate;
-export { formatDates };
+// export { formatDates };
