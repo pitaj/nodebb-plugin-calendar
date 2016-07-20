@@ -31,14 +31,26 @@ module.exports = {
         test: /\.js$/,
         exclude: /node_modules/,
         loaders: [
-          'babel-loader',
+          {
+            loader: 'babel-loader',
+            query: {
+              presets: ['es2015-native-modules'],
+              plugins: ['transform-runtime'],
+            },
+          },
         ],
       },
       {
         test: /\.ts$/,
         exclude: /node_modules/,
         loaders: [
-          'babel-loader',
+          {
+            loader: 'babel-loader',
+            query: {
+              presets: ['es2015-native-modules'],
+              plugins: ['transform-runtime'],
+            },
+          },
           'ts-loader',
         ],
       },
