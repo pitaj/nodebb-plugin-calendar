@@ -42,6 +42,9 @@
     },
     {
       "hook": "filter:composer.formatting", "method": "composerFormatting", "priority": 19
+    },
+    {
+      "hook": "action:post.delete", "method": "postDelete"
     }
   ],
   "templates": "public/templates",

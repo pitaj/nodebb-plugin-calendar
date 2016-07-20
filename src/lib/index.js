@@ -2,6 +2,7 @@ import init from './init';
 import { parsePostCallback, parseRawCallback } from './parseFilters';
 import { postSaveCallback, postEditCallback } from './postSave';
 import { privilegesList, privilegesGroupsList, privilegesListHuman } from './privileges';
+import { deleteEvent } from './event';
 import './sockets';
 
 // TODO: repeating events
@@ -34,6 +35,8 @@ const composerFormatting = (data, callback) => {
   callback(null, data);
 };
 
+const postDelete = (pid, cb) => deleteEvent(pid).asCallback(cb);
+
 export {
   init,
   addNavigation,
@@ -46,4 +49,5 @@ export {
   privilegesListHuman,
   postEditCallback as postEdit,
   composerFormatting,
+  postDelete,
 };
