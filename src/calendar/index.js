@@ -81,6 +81,7 @@ const calendarOptions = {
         .modal('show');
     });
   },
+  timezone: 'local',
 };
 
 /* eslint-disable */
