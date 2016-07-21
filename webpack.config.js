@@ -13,7 +13,7 @@ module.exports = {
   },
   output: {
     path: path.join(__dirname, './build'),
-    filename: '[name].js',
+    filename: '[name].bundle.js',
   },
   // amd: {
   //   jQuery: true,
@@ -67,11 +67,6 @@ module.exports = {
     ],
   },
   plugins: [
-    // new webpack.optimize.CommonsChunkPlugin({
-    //   name: 'vendor',
-    //   minChunks: Infinity,
-    //   filename: 'vendor.bundle.js',
-    // }),
     // new webpack.LoaderOptionsPlugin({
     //   minimize: isProd,
     //   debug: !isProd,
@@ -87,6 +82,10 @@ module.exports = {
     // }),
     new webpack.ProvidePlugin({
       fetch: 'imports?this=>global!exports?global.fetch!whatwg-fetch',
+    }),
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'commons',
+      minChunks: 2,
     }),
   ],
 };

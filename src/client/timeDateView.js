@@ -53,6 +53,7 @@ const initTimeDateViews = () => {
     'action:posts.loaded action:ajaxify.end action:posts.edited action:calendar.event.display',
     parseTimeDateViews
   );
+  parseTimeDateViews();
 };
 
 export default initTimeDateViews;

@@ -9,5 +9,6 @@
     "transform-object-rest-spread",
     "transform-es2015-destructuring"
   ],
+  "presets": ["es2015-node4"],
   "sourceMaps": "inline"
 }

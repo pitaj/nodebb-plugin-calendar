@@ -55,6 +55,7 @@
     "public/calendar.less"
   ],
   "scripts": [
-    "build/client.js"
+    "build/commons.bundle.js",
+    "build/client.bundle.js"
   ]
 }

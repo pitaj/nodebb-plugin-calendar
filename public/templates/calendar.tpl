@@ -1,6 +1,6 @@
 <div id="calendar"></div>
 
-<script src="{relative_path}/plugins/nodebb-plugin-calendar/root/calendar.js"></script>
+<script src="{relative_path}/plugins/nodebb-plugin-calendar/root/calendar.bundle.js"></script>
 <style type="text/css" class="plugin-calendar-cal-styles">{{calendarEventsStyle}}</style>
 
 <div class="modal fade" id="plugin-calendar-cal-event-display" tabindex="-1"
