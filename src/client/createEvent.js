@@ -19,7 +19,10 @@ const formats = {
 };
 
 const createEventFactory = () => {
-  const modal = $('#plugin-calendar-event-editor');
+  const modal = $('#plugin-calendar-event-editor').modal({
+    backdrop: false,
+    show: false,
+  });
   const inputs = {
     name: modal.find('#plugin-calendar-event-editor-name'),
     allday: modal.find('#plugin-calendar-event-editor-allday'),

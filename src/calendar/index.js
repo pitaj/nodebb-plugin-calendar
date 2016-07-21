@@ -1,4 +1,4 @@
-/* global socket, $, config, app, RELATIVE_PATH, fetch */
+/* global socket, $, config, app, RELATIVE_PATH, fetch, ajaxify */
 
 import './vendor/fullcalendar';
 
@@ -13,14 +13,6 @@ const convertToFC = event => {
   };
 
   return ev;
-};
-
-const toggle = e => {
-  const panel = $(e.target).closest('.panel');
-  const cont = panel.find('.panel-collapse');
-  const height = cont.children()[0].scrollHeight;
-  cont.css('height', `${height}px`);
-  panel.toggleClass('closed');
 };
 
 const calendarOptions = {
@@ -67,9 +59,9 @@ const calendarOptions = {
       modal
         .find('.modal-footer a.btn-primary')
         .attr('href', `${RELATIVE_PATH}/post/${pid}`);
-      modal
-        .find('.modal-body .plugin-calendar-event-responses-lists .panel-heading a')
-        .on('click', toggle);
+      // modal
+      //   .find('.modal-body .plugin-calendar-event-responses-lists .panel-heading a')
+      //   .on('click', toggle);
       modal
         .find('.plugin-calendar-event-responses-lists .panel-body')
         .addClass('topic')
@@ -78,41 +70,26 @@ const calendarOptions = {
       $(window).trigger('action:calendar.event.display', { pid, modal });
       modal
         .attr('data-pid', pid)
-        .modal('show');
+        .modal({
+          backdrop: false,
+        });
     });
   },
   timezone: 'local',
 };
 
-/* eslint-disable */
-// function shadeColor2(color, percent) {
-//   var f=parseInt(color.slice(1),16),t=percent<0?0:255,p=percent<0?percent*-1:percent,R=f>>16,G=f>>8&0x00FF,B=f&0x0000FF;
-//   return "#"+(0x1000000+(Math.round((t-R)*p)+R)*0x10000+(Math.round((t-G)*p)+G)*0x100+(Math.round((t-B)*p)+B)).toString(16).slice(1);
-// }
-/* eslint-enable */
+const openEvent = () => {
+  // TODO: automatically go to an open event when pid is in hash of url
+};
 
 const init = () => {
-  // socket.emit('plugins.calendar.getCategoryColors', (err, colors) => {
-  //   if (err) {
-  //     app.alertError(err);
-  //     return;
-  //   }
-  //   let style = '<style type="text/css" class="plugin-calendar-cal-styles">';
-  //   for (const { cid, bgColor } of colors) {
-  //     style += `.plugin-calendar-cal-event-category-${cid} {
-  //       background-color: ${bgColor};
-  //       border-color: ${shadeColor2(bgColor, -0.2)};
-  //     }`;
-  //   }
-  //   style += '</style>';
-  //   $(document.head).append(style);
-  // });
-
   $('#calendar').fullCalendar(calendarOptions);
-
-  $(window).on('action:ajaxify.end', () => {
-    // TODO: automatically go to and open event when pid is in hash of url
-  });
+  openEvent();
 };
 
 $(document).ready(init);
+$(window).on('action:ajaxify.end', () => {
+  if (ajaxify.data.template.calendar) {
+    init();
+  }
+});
