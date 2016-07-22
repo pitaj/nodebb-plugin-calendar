@@ -38,13 +38,14 @@ const postSave = async postData => {
     return postData;
   }
 
-  const invalid = () => ({
-    ...postData,
-    content: postData.content.replace(
+  const invalid = () => {
+    const d = postData;
+    d.content = d.content.replace(
       /\[\s?(\/?)\s?event\s?\]/g,
       '[$1event-invalid]'
-    ),
-  });
+    );
+    return postData;
+  };
 
   if (!event) {
     return invalid();
@@ -78,9 +79,6 @@ const postSave = async postData => {
 
 const postSaveCallback = (postData, cb) => postSave(postData).asCallback(cb);
 const postEditCallback = (data, cb) =>
-  postSave(data.post).then(postData => ({
-    ...data,
-    post: postData,
-  })).asCallback(cb);
+  postSave(data.post).then(() => data).asCallback(cb);
 
 export { postSave, postSaveCallback, postEditCallback };

@@ -42,15 +42,13 @@ const parseRaw = async (content, userLang) => {
   return text;
 };
 
-const parsePost = async ({ postData }) => {
+const parsePost = async data => {
+  const postData = data.postData;
   const content = await parseRaw(postData.content,
     getUserSettings(postData.uid).then(x => x.userLang));
-  return {
-    postData: {
-      ...postData,
-      content,
-    },
-  };
+  postData.content = content;
+
+  return data;
 };
 
 const parsePostCallback = (postData, cb) => parsePost(postData).asCallback(cb);
