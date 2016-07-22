@@ -2,8 +2,6 @@
   "name": "NodeBB Calendar plugin",
   "library": "library.js",
   "staticDirs": {
-    "moment-locales": "node_modules/moment/locale/",
-    "fc-langs": "node_modules/fullcalendar/dist/lang/",
     "root": "build/"
   },
   "hooks": [
