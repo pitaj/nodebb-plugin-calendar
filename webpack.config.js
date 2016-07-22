@@ -8,16 +8,13 @@ module.exports = {
   devtool: isProd ? 'hidden-source-map' : 'eval-source-map',
   context: __dirname,
   entry: {
-    client: './src/client/index.js',
-    calendar: './src/calendar/index.js',
+    client: ['babel-polyfill', './src/client/index.js'],
+    calendar: ['babel-polyfill', './src/calendar/index.js'],
   },
   output: {
     path: path.join(__dirname, './build'),
     filename: '[name].bundle.js',
   },
-  // amd: {
-  //   jQuery: true,
-  // },
   module: {
     loaders: [
       {

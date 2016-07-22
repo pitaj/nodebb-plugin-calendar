@@ -1,6 +1,5 @@
 /* global $, config */
 
-import 'babel-polyfill';
 import 'bootstrap-datetimepicker';
 import moment from 'moment';
 
