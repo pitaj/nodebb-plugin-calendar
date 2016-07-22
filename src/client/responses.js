@@ -4,10 +4,11 @@ const userTemplate = user => (`
   <li class="icon pull-left">
     <a href="${config.relative_path}/user/${user.userslug}">
   		${user.picture ? `
-      <img title="${user.username}" class="img-rounded user-img" src="${user.picture}">
+      <img title="${user.username}" class="img-rounded user-img not-responsive"
+        src="${user.picture}">
       `	: `
       <div class="user-icon user-img" style="background-color: ${user['icon:bgColor']};"
-      title="${user.username}">${user['icon:text']}</div>
+        title="${user.username}">${user['icon:text']}</div>
       `}
   	</a>
   </li>
