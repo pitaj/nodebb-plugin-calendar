@@ -8,8 +8,8 @@ module.exports = {
   devtool: isProd ? 'hidden-source-map' : 'eval-source-map',
   context: __dirname,
   entry: {
-    client: ['babel-polyfill', './src/client/index.js'],
-    calendar: ['babel-polyfill', './src/calendar/index.js'],
+    client: ['core-js/shim', './src/client/index.js'],
+    calendar: ['core-js/shim', './src/calendar/index.js'],
   },
   output: {
     path: path.join(__dirname, './build'),
@@ -32,7 +32,12 @@ module.exports = {
             loader: 'babel-loader',
             query: {
               presets: ['es2015-native-modules'],
-              plugins: ['transform-runtime'],
+              plugins: [
+                ['transform-runtime', {
+                  polyfill: false,
+                  regenerator: false,
+                }],
+              ],
             },
           },
         ],
@@ -77,9 +82,6 @@ module.exports = {
     //   },
     //   sourceMap: false,
     // }),
-    new webpack.ProvidePlugin({
-      fetch: 'imports?this=>global!exports?global.fetch!whatwg-fetch',
-    }),
     new webpack.optimize.CommonsChunkPlugin({
       name: 'commons',
       minChunks: 2,

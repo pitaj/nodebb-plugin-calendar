@@ -107,8 +107,8 @@ const postTemplate = (event, lang) => {
         <div class="panel-heading">
           <a role="button" data-toggle="collapse" href="#"
           class="btn btn-sm btn-info" aria-expanded="true">
-            [[calendar:response_yes]]
             <i class="fa fa-chevron-down pull-right"></i>
+            [[calendar:response_yes]]
           </a>
         </div>
         <div class="panel-collapse">
@@ -123,8 +123,8 @@ const postTemplate = (event, lang) => {
         <div class="panel-heading">
           <a role="button" data-toggle="collapse" href="#"
           class="btn btn-sm btn-link" aria-expanded="true">
-            [[calendar:response_maybe]]
             <i class="fa fa-chevron-down pull-right"></i>
+            [[calendar:response_maybe]]
           </a>
         </div>
         <div class="panel-collapse">
@@ -139,8 +139,8 @@ const postTemplate = (event, lang) => {
         <div class="panel-heading">
           <a role="button" data-toggle="collapse" href="#"
           class="btn btn-sm btn-warning" aria-expanded="true">
-            [[calendar:response_no]]
             <i class="fa fa-chevron-down pull-right"></i>
+            [[calendar:response_no]]
           </a>
         </div>
         <div class="panel-collapse">
@@ -203,4 +203,4 @@ const postTemplate = (event, lang) => {
 };
 
 export default postTemplate;
-// export { formatDates };
+export { formatDates };

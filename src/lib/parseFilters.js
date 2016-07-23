@@ -15,7 +15,6 @@ const user = require.main.require('./src/user');
 const getUserSettings = p(user.getSettings);
 const translate = p((text, language, callback) => {
   translator.translate(text, language, content => callback(null, content));
-  // callback(null, text);
 });
 
 const eventRX = new RegExp(tagTemplate('event', '[\\w\\W]*'));

@@ -1,3 +1,6 @@
+// Polyfills
+import 'core-js/shim';
+
 import init from './init';
 import { parsePostCallback, parseRawCallback } from './parseFilters';
 import { postSaveCallback, postEditCallback } from './postSave';

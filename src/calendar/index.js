@@ -15,6 +15,53 @@ const convertToFC = event => {
   return ev;
 };
 
+const queryRegExp = /&event=([0-9]+)/;
+const globalRegExp = /&event=([0-9]+)/g;
+
+const displayEvent = (event, e, cb) => {
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  const pid = event.id;
+
+  socket.emit('plugins.calendar.getParsedEvent', pid, (err, { content, parsed }) => {
+    if (err) {
+      app.alertError(err.message || err);
+      return;
+    }
+
+    const div = $(content);
+    const modal = $('#plugin-calendar-cal-event-display');
+    modal
+      .find('.modal-body')
+      .empty()
+      .append(div);
+    modal
+      .find('.modal-footer a.btn-primary')
+      .attr('href', `${RELATIVE_PATH}/post/${pid}`);
+    modal
+      .find('.plugin-calendar-event-responses-lists .panel-body')
+      .addClass('topic')
+      .find('ul')
+      .addClass('posts');
+    modal
+      .attr('data-pid', pid)
+      .modal({
+        backdrop: false,
+      });
+    modal.on('hide.bs.modal', () => {
+      location.hash = location.hash.replace(globalRegExp, '');
+    });
+    $(window).trigger('action:calendar.event.display', { pid, modal });
+    location.hash = `${location.hash.replace(globalRegExp, '') || '#'}&event=${pid}`;
+
+    if (typeof cb === 'function') {
+      cb({ content, parsed });
+    }
+  });
+};
+
 const calendarOptions = {
   editable: false,
   header: {
@@ -29,62 +76,35 @@ const calendarOptions = {
       endDate: end.valueOf(),
     }, (err, events) => {
       if (err) {
-        app.alertError(err);
+        app.alertError(err.message || err);
         return;
       }
       callback(events.map(convertToFC));
     });
   },
-  eventClick: event => {
-    const pid = event.id;
-    fetch(`${RELATIVE_PATH}/api/post/${pid}`)
-    .then(response => response.json())
-    .then(path => fetch(`${RELATIVE_PATH}/api${path}`))
-    .then(response => response.json())
-    .then(topic => topic.posts.find(post => parseInt(post.pid, 10) === pid).content)
-    .then(content => {
-      const $c = $(content);
-      let div = $c.filter('.plugin-calendar-event');
-      if (!div.length) {
-        div = $c.find('.plugin-calendar-event');
-      }
-      return div;
-    })
-    .then(div => {
-      const modal = $('#plugin-calendar-cal-event-display');
-      modal
-        .find('.modal-body')
-        .empty()
-        .append(div);
-      modal
-        .find('.modal-footer a.btn-primary')
-        .attr('href', `${RELATIVE_PATH}/post/${pid}`);
-      // modal
-      //   .find('.modal-body .plugin-calendar-event-responses-lists .panel-heading a')
-      //   .on('click', toggle);
-      modal
-        .find('.plugin-calendar-event-responses-lists .panel-body')
-        .addClass('topic')
-        .find('ul')
-        .addClass('posts');
-      $(window).trigger('action:calendar.event.display', { pid, modal });
-      modal
-        .attr('data-pid', pid)
-        .modal({
-          backdrop: false,
-        });
-    });
-  },
+  eventClick: displayEvent,
   timezone: 'local',
 };
 
-const openEvent = () => {
-  // TODO: automatically go to an open event when pid is in hash of url
+const openEvent = fc => {
+  // TODO: possibly use server rendering instead of sockets
+  const matches = location.hash.match(queryRegExp);
+  const pid = matches && parseInt(matches[1], 10);
+
+  if (!pid) {
+    return;
+  }
+
+  setTimeout(() => {
+    displayEvent({ id: pid }, null, ({ parsed }) => {
+      fc.fullCalendar('gotoDate', parsed.startDate);
+    });
+  }, 200);
 };
 
 const init = () => {
-  $('#calendar').fullCalendar(calendarOptions);
-  openEvent();
+  const fc = $('#calendar').fullCalendar(calendarOptions);
+  openEvent(fc);
 };
 
 $(document).ready(init);

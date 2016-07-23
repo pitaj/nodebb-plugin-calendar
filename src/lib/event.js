@@ -1,7 +1,7 @@
 const db = require.main.require('./src/database');
 const privileges = require.main.require('./src/privileges');
 const plugins = require.main.require('./src/plugins');
-const topics = require.main.require('./src/topics');
+const posts = require.main.require('./src/posts');
 
 import Promise from 'bluebird';
 import { removeAll as removeAllResponses } from './responses';
@@ -18,8 +18,8 @@ const deleteKey = p(db.delete);
 const exists = p(db.exists);
 const filterPids = p(privileges.posts.filter);
 const fireHook = p(plugins.fireHook);
-const getTopicsFields = p(topics.getTopicsFields);
-const getTopicField = p(topics.getTopicField);
+const getCidsByPids = p(posts.getCidsByPids);
+const getCidByPid = p(posts.getCidByPid);
 
 const listKey = 'plugins:calendar:events';
 
@@ -38,11 +38,11 @@ const getEventsByDate = async (startDate, endDate) => {
   const keys = await getSortedSetRangeByScore(listKey, 0, -1, startDate, endDate);
   const events = await getObjects(keys);
 
-  const topicsWithCids = await getTopicsFields(events.map(ev => ev.tid), ['cid']);
+  const cids = await getCidsByPids(events.map(event => event.pid));
 
-  return events.map((ev, i) => ({
-    ...ev,
-    cid: topicsWithCids[i].cid,
+  return events.map((event, i) => ({
+    ...event,
+    cid: cids[i],
   }));
 };
 
@@ -50,7 +50,7 @@ const eventExists = pid => exists(`${listKey}:pid:${pid}`);
 
 const getEvent = async pid => {
   const event = await getObject(`${listKey}:pid:${pid}`);
-  const { cid } = await getTopicField(event.tid, 'cid');
+  const cid = await getCidByPid(event.pid);
 
   return {
     ...event,
