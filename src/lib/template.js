@@ -90,7 +90,7 @@ const postTemplate = (event, lang) => {
   const responsesTemplate = `
 <div class="plugin-calendar-event-responses">
   <i class="fa fa-reply" aria-hidden="true"></i>
-  <div>
+  <div class="col-xs-12 col-sm-6">
     <div class="plugin-calendar-event-responses-user btn-group">
       <button data-value="no" type="button" class="btn btn-sm btn-danger">
         [[calendar:response_no]]
