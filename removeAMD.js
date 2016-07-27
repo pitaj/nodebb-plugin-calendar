@@ -35,25 +35,6 @@ const dtp = text =>
     .replace(replaceInDTP, replaceWithDTP)
     .replace(/'use strict';/g, '');
 
-// const replaceInMomentLocales =
-// `;(function (global, factory) {
-//    typeof exports === 'object' && typeof module !== 'undefined'
-//        && typeof require === 'function' ? factory(require('../moment')) :
-//    typeof define === 'function' && define.amd ? define(['../moment'], factory) :
-//    factory(global.moment)
-// }(this, function (moment) { 'use strict';`;
-//
-// const replaceWithMomentLocales =
-// `import moment from "moment";
-// (function (factory) {
-//    factory(moment);
-// }(function (moment) {`;
-//
-// const momentLocales = text =>
-//   text
-//     .replace(replaceInMomentLocales, replaceWithMomentLocales)
-//     .replace(/'use strict';/g, '');
-
 module.exports = function loader(content) {
   if (this.resourcePath.includes('fullcalendar/dist/lang')) {
     const output = fullCalendarLang(content);

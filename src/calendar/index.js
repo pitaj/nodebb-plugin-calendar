@@ -2,13 +2,6 @@
 
 import 'fullcalendar';
 
-const lang = config.userLang || config.defaultLang;
-const momentLang = lang.toLowerCase().replace(/_/g, '-');
-
-if (momentLang !== 'en-us') {
-  require(`bundle!fullcalendar/dist/lang/${momentLang}`)(() => null);
-}
-
 const convertToFC = event => {
   const ev = {
     id: event.pid,
@@ -69,61 +62,81 @@ const displayEvent = (event, e, cb) => {
   });
 };
 
-const calendarOptions = {
-  editable: false,
-  header: {
-    left: 'prev,next today',
-    center: 'title',
-    right: 'month,agendaWeek,agendaDay',
-  },
-  lang: momentLang,
-  events: (start, end, timezone, callback) => {
-    socket.emit('plugins.calendar.getEventsByDate', {
-      startDate: start.valueOf(),
-      endDate: end.valueOf(),
-    }, (err, events) => {
-      if (err) {
-        app.alertError(err.message || err);
-        return;
-      }
-      callback(events.map(convertToFC));
-    });
-  },
-  eventClick: displayEvent,
-  timezone: 'local',
-};
+const begin = (momentLang) => {
+  const calendarOptions = {
+    editable: false,
+    header: {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'month,agendaWeek,agendaDay',
+    },
+    lang: momentLang,
+    events: (start, end, timezone, callback) => {
+      socket.emit('plugins.calendar.getEventsByDate', {
+        startDate: start.valueOf(),
+        endDate: end.valueOf(),
+      }, (err, events) => {
+        if (err) {
+          app.alertError(err.message || err);
+          return;
+        }
+        callback(events.map(convertToFC));
+      });
+    },
+    eventClick: displayEvent,
+    timezone: 'local',
+  };
 
-const openEvent = fc => {
-  // TODO: possibly use server rendering instead of sockets
-  const matches = location.hash.match(queryRegExp);
-  const pid = matches && parseInt(matches[1], 10);
+  const openEvent = fc => {
+    // TODO: possibly use server rendering instead of sockets
+    const matches = location.hash.match(queryRegExp);
+    const pid = matches && parseInt(matches[1], 10);
 
-  if (!pid) {
+    if (!pid) {
+      setTimeout(() => {
+        $('#plugin-calendar-cal-event-display').modal({
+          backdrop: false,
+          show: false,
+          hide: true,
+        });
+      }, 200);
+      return;
+    }
+
     setTimeout(() => {
-      $('#plugin-calendar-cal-event-display').modal({
-        backdrop: false,
-        show: false,
-        hide: true,
+      displayEvent({ id: pid }, null, ({ parsed }) => {
+        fc.fullCalendar('gotoDate', parsed.startDate);
       });
     }, 200);
-    return;
-  }
+  };
 
-  setTimeout(() => {
-    displayEvent({ id: pid }, null, ({ parsed }) => {
-      fc.fullCalendar('gotoDate', parsed.startDate);
+  const init = () => {
+    const fc = $('#calendar').fullCalendar(calendarOptions);
+    openEvent(fc);
+  };
+
+  $(document).ready(init);
+  $(window).on('action:ajaxify.end popstate', () => {
+    if (ajaxify.data.template.calendar) {
+      init();
+    }
+  });
+};
+
+__webpack_public_path__ = `${RELATIVE_PATH}/plugins/nodebb-plugin-calendar/bundles/`; // eslint-disable-line
+
+const lang = config.userLang || config.defaultLang;
+const momentLang = lang.toLowerCase().replace(/_/g, '-');
+
+try {
+  if (momentLang === 'en-us') {
+    begin('en-us');
+  } else {
+    require(`bundle!fullcalendar/dist/lang/${momentLang}`)(() => { // eslint-disable-line
+      begin(momentLang);
     });
-  }, 200);
-};
-
-const init = () => {
-  const fc = $('#calendar').fullCalendar(calendarOptions);
-  openEvent(fc);
-};
-
-$(document).ready(init);
-$(window).on('action:ajaxify.end popstate', () => {
-  if (ajaxify.data.template.calendar) {
-    init();
   }
-});
+} catch (e) {
+  console.error(`could not load locale data (${momentLang}) for fullcalendar`);
+  begin('en-us');
+}
