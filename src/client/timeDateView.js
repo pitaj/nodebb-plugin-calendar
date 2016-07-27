@@ -1,40 +1,9 @@
-/* global $ */
+/* global $, config */
 
-import moment from 'moment';
+import { formatDates } from '../lib/template';
 
-const justDate = 'dddd, LL';
-const justTime = 'LT';
-const dateAndTime = 'LLLL';
-
-const formatDates = (s, e, allday, utc) => {
-  const mom = utc ? moment.utc : moment;
-
-  const start = mom(s);
-  const end = mom(e);
-
-  if (Math.abs(s - e) <= 60 * 1000) {
-    if (allday) {
-      return start.format(justDate);
-    }
-    return start.format(dateAndTime);
-  }
-
-  if (
-    start.dayOfYear() === end.dayOfYear() &&
-    start.year() === end.year()
-  ) {
-    if (allday) {
-      return start.format(justDate);
-    }
-    return `${start.format(justDate)}<br>` +
-      `${start.format(justTime)} - ${end.format(justTime)}`;
-  }
-
-  if (allday) {
-    return `${start.format(justDate)} - ${end.format(justDate)}`;
-  }
-  return `${start.format(dateAndTime)} - ${end.format(dateAndTime)}`;
-};
+const lang = config.userLang || config.defaultLang;
+const momentLang = lang.toLowerCase().replace(/_/g, '-');
 
 const parseTimeDateViews = () => {
   $('.plugin-calendar-time-date-view[data-parsed=false]').each((i, elem) => {
@@ -42,7 +11,7 @@ const parseTimeDateViews = () => {
     const s = parseInt(el.attr('data-startDate'), 10);
     const e = parseInt(el.attr('data-endDate'), 10);
     const allday = el.attr('data-allday') === 'true';
-    const dateString = formatDates(s, e, allday);
+    const dateString = formatDates(s, e, allday, momentLang);
 
     el.html(dateString);
   });

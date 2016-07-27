@@ -1,8 +1,19 @@
 const webpack = require('webpack');
 const path = require('path');
+const fs = require('fs');
 
 const nodeEnv = process.env.NODE_ENV || 'development';
 const isProd = nodeEnv === 'production';
+
+const dir = path.resolve(path.dirname(require.resolve('moment')), './locale');
+const locales = fs.readdirSync(dir).map(locale => path.basename(locale, '.js'));
+let alias = locales.map(locale =>
+  locale.includes('-') &&
+  !locales.includes(locale.split('-')[0]) &&
+  { [path.join('moment/locale/', locale.split('-')[0])]: path.join('moment/locale/', locale) }
+)
+.filter(Boolean);
+alias = Object.assign({}, ...alias);
 
 module.exports = {
   devtool: isProd ? 'hidden-source-map' : 'eval-source-map',
@@ -12,8 +23,8 @@ module.exports = {
     calendar: ['core-js/shim', './src/calendar/index.js'],
   },
   output: {
-    path: path.join(__dirname, './build'),
-    filename: '[name].bundle.js',
+    path: path.join(__dirname, './build/bundles'),
+    filename: '[name].js',
   },
   module: {
     loaders: [
@@ -43,6 +54,11 @@ module.exports = {
         ],
       },
       {
+        test: /\.js$/,
+        include: /node_modules/,
+        loader: './removeAMD',
+      },
+      {
         test: /\.ts$/,
         exclude: /node_modules/,
         loaders: [
@@ -61,12 +77,10 @@ module.exports = {
   resolve: {
     extensions: ['', '.js', '.ts'],
     modules: [
-      path.resolve('./src/client/vendor'),
       'node_modules',
     ],
-    root: [
-      path.resolve('./src/client/vendor'),
-    ],
+    root: [],
+    // alias,
   },
   plugins: [
     // new webpack.LoaderOptionsPlugin({
@@ -86,6 +100,35 @@ module.exports = {
       name: 'commons',
       minChunks: 2,
     }),
+    new webpack.IgnorePlugin(/^\.\/locale$/, [/moment$/]),
+    function resolve(compiler) {
+      const locs = locales.map(locale => path.join('moment/locale/', locale));
+
+      compiler.resolvers.normal.plugin('module', (request, callback) => {
+        if (
+          !locs.includes(request.request)
+        ) {
+          if (locs.includes(request.request.split('-')[0])) {
+            callback(null, {
+              ...request,
+              request: request.request.split('-')[0],
+            });
+            return;
+          }
+          const r = request.request.split('-')[0];
+          const locale = locs.find(loc => loc.split('-')[0] === r);
+          if (locale) {
+            callback(null, {
+              ...request,
+              request: locale,
+            });
+            return;
+          }
+        } else {
+          callback();
+        }
+      });
+    },
   ],
 };
 

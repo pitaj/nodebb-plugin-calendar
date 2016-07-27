@@ -1,68 +1,38 @@
 import moment from 'moment';
-import IntlPolyfill from 'intl';
-Intl.NumberFormat = IntlPolyfill.NumberFormat;
-Intl.DateTimeFormat = IntlPolyfill.DateTimeFormat;
 
-const stringOptions = {
-  date: {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  },
-  time: {
-    hour: 'numeric',
-    minute: 'numeric',
-  },
-  full: {},
-};
-
-stringOptions.full = {
-  ...stringOptions.date,
-  ...stringOptions.time,
-};
-
-stringOptions.UTC = Object.keys(stringOptions).reduce((utc, key) => ({
-  ...utc,
-  [key]: {
-    ...stringOptions[key],
-    timeZone: 'UTC',
-    timeZoneName: 'short',
-  },
-}), {});
+const justDate = 'dddd, LL';
+const justTime = 'LT';
+const dateAndTime = 'LLLL';
 
 const formatDates = (s, e, allday, lang, utc) => {
-  const start = new Date(s);
-  const end = new Date(e);
+  const mom = utc ? moment.utc : moment;
+  moment.locale(lang);
 
-  const options = utc ? stringOptions.UTC : stringOptions;
+  const start = mom(s);
+  const end = mom(e);
 
   if (Math.abs(s - e) <= 60 * 1000) {
     if (allday) {
-      return start.toLocaleDateString(lang, options.date);
+      return start.format(justDate);
     }
-    return start.toLocaleString(lang, options.full);
+    return start.format(dateAndTime);
   }
 
   if (
-    start.getDate() === end.getDate() &&
-    start.getMonth() === end.getMonth() &&
-    start.getYear() === end.getYear()
+    start.dayOfYear() === end.dayOfYear() &&
+    start.year() === end.year()
   ) {
     if (allday) {
-      return start.toLocaleDateString(lang, options.date);
+      return start.format(justDate);
     }
-    return `${start.toLocaleDateString(lang, options.date)}<br>` +
-      `${start.toLocaleTimeString(lang, options.time)}` +
-      ` - ${end.toLocaleTimeString(lang, options.time)}`;
+    return `${start.format(justDate)}<br>` +
+      `${start.format(justTime)} - ${end.format(justTime)}`;
   }
 
   if (allday) {
-    return `${start.toLocaleDateString(lang, options.date)}` +
-      ` - ${end.toLocaleDateString(lang, options.date)}`;
+    return `${start.format(justDate)} - ${end.format(justDate)}`;
   }
-  return `${start.toLocaleString(lang, options.full)} - ` +
-    `${end.toLocaleString(lang, options.full)}`;
+  return `${start.format(dateAndTime)} - ${end.format(dateAndTime)}`;
 };
 
 const zero = moment(0);
@@ -73,12 +43,6 @@ const makeListElement = n => {
 };
 
 const postTemplate = (event, lang) => {
-  // const dateString = formatDates(
-  //   event.startDate,
-  //   event.endDate,
-  //   event.allday,
-  //   lang
-  // );
   const dateStringUTC = formatDates(
     event.startDate,
     event.endDate,

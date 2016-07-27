@@ -1,6 +1,13 @@
-/* global socket, $, config, app, RELATIVE_PATH, fetch, ajaxify */
+/* global socket, $, config, app, RELATIVE_PATH, ajaxify */
 
-import './vendor/fullcalendar';
+import 'fullcalendar';
+
+const lang = config.userLang || config.defaultLang;
+const momentLang = lang.toLowerCase().replace(/_/g, '-');
+
+if (momentLang !== 'en-us') {
+  require(`bundle!fullcalendar/dist/lang/${momentLang}`)(() => null);
+}
 
 const convertToFC = event => {
   const ev = {
@@ -69,7 +76,7 @@ const calendarOptions = {
     center: 'title',
     right: 'month,agendaWeek,agendaDay',
   },
-  lang: config.userLang || config.defaultLang,
+  lang: momentLang,
   events: (start, end, timezone, callback) => {
     socket.emit('plugins.calendar.getEventsByDate', {
       startDate: start.valueOf(),
@@ -92,6 +99,13 @@ const openEvent = fc => {
   const pid = matches && parseInt(matches[1], 10);
 
   if (!pid) {
+    setTimeout(() => {
+      $('#plugin-calendar-cal-event-display').modal({
+        backdrop: false,
+        show: false,
+        hide: true,
+      });
+    }, 200);
     return;
   }
 
@@ -108,7 +122,7 @@ const init = () => {
 };
 
 $(document).ready(init);
-$(window).on('action:ajaxify.end', () => {
+$(window).on('action:ajaxify.end popstate', () => {
   if (ajaxify.data.template.calendar) {
     init();
   }

@@ -1,6 +1,6 @@
 /* global $, config */
 
-import 'bootstrap-datetimepicker';
+import 'eonasdan-bootstrap-datetimepicker';
 import moment from 'moment';
 
 import { eventTemplate, modalTemplate } from './templates';
@@ -11,7 +11,12 @@ import initResponses from './responses';
 import initTimeDateViews from './timeDateView';
 
 const lang = config.userLang || config.defaultLang;
-moment.locale(lang);
+const momentLang = lang.toLowerCase().replace(/_/g, '-');
+if (momentLang !== 'en-us') {
+  require(`bundle!moment/locale/${momentLang}`)(() => {
+    moment.locale(momentLang);
+  });
+}
 
 window.requirejs([
   'composer',
@@ -36,7 +41,7 @@ $(document).ready(() => {
         close: 'fa fa-times',
       },
       allowInputToggle: true,
-      locale: lang,
+      locale: momentLang,
       sideBySide: true,
     });
     const createEvent = createEventFactory();
