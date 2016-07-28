@@ -84,6 +84,7 @@ const initResponses = () => {
         app.alertError(err);
         return;
       }
+      app.alertSuccess();
       button.siblings().removeClass('active');
       button.addClass('active');
     });
