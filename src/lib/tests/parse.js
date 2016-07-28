@@ -196,4 +196,4 @@ const setEquals = (a, b) => {
     );
     assert.strictEqual(null, result, 'Expected null, got something else');
   },
-].forEach(x => x());
+].forEach((x) => x());

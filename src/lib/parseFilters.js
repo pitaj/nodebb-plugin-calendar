@@ -14,7 +14,7 @@ const getLang = () => Promise.resolve(meta.config.defaultLang || 'en_GB');
 const user = require.main.require('./src/user');
 const getUserSettings = p(user.getSettings);
 const translate = p((text, language, callback) => {
-  translator.translate(text, language, content => callback(null, content));
+  translator.translate(text, language, (content) => callback(null, content));
 });
 
 const eventRX = new RegExp(tagTemplate('event', '[\\w\\W]*'));
@@ -41,10 +41,10 @@ const parseRaw = async (content, userLang) => {
   return text;
 };
 
-const parsePost = async data => {
+const parsePost = async (data) => {
   const postData = data.postData;
   const content = await parseRaw(postData.content,
-    getUserSettings(postData.uid).then(x => x.userLang));
+    getUserSettings(postData.uid).then((x) => x.userLang));
   postData.content = content;
 
   return data;

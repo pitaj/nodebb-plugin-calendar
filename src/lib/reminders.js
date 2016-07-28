@@ -75,8 +75,8 @@ const initNotifierDaemon = async () => {
 
     await Promise.all(
       events
-      .map(event => {
-        const reminder = [0, ...event.reminders].find(r => {
+      .map((event) => {
+        const reminder = [0, ...event.reminders].find((r) => {
           const remDate = event.startDate - r;
           return remDate > start && remDate < end;
         });

@@ -11,7 +11,8 @@
     "watch": "rm -r build/lib/* && babel src/lib --out-dir build/lib --watch",
     "release": "npm run test && npm run build-production && git commit && git push && npm version prerelease && npm publish",
     "docs": "typedoc --out docs src",
-    "compile": "typescript"
+    "compile": "typescript",
+    "lint": "eslint ./src/; exit 0"
   },
   "repository": {
     "type": "git",
@@ -51,7 +52,7 @@
     "eslint": "^2.9.0",
     "eslint-config-airbnb-base": "^3.0.1",
     "eslint-import-resolver-webpack": "^0.3.2",
-    "eslint-plugin-babel": "^3.2.0",
+    "eslint-plugin-babel": "^3.3.0",
     "eslint-plugin-import": "^1.7.0",
     "exports-loader": "^0.6.3",
     "file-loader": "^0.9.0",

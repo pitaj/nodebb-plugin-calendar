@@ -11,20 +11,20 @@ const regExps = {
   description: '[\\w\\W]*',
 };
 
-const full = Object.keys(regExps).map(r => {
+const full = Object.keys(regExps).map((r) => {
   regExps[r] = tagTemplate(r, regExps[r]);
   return regExps[r].replace('(', '(?:');
 }).join('');
 const eventRegExp = tagTemplate('event', full);
 
-const parse = text => {
+const parse = (text) => {
   const matches = text.match(eventRegExp);
   if (!matches || !matches.length || !Array.isArray(matches)) {
     return null;
   }
   const match = matches[0];
   const results = {};
-  Object.keys(regExps).forEach(r => {
+  Object.keys(regExps).forEach((r) => {
     results[r] = match.match(regExps[r])[1].trim();
   });
 

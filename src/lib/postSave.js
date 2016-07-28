@@ -19,7 +19,7 @@ const regex = new RegExp(
   '(\\[\\s?event\\-invalid?\\s?\\][\\w\\W]*\\[\\s?\\/\\s?event\\-invalid?\\s?\\])'
 );
 
-const postSave = async postData => {
+const postSave = async (postData) => {
   let event = parse(postData.content);
 
   // delete event if no longer in post

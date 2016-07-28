@@ -19,7 +19,7 @@ const begin = (momentLang) => {
     'translator',
   ], (composer, formatting, translator) =>
   $(document).ready(() => {
-    translator.translate(modalTemplate(), lang, html => {
+    translator.translate(modalTemplate(), lang, (html) => {
       $('body').append(html);
 
       setupComposerButton(composer, translator);
@@ -46,10 +46,10 @@ const begin = (momentLang) => {
           return;
         }
 
-        formatting.addButtonDispatch('plugin-calendar-event', textarea => {
+        formatting.addButtonDispatch('plugin-calendar-event', (textarea) => {
           const $textarea = $(textarea);
           const old = parse($textarea.val());
-          createEvent(old || {}, event => {
+          createEvent(old || {}, (event) => {
             const text = event ? eventTemplate(event) : '';
             $textarea.val(
               $textarea

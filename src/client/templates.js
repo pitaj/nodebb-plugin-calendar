@@ -1,6 +1,6 @@
 import moment from 'moment';
 
-const eventTemplate = event => (
+const eventTemplate = (event) => (
   `[event][name]${event.name}[/name][allday]${event.allday}[/allday]` +
   `[startDate]${event.startDate}[/startDate][endDate]${event.endDate}[/endDate]` +
   `[reminders]${JSON.stringify(event.reminders)}[/reminders]` +

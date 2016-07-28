@@ -40,7 +40,7 @@ const createEventFactory = () => {
     inputs.endDate.data('DateTimePicker').format(format);
   });
 
-  const setInputs = event => {
+  const setInputs = (event) => {
     inputs.name.val(event.name);
     inputs.allday.prop('checked', event.allday);
     inputs.startDate.data('DateTimePicker').date(new Date(event.startDate));
@@ -78,7 +78,7 @@ const createEventFactory = () => {
     return event;
   };
 
-  const alertFailure = input => {
+  const alertFailure = (input) => {
     input.closest('.form-group').addClass('has-error');
   };
 
@@ -97,7 +97,7 @@ const createEventFactory = () => {
 
       const [failed, failures] = validateEvent(newEvent);
       if (failed) {
-        failures.map(failure => inputs[failure]).forEach(alertFailure);
+        failures.map((failure) => inputs[failure]).forEach(alertFailure);
         return;
       }
 
@@ -119,7 +119,7 @@ const createEventFactory = () => {
 
       const [failed, failures] = validateEvent(newEvent);
       if (failed) {
-        failures.map(failure => inputs[failure]).forEach(alertFailure);
+        failures.map((failure) => inputs[failure]).forEach(alertFailure);
       }
     };
     modal.find('input').on('change', onChange);

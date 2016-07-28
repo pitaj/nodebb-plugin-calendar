@@ -26,14 +26,14 @@ const submitResponse = async ({ pid, uid, value }) => {
 
   await Promise.all([
     setsRemove(values
-      .filter(val => val !== value)
-      .map(val => `${listKey}:pid:${pid}:responses:${val}`), uid),
+      .filter((val) => val !== value)
+      .map((val) => `${listKey}:pid:${pid}:responses:${val}`), uid),
     setAdd(`${listKey}:pid:${pid}:responses:${value}`, uid),
   ]);
 };
 
-const removeAll = pid => deleteAll(
-  values.map(val => `${listKey}:pid:${pid}:responses:${val}`)
+const removeAll = (pid) => deleteAll(
+  values.map((val) => `${listKey}:pid:${pid}:responses:${val}`)
 );
 
 const getAll = async ({ pid, uid = false, selection = values } = {}) => {
@@ -42,11 +42,11 @@ const getAll = async ({ pid, uid = false, selection = values } = {}) => {
   }
 
   const responseUids = await getSetsMembers(selection
-    .map(val => `${listKey}:pid:${pid}:responses:${val}`));
+    .map((val) => `${listKey}:pid:${pid}:responses:${val}`));
   const userFields = ['userslug', 'picture', 'username', 'icon:bgColor', 'icon:text'];
 
   const [yes, maybe, no] = await Promise.all(responseUids
-    .map(uids => getUsersFields(uids, userFields)));
+    .map((uids) => getUsersFields(uids, userFields)));
 
   return {
     yes,
@@ -61,10 +61,10 @@ const getUserResponse = async ({ pid, uid }) => {
   }
 
   const arr = await Promise.all(
-    values.map(val => isSetMember(`${listKey}:pid:${pid}:responses:${val}`, uid))
+    values.map((val) => isSetMember(`${listKey}:pid:${pid}:responses:${val}`, uid))
   );
 
-  return values[arr.findIndex(val => !!val)];
+  return values[arr.findIndex((val) => !!val)];
 };
 
 export { submitResponse, removeAll, getAll, getUserResponse };

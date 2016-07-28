@@ -52,9 +52,9 @@ export default (router, middleware) => {
 
     (async () => {
       const cats = await getAllCategoryFields(['cid', 'bgColor']);
-      const filtered = await filterCids('read', cats.map(c => c.cid), req.uid);
+      const filtered = await filterCids('read', cats.map((c) => c.cid), req.uid);
 
-      const colors = cats.filter(c => filtered.includes(c.cid));
+      const colors = cats.filter((c) => filtered.includes(c.cid));
 
       const style = colors.map(({ cid, bgColor }) =>
         `.plugin-calendar-cal-event-category-${cid} {

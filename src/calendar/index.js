@@ -2,7 +2,7 @@
 
 import 'fullcalendar';
 
-const convertToFC = event => {
+const convertToFC = (event) => {
   const ev = {
     id: event.pid,
     title: event.name,
@@ -87,7 +87,7 @@ const begin = (momentLang) => {
     timezone: 'local',
   };
 
-  const openEvent = fc => {
+  const openEvent = (fc) => {
     // TODO: possibly use server rendering instead of sockets
     const matches = location.hash.match(queryRegExp);
     const pid = matches && parseInt(matches[1], 10);

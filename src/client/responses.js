@@ -1,6 +1,6 @@
 /* global $, socket, app, config, ajaxify */
 
-const userTemplate = user => (`
+const userTemplate = (user) => (`
   <li class="icon pull-left">
     <a href="${config.relative_path}/user/${user.userslug}">
   		${user.picture ? `
@@ -74,12 +74,12 @@ const setUserResponseToPost = (pid, cb) => {
 };
 
 const initResponses = () => {
-  $(document.body).on('click', '.plugin-calendar-event-responses-user .btn', e => {
+  $(document.body).on('click', '.plugin-calendar-event-responses-user .btn', (e) => {
     const button = $(e.target);
     const value = button.data('value');
     const pid = button.closest('[data-pid]').data('pid');
 
-    socket.emit('plugins.calendar.submitResponse', { pid, value }, err => {
+    socket.emit('plugins.calendar.submitResponse', { pid, value }, (err) => {
       if (err) {
         app.alertError(err);
         return;
@@ -95,7 +95,7 @@ const initResponses = () => {
 
     if (posts && posts.length > 0) {
       setTimeout(() => {
-        posts.forEach(post => setUserResponseToPost(post.pid));
+        posts.forEach((post) => setUserResponseToPost(post.pid));
       }, 200);
     }
   };
@@ -103,7 +103,7 @@ const initResponses = () => {
   $(document.body).on(
     'click',
     '[data-pid] .plugin-calendar-event-responses-lists .panel-heading a',
-    e => {
+    (e) => {
       const target = $(e.target).closest('a');
       const notLoaded = target.is('[data-loaded=false] a');
       const pid = parseInt(target.closest('[data-pid]').attr('data-pid'), 10);
@@ -137,12 +137,12 @@ const initResponses = () => {
   );
   checkPosts(null, ajaxify.data);
 
-  window.requirejs(['translator'], translator => {
+  window.requirejs(['translator'], (translator) => {
     translator.translate(
       '[[calendar:no_x_responses, [[calendar:response_yes]]]],' +
       '[[calendar:no_x_responses, [[calendar:response_maybe]]]],' +
       '[[calendar:no_x_responses, [[calendar:response_no]]]]',
-      translated => {
+      (translated) => {
         const text = translated.split(',');
         noYesResponses = text[0];
         noMaybeResponses = text[1];

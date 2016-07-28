@@ -23,12 +23,12 @@ const getCidByPid = p(posts.getCidByPid);
 
 const listKey = 'plugins:calendar:events';
 
-const saveEvent = event => Promise.all([
+const saveEvent = (event) => Promise.all([
   sortedSetAdd(listKey, event.startDate, `${listKey}:pid:${event.pid}`),
   setObject(`${listKey}:pid:${event.pid}`, event),
 ]);
 
-const deleteEvent = pid => Promise.all([
+const deleteEvent = (pid) => Promise.all([
   sortedSetRemove(listKey, `${listKey}:pid:${pid}`),
   deleteKey(`${listKey}:pid:${pid}`),
   removeAllResponses(pid),
@@ -38,7 +38,7 @@ const getEventsByDate = async (startDate, endDate) => {
   const keys = await getSortedSetRangeByScore(listKey, 0, -1, startDate, endDate);
   const events = await getObjects(keys);
 
-  const cids = await getCidsByPids(events.map(event => event.pid));
+  const cids = await getCidsByPids(events.map((event) => event.pid));
 
   return events.map((event, i) => ({
     ...event,
@@ -46,9 +46,9 @@ const getEventsByDate = async (startDate, endDate) => {
   }));
 };
 
-const eventExists = pid => exists(`${listKey}:pid:${pid}`);
+const eventExists = (pid) => exists(`${listKey}:pid:${pid}`);
 
-const getEvent = async pid => {
+const getEvent = async (pid) => {
   const event = await getObject(`${listKey}:pid:${pid}`);
   const cid = await getCidByPid(event.pid);
 
@@ -59,10 +59,10 @@ const getEvent = async pid => {
 };
 
 const filterByPid = (events, uid) =>
-  filterPids('read', events.map(e => e.pid), uid)
-  .then(filtered => events.filter(e => filtered.includes(e.pid)));
+  filterPids('read', events.map((e) => e.pid), uid)
+  .then((filtered) => events.filter((e) => filtered.includes(e.pid)));
 
-const escapeEvent = async event => {
+const escapeEvent = async (event) => {
   const [location, description] = await Promise.all([
     fireHook('filter:parse.raw', event.location),
     fireHook('filter:parse.raw', event.description),

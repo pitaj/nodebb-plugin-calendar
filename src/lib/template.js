@@ -37,7 +37,7 @@ const formatDates = (s, e, allday, lang, utc) => {
 
 const zero = moment(0);
 
-const makeListElement = n => {
+const makeListElement = (n) => {
   const li = `<li data-value="${n}">${zero.to(n, true)}</li>`;
   return li;
 };

@@ -1,7 +1,7 @@
 /* global $, socket, app, bootbox */
 
 const find = (posts, data) => {
-  const uuid = Object.keys(posts).find(key => {
+  const uuid = Object.keys(posts).find((key) => {
     const post = posts[key];
     if (data.pid && parseInt(post.pid, 10) === parseInt(data.pid, 10)) {
       return true;
@@ -23,7 +23,7 @@ const regex = new RegExp(
 );
 
 export default (composer, translator) => {
-  const onChange = data => {
+  const onChange = (data) => {
     socket.emit('plugins.calendar.canPostEvent', data, (e, canPost) => {
       const uuid = find(composer.posts, data);
       setTimeout(() =>
@@ -35,7 +35,7 @@ export default (composer, translator) => {
     });
   };
 
-  const alterSubmit = data => {
+  const alterSubmit = (data) => {
     if (!data.pid) {
       return;
     }
@@ -54,15 +54,15 @@ export default (composer, translator) => {
         const orig = $._data(button[0], 'events').click.map(x => x.handler);
         /* eslint-enable */
         const trigger = (self, e) => {
-          orig.forEach(handler => {
+          orig.forEach((handler) => {
             handler.call(self, e);
           });
         };
         button.off('click').on('click', function onClick(e) {
           const text = write.val();
           if (!regex.test(text)) {
-            translator.translate('[[calendar:confirm_delete_event]]', question => {
-              bootbox.confirm(question, okay => {
+            translator.translate('[[calendar:confirm_delete_event]]', (question) => {
+              bootbox.confirm(question, (okay) => {
                 if (okay) {
                   trigger(this, e);
                 }
@@ -81,7 +81,7 @@ export default (composer, translator) => {
     onChange(data);
     alterSubmit(data);
   });
-  $(document.body).on('change', '.composer .category-list', e => {
+  $(document.body).on('change', '.composer .category-list', (e) => {
     const uuid = $(e.target)
       .closest('.composer')
       .attr('id')

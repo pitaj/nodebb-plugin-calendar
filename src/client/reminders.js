@@ -3,7 +3,7 @@
 import moment from 'moment';
 
 const zero = moment(0);
-const makeListElement = n => {
+const makeListElement = (n) => {
   const li = $(
     `<li class="plugin-calendar-event-editor-reminder" data-value="${n}">
       ${zero.to(n, true)}
@@ -15,21 +15,21 @@ const makeListElement = n => {
   return li;
 };
 
-const factory = $ul => {
+const factory = ($ul) => {
   const addButtons = $ul
   .find('#plugin-calendar-event-editor-reminders-add li > a');
 
   const obj = {
-    setReminders: reminders => {
+    setReminders: (reminders) => {
       $ul.find('li.plugin-calendar-event-editor-reminder').remove();
       $ul.data('value', reminders);
       reminders
       .reverse()
       .map(makeListElement)
-      .forEach(el => $ul.prepend(el));
+      .forEach((el) => $ul.prepend(el));
     },
     getReminders: () => $ul.data('value'),
-    addReminder: n => {
+    addReminder: (n) => {
       const nots = $ul.data('value');
       if (nots.includes(n)) {
         return;
@@ -47,13 +47,13 @@ const factory = $ul => {
         $ul.find(`li.plugin-calendar-event-editor-reminder:nth-of-type(${index})`).after(li);
       }
     },
-    removeReminder: n => {
+    removeReminder: (n) => {
       const nots = $ul.data('value');
       if (!nots.includes(n)) {
         return;
       }
 
-      const reminders = nots.filter(not => not !== n);
+      const reminders = nots.filter((not) => not !== n);
       $ul.data('value', reminders);
 
       $ul.find(`li.plugin-calendar-event-editor-reminder[data-value=${n}]`).remove();
@@ -65,14 +65,14 @@ const factory = $ul => {
   const radios = popup.find('#plugin-calendar-event-editor-reminder-custom-unit');
   const button = popup.find('button.btn-primary');
 
-  radios.find('.btn').on('click', e => {
+  radios.find('.btn').on('click', (e) => {
     $(e.target)
     .addClass('active')
     .siblings()
     .removeClass('active');
   });
 
-  const promptCustom = addNotif => {
+  const promptCustom = (addNotif) => {
     button.on('click', () => {
       const unit = radios.find(':checked').val();
       const number = parseInt(input.val(), 10);
@@ -91,24 +91,24 @@ const factory = $ul => {
     popup.slideDown(200);
   };
 
-  popup.on('click', e => {
+  popup.on('click', (e) => {
     e.stopPropagation();
   });
 
-  addButtons.on('click', e => {
+  addButtons.on('click', (e) => {
     const el = $(e.target).closest('li');
     const n = el.data('value');
 
     if (n === 'custom') {
       e.preventDefault();
       e.stopPropagation();
-      promptCustom(notif => obj.addReminder(notif));
+      promptCustom((notif) => obj.addReminder(notif));
       return;
     }
     obj.addReminder(n);
   });
 
-  $ul.on('click', 'li.plugin-calendar-event-editor-reminder .remove', e => {
+  $ul.on('click', 'li.plugin-calendar-event-editor-reminder .remove', (e) => {
     e.preventDefault();
     const n = $(e.target).closest('li').data('value');
     obj.removeReminder(n);

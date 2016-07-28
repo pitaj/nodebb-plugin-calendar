@@ -4,8 +4,14 @@
     "ecmaVersion": 6,
     "sourceType": "module"
   },
+  "plugins": [
+    "babel"
+  ],
   "extends": "airbnb-base",
   "settings": {
     "import/resolver": "webpack"
   },
+  "rules": {
+    "babel/arrow-parens": 2
+  }
 }

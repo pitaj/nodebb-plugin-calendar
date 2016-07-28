@@ -14,7 +14,7 @@ const p = Promise.promisify;
 
 const getUserSettings = p(user.getSettings);
 const translate = p((text, language, callback) => {
-  translator.translate(text, language, content => callback(null, content));
+  translator.translate(text, language, (content) => callback(null, content));
 });
 
 const perm = 'plugin-calendar:event:post';

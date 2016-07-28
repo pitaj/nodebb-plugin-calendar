@@ -96,6 +96,6 @@ const lang = 'en-us';
     assert(`${start.toLocaleDateString(lang)} - ${end.toLocaleDateString(lang)}`,
       formatDates(s, e, true, lang));
   },
-].forEach(x => x());
+].forEach((x) => x());
 
 // postTemplate is just a template, it doesn't need testing
