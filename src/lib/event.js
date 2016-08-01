@@ -11,6 +11,8 @@ const p = Promise.promisify;
 const sortedSetAdd = p(db.sortedSetAdd);
 const sortedSetRemove = p(db.sortedSetRemove);
 const getSortedSetRangeByScore = p(db.getSortedSetRangeByScore);
+const getSortedSetRange = p(db.getSortedSetRange);
+const getObjectsFields = p(db.getObjectsFields);
 const setObject = p(db.setObject);
 const getObject = p(db.getObject);
 const getObjects = p(db.getObjects);
@@ -46,7 +48,12 @@ const getEventsByDate = async (startDate, endDate) => {
   }));
 };
 
-const eventExists = (pid) => exists(`${listKey}:pid:${pid}`);
+const getAllEvents = async () => {
+  const keys = await getSortedSetRange(listKey, 0, -1);
+  const events = await getObjectsFields(keys, ['pid', 'reminders', 'startDate']);
+
+  return events;
+};
 
 const getEvent = async (pid) => {
   const event = await getObject(`${listKey}:pid:${pid}`);
@@ -57,6 +64,8 @@ const getEvent = async (pid) => {
     cid,
   };
 };
+
+const eventExists = (pid) => exists(`${listKey}:pid:${pid}`);
 
 const filterByPid = (events, uid) =>
   filterPids('read', events.map((e) => e.pid), uid)
@@ -83,4 +92,5 @@ export {
   getEventsByDate,
   filterByPid,
   escapeEvent,
+  getAllEvents,
 };

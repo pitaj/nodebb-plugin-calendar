@@ -1,29 +1,18 @@
-const db = require.main.require('./src/database');
 const notifications = require.main.require('./src/notifications');
 const posts = require.main.require('./src/posts');
 const meta = require.main.require('./src/meta');
 
 // import { fork } from 'child_process';
 import { getAll as getResponses } from './responses';
+import { getAllEvents } from './event';
 import moment from 'moment';
 import Promise from 'bluebird';
 const p = Promise.promisify;
 
-const getSortedSetRange = p(db.getSortedSetRange);
-const getObjectsFields = p(db.getObjectsFields);
 const createNotif = p(notifications.create);
 const pushNotif = p(notifications.push);
-const getPostField = p(posts.getPostField);
+const getPostFields = p(posts.getPostFields);
 const getSetting = p(meta.settings.getOne);
-
-const listKey = 'plugins:calendar:events';
-
-const getAll = async () => {
-  const keys = await getSortedSetRange(listKey, 0, -1);
-  const events = await getObjectsFields(keys, ['pid', 'reminders', 'startDate']);
-
-  return events;
-};
 
 const notify = async ({ event, reminder, message }) => {
   let uids;
@@ -44,13 +33,13 @@ const notify = async ({ event, reminder, message }) => {
     uids = responses.yes;
   }
 
-  const content = await getPostField(event.pid, 'content');
+  const { tid, content } = await getPostFields(event.pid, ['tid', 'content']);
   const notif = await createNotif({
     bodyShort: `[[calendar:event_starting, ${message}, ${event.name}]]`,
     bodyLong: content,
-    nid: `plugin-calendar:tid:${event.tid}:pid:${event.pid}:event`,
+    nid: `plugin-calendar:tid:${tid}:pid:${event.pid}:event`,
     pid: event.pid,
-    tid: event.tid,
+    tid,
     from: event.uid,
     path: `/post/${event.pid}`,
     importance: 1,
@@ -63,22 +52,27 @@ const initNotifierDaemon = async () => {
   // pulled from settings
   const checkingInterval = await getSetting('plugin-calendar', 'checkingInterval');
 
+  let lastEnd = Date.now() + checkingInterval;
+
   const checkReminders = async () => {
     // timespan we check is a checkingInterval in the future
     // so as to avoid sending notifications too late
-    const start = Date.now() + checkingInterval;
+    const start = lastEnd;
     const end = start + checkingInterval;
+    lastEnd = end;
 
-    const events = await getAll();
+    console.log('start', start, 'end', end);
 
-    const mom = moment(start);
+    const events = await getAllEvents();
+
+    const s = moment(start);
 
     await Promise.all(
       events
       .map((event) => {
         const reminder = [0, ...event.reminders].find((r) => {
           const remDate = event.startDate - r;
-          return remDate > start && remDate < end;
+          return remDate > start && remDate <= end;
         });
         if (reminder === 0) {
           return {
@@ -88,7 +82,7 @@ const initNotifierDaemon = async () => {
           };
         }
         if (reminder) {
-          const message = mom.to(event.startDate);
+          const message = s.to(event.startDate);
           return { event, reminder, message };
         }
         return null;
