@@ -47,8 +47,6 @@ export default (composer, translator) => {
 
       if (eventExisted) {
         const button = comp.find('.composer-submit:visible');
-        // TODO: terrible hack. Add a new client-side filter hook for aborting submissions
-        // perhaps `filter:posts.submit`
 
         /* eslint-disable */
         const orig = $._data(button[0], 'events').click.map(x => x.handler);

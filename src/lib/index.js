@@ -8,8 +8,6 @@ import { privilegesList, privilegesGroupsList, privilegesListHuman } from './pri
 import { deleteEvent } from './event';
 import './sockets';
 
-// TODO: repeating events
-
 const addNavigation = (navs, callback) => {
   navs.push({
     route: '/calendar',

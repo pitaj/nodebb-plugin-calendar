@@ -20,6 +20,4 @@ export default ({ router, middleware }, callback) => {
   )
   .then(() => initNotifierDaemon())
   .asCallback(callback);
-
-  // TODO: configuration
 };
