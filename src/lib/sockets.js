@@ -5,8 +5,8 @@ const user = require.main.require('./src/user');
 const meta = require.main.require('./src/meta');
 
 import { getAll as getAllResponses, submitResponse, getUserResponse } from './responses';
-import { getEventsByDate, filterByPid, escapeEvent, getEvent } from './event';
-import { canViewPost } from './privileges';
+import { getEventsByDate, escapeEvent, getEvent } from './event';
+import { canViewPost, filterByPid } from './privileges';
 import postTemplate from './template';
 import Promise from 'bluebird';
 

@@ -1,5 +1,4 @@
 const db = require.main.require('./src/database');
-const privileges = require.main.require('./src/privileges');
 const plugins = require.main.require('./src/plugins');
 const posts = require.main.require('./src/posts');
 
@@ -18,7 +17,6 @@ const getObject = p(db.getObject);
 const getObjects = p(db.getObjects);
 const deleteKey = p(db.delete);
 const exists = p(db.exists);
-const filterPids = p(privileges.posts.filter);
 const fireHook = p(plugins.fireHook);
 const getCidsByPids = p(posts.getCidsByPids);
 const getCidByPid = p(posts.getCidByPid);
@@ -50,7 +48,13 @@ const getEventsByDate = async (startDate, endDate) => {
 
 const getAllEvents = async () => {
   const keys = await getSortedSetRange(listKey, 0, -1);
-  const events = await getObjectsFields(keys, ['pid', 'reminders', 'startDate']);
+  const events = await getObjectsFields(keys, [
+    'pid',
+    'name',
+    'reminders',
+    'startDate',
+    'mandatory',
+  ]);
 
   return events;
 };
@@ -66,10 +70,6 @@ const getEvent = async (pid) => {
 };
 
 const eventExists = (pid) => exists(`${listKey}:pid:${pid}`);
-
-const filterByPid = (events, uid) =>
-  filterPids('read', events.map((e) => e.pid), uid)
-  .then((filtered) => events.filter((e) => filtered.includes(e.pid)));
 
 const escapeEvent = async (event) => {
   const [location, description] = await Promise.all([
@@ -90,7 +90,6 @@ export {
   eventExists,
   getEvent,
   getEventsByDate,
-  filterByPid,
   escapeEvent,
   getAllEvents,
 };

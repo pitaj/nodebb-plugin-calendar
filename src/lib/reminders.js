@@ -15,7 +15,7 @@ const getPostFields = p(posts.getPostFields);
 const getSetting = p(meta.settings.getOne);
 
 const notify = async ({ event, reminder, message }) => {
-  let uids;
+  let users;
   // if reminder is for the event start
   // notify 'maybe' and 'yes' responders
   // otherwise, notify only 'yes' responders
@@ -24,14 +24,16 @@ const notify = async ({ event, reminder, message }) => {
       pid: event.pid,
       selection: ['yes', 'maybe'],
     });
-    uids = [...responses.yes, ...responses.maybe];
+    users = [...responses.yes, ...responses.maybe];
   } else {
     const responses = await getResponses({
       pid: event.pid,
       selection: ['yes'],
     });
-    uids = responses.yes;
+    users = responses.yes;
   }
+
+  const uids = users.map((user) => user.uid);
 
   const { tid, content } = await getPostFields(event.pid, ['tid', 'content']);
   const notif = await createNotif({
@@ -52,48 +54,61 @@ const initNotifierDaemon = async () => {
   // pulled from settings
   const checkingInterval = await getSetting('plugin-calendar', 'checkingInterval');
 
+  console.log(`Notifier Daemon initialized with
+    interval of ${Math.floor(checkingInterval / 1000)} seconds`);
+
+  const lang = (meta.config.defaultLang || 'en-GB')
+    .toLowerCase()
+    .replace('_', '-');
+  moment.locale(lang);
+
   let lastEnd = Date.now() + checkingInterval;
 
   const checkReminders = async () => {
     // timespan we check is a checkingInterval in the future
     // so as to avoid sending notifications too late
     const start = lastEnd;
-    const end = start + checkingInterval;
-    lastEnd = end;
+    const end = lastEnd + checkingInterval;
 
-    console.log('start', start, 'end', end);
+    lastEnd += checkingInterval;
+    const s = moment(start);
 
     const events = await getAllEvents();
 
-    const s = moment(start);
+    const filtered = events
+    .map((event) => {
+      const reminder = [0, ...event.reminders].find((r) => {
+        const remDate = event.startDate - r;
+        return remDate > start && remDate <= end;
+      });
+      if (!reminder) {
+        return null;
+      }
+      if (reminder === 0) {
+        return {
+          event,
+          reminder,
+          message: '[[calendar:now]]',
+        };
+      }
+      const message = s.to(event.startDate);
+      return { event, reminder, message };
+    })
+    .filter(Boolean);
 
     await Promise.all(
-      events
-      .map((event) => {
-        const reminder = [0, ...event.reminders].find((r) => {
-          const remDate = event.startDate - r;
-          return remDate > start && remDate <= end;
-        });
-        if (reminder === 0) {
-          return {
-            event,
-            reminder,
-            message: '[[calendar:now]]',
-          };
-        }
-        if (reminder) {
-          const message = s.to(event.startDate);
-          return { event, reminder, message };
-        }
-        return null;
-      })
-      .filter(Boolean)
+      filtered
       .map(notify)
     );
   };
 
   const daemon = () => {
-    checkReminders().asCallback(() => setTimeout(daemon, checkingInterval));
+    checkReminders().asCallback((err) => {
+      if (err) {
+        console.error(err);
+      }
+      setTimeout(daemon, checkingInterval);
+    });
   };
   daemon();
 };

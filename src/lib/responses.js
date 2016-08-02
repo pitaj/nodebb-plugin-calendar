@@ -36,8 +36,8 @@ const removeAll = (pid) => deleteAll(
   values.map((val) => `${listKey}:pid:${pid}:responses:${val}`)
 );
 
-const getAll = async ({ pid, uid = false, selection = values } = {}) => {
-  if (uid !== false && !await canViewPost(pid, uid)) {
+const getAll = async ({ pid, uid = 0, selection = values } = {}) => {
+  if (uid !== 0 && !await canViewPost(pid, uid)) {
     throw new Error('[[error:no-privileges]]');
   }
 

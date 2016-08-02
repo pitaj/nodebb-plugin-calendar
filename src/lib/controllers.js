@@ -1,7 +1,8 @@
 const privileges = require.main.require('./src/privileges');
 const categories = require.main.require('./src/categories');
 
-// import { getEventsByDate, filterByPid, escapeEvent } from './event';
+// import { getEventsByDate, escapeEvent } from './event';
+// import { filterByPid } from './privileges';
 import Promise from 'bluebird';
 const p = Promise.promisify;
 
