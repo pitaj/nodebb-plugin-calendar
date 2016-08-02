@@ -11,6 +11,7 @@ const defaultEvent = {
   reminders: [],
   location: '',
   description: '',
+  mandatory: false,
 };
 
 const formats = {
@@ -31,6 +32,7 @@ const createEventFactory = () => {
     reminders: modal.find('#plugin-calendar-event-editor-reminders'),
     location: modal.find('#plugin-calendar-event-editor-location'),
     description: modal.find('#plugin-calendar-event-editor-description'),
+    mandatory: modal.find('#plugin-calendar-event-editor-mandatory'),
   };
   const reminders = remindersFactory(inputs.reminders);
 
@@ -48,6 +50,7 @@ const createEventFactory = () => {
     reminders.setReminders(event.reminders);
     inputs.location.val(event.location);
     inputs.description.val(event.description);
+    inputs.mandatory.prop('checked', event.mandatory);
 
     const format = event.allday ? formats.date : formats.timeDate;
     inputs.startDate.data('DateTimePicker').format(format);
@@ -62,6 +65,7 @@ const createEventFactory = () => {
       reminders: reminders.getReminders(),
       location: inputs.location.val().trim(),
       description: inputs.description.val().trim(),
+      mandatory: inputs.mandatory.prop('checked'),
     };
 
     if (event.allday) {
@@ -122,7 +126,7 @@ const createEventFactory = () => {
         failures.map((failure) => inputs[failure]).forEach(alertFailure);
       }
     };
-    modal.find('input').on('change', onChange);
+    modal.on('change dp.change', onChange);
   };
 
   return createEvent;

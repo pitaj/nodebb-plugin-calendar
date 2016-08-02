@@ -18,6 +18,7 @@ const fields = {
   startDate: checkDate,
   endDate: checkDate,
   reminders: (val) => isArrayOf(val, 'number'),
+  mandatory: (val) => typeof val === 'boolean',
   location: (val) => typeof val === 'string' && !val.includes('\n'),
   description: (val) => typeof val === 'string',
 };

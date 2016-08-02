@@ -1,10 +1,12 @@
 const notifications = require.main.require('./src/notifications');
 const posts = require.main.require('./src/posts');
 const meta = require.main.require('./src/meta');
+const user = require.main.require('./src/user');
 
 // import { fork } from 'child_process';
 import { getAll as getResponses } from './responses';
 import { getAllEvents } from './event';
+import { filterUidsByPid } from './privileges';
 import moment from 'moment';
 import Promise from 'bluebird';
 const p = Promise.promisify;
@@ -13,27 +15,37 @@ const createNotif = p(notifications.create);
 const pushNotif = p(notifications.push);
 const getPostFields = p(posts.getPostFields);
 const getSetting = p(meta.settings.getOne);
+const getUidsFromSet = p(user.getUidsFromSet);
+
 
 const notify = async ({ event, reminder, message }) => {
-  let users;
-  // if reminder is for the event start
-  // notify 'maybe' and 'yes' responders
-  // otherwise, notify only 'yes' responders
-  if (reminder === 0) {
-    const responses = await getResponses({
-      pid: event.pid,
-      selection: ['yes', 'maybe'],
-    });
-    users = [...responses.yes, ...responses.maybe];
-  } else {
-    const responses = await getResponses({
-      pid: event.pid,
-      selection: ['yes'],
-    });
-    users = responses.yes;
-  }
+  let uids;
 
-  const uids = users.map((user) => user.uid);
+  // if event is mandatory, notify all the users who can view it
+  if (event.mandatory) {
+    const all = await getUidsFromSet('users:joindate', 0, -1);
+    uids = await filterUidsByPid(all, event.pid);
+  } else {
+    let users;
+
+    // if reminder is for the event start
+    // notify 'maybe' and 'yes' responders
+    // otherwise, notify only 'yes' responders
+    if (reminder === 0) {
+      const responses = await getResponses({
+        pid: event.pid,
+        selection: ['yes', 'maybe'],
+      });
+      users = [...responses.yes, ...responses.maybe];
+    } else {
+      const responses = await getResponses({
+        pid: event.pid,
+        selection: ['yes'],
+      });
+      users = responses.yes;
+    }
+    uids = users.map((u) => u.uid);
+  }
 
   const { tid, content } = await getPostFields(event.pid, ['tid', 'content']);
   const notif = await createNotif({

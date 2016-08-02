@@ -1,20 +1,21 @@
 const tagTemplate = (name, content) =>
   `\\s*\\[\\s*${name}\\s*\\]\\s*(${content})\\s*\\[\\s*\\/${name}\\s*\\]\\s*`;
 
-const regExps = {
-  name: '.*',
-  allday: 'true|false',
-  startDate: '[0-9]+',
-  endDate: '[0-9]+',
-  reminders: '\\[[0-9,\\s]*\\]',
-  location: '.*',
-  description: '[\\w\\W]*',
-};
+const regExps = [
+  { key: 'name', pattern: '.*' },
+  { key: 'allday', pattern: 'true|false' },
+  { key: 'startDate', pattern: '[0-9]+' },
+  { key: 'endDate', pattern: '[0-9]+' },
+  { key: 'reminders', pattern: '\\[[0-9,\\s]*\\]' },
+  { key: 'location', pattern: '.*' },
+  { key: 'description', pattern: '[\\w\\W]*' },
+  { key: 'mandatory', pattern: 'true|false' },
+].map(({ key, pattern }) => ({
+  key,
+  pattern: tagTemplate(key, pattern),
+}));
 
-const full = Object.keys(regExps).map((r) => {
-  regExps[r] = tagTemplate(r, regExps[r]);
-  return regExps[r].replace('(', '(?:');
-}).join('');
+const full = regExps.map((r) => r.pattern).join('');
 const eventRegExp = tagTemplate('event', full);
 
 const parse = (text) => {
@@ -24,8 +25,8 @@ const parse = (text) => {
   }
   const match = matches[0];
   const results = {};
-  Object.keys(regExps).forEach((r) => {
-    results[r] = match.match(regExps[r])[1].trim();
+  regExps.forEach(({ key, pattern }) => {
+    results[key] = match.match(pattern)[1].trim();
   });
 
   return {
@@ -36,6 +37,7 @@ const parse = (text) => {
     reminders: JSON.parse(results.reminders).sort((a, b) => b - a),
     location: results.location,
     description: results.description,
+    mandatory: results.mandatory === 'true',
   };
 };
 

@@ -159,7 +159,12 @@ const postTemplate = (event, lang) => {
       </ul>
     </div>
     ` : ''}
-    ${responsesTemplate}
+    ${event.mandatory ? `
+    <div class="plugin-calendar-event-mandatory">
+      <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+      <span>[[calendar:mandatory]]</span>
+    </div>
+    ` : responsesTemplate}
   </div>
 </div>`.trim();
 

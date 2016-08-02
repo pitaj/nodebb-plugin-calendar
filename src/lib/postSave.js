@@ -71,7 +71,7 @@ const postSave = async (postData) => {
   event.description = event.description.trim();
   event.pid = postData.pid;
   event.uid = postData.uid;
-  event = await fireHook('filter:plugin-calendar:event.post', event);
+  event = await fireHook('filter:plugin-calendar.event.post', event);
 
   await saveEvent(event);
   log(`[plugin-calendar] Event (pid:${event.pid}) saved`);

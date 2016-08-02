@@ -18,10 +18,13 @@ const parseTimeDateViews = () => {
 };
 
 const initTimeDateViews = () => {
-  $(window).on(
-    'action:posts.loaded action:ajaxify.end action:posts.edited action:calendar.event.display',
-    parseTimeDateViews
-  );
+  $(window).on([
+    'action:posts.loaded',
+    'action:ajaxify.end',
+    'action:posts.edited',
+    'action:calendar.event.display',
+    'action:composer.preview',
+  ].join(' '), parseTimeDateViews);
   parseTimeDateViews();
 };
 
