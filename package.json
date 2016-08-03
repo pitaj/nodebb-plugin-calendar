@@ -68,6 +68,7 @@
     "core-js": "^2.4.1",
     "eonasdan-bootstrap-datetimepicker": "^4.15.35",
     "fullcalendar": "^2.9.0",
+    "html-entities": "^1.2.0",
     "moment": "^2.14.1",
     "validator": "^5.2.0"
   },
