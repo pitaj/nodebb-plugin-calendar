@@ -1,0 +1,21 @@
+{
+  "title": "Configuration des permissions du Calandrier",
+  "intro": "Cette page permet les administrateurs de configurer les droits des groupes pour l'édition, la création et l'administration des événements",
+  "explanation_header": "Explication",
+  "explanation_creation_rights": "Les utilisateurs du groupe disposant des droits de création peuvent créer et modifier leurs propres événements. Ils ne peuvent cependant pas modifier les événements des autres.",
+  "explanation_edit_rights": "Les éditeurs du calendrier peuvent créer leurs propres événements ainsi que modifier les événements des autres, ils ne peuvent cependant pas supprimer les événements d'autres personnes.",
+  "explanation_admin_rights": "Les administrateurs des calendriers peuvent créer leurs propres événements mais aussi modifier et supprimer les événements des autres utilisateurs. Les administrateurs du site bénéficient des mêmes droits, il n'est donc pas nécessaire de les ajouter ici.",
+  "explanation_hierarchy": "Le niveau le plus élevé obtient toutes les autorisations du niveau inférieur (adminstrateurs > editeurs > droit de création)",
+  "explanation_one_group": "Saisir un groupe dans chacun des champs suivants",
+  "explanation_global_note": "Garder en tête que ce sont des autorisations globales pour chaque événement. Ils ne peuvent pas être limitées par des autorisations spécifiques au niveau de l'événement.",
+  "explanation_individual_rights": "Si vous souhaitez configurer individuellement les droits d'édition et de visualisation d'un événement, faites le directement au niveau de l'interface du calendrier concerné.",
+  "creation_rights": "Droit de création",
+  "creation_placeholder": "Groupes pouvant créer des événements",
+  "edit_rights": "Editeurs",
+  "edit_placeholder": "Groupes pouvant éditer des événements",
+  "admin_rights": "Administrateurs",
+  "admin_placeholder": "Groupe administrateur",
+  "category_label": "La catégorie où les publications d'événements et leurs commentaires seront créés.",
+  "category_placeholder": "Saisir un numéro de catégorie",
+  "use_whoisin_label": "Voulez-vous utiliser le plugin 'Whoisin' à la place du système de réponse standard?"
+}
