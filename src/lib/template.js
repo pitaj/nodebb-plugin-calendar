@@ -35,10 +35,8 @@ const formatDates = (s, e, allday, lang, utc) => {
   return `${start.format(dateAndTime)} - ${end.format(dateAndTime)}`;
 };
 
-const zero = moment(0);
-
 const makeListElement = (n) => {
-  const li = `<li data-value="${n}">${zero.to(n, true)}</li>`;
+  const li = `<li data-value="${n}">[[time:duration, ${n}]]</li>`;
   return li;
 };
 

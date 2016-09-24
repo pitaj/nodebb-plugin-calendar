@@ -3,7 +3,6 @@ const posts = require.main.require('./src/posts');
 const meta = require.main.require('./src/meta');
 const user = require.main.require('./src/user');
 const emailer = require.main.require('./src/emailer');
-const translator = require.main.require('./public/src/modules/translator');
 const nconf = require.main.require('nconf');
 
 // import { fork } from 'child_process';
@@ -11,9 +10,8 @@ import { getAll as getResponses } from './responses';
 import { getAllEvents, escapeEvent } from './event';
 import { filterUidsByPid } from './privileges';
 import postTemplate from './template';
-import moment from 'moment';
 import Promise from 'bluebird';
-import { decode } from 'html-entities';
+import { Html5Entities as Entities } from 'html-entities';
 const p = Promise.promisify;
 
 const createNotif = p(notifications.create);
@@ -24,26 +22,25 @@ const getUidsFromSet = p(user.getUidsFromSet);
 const sendEmail = p(emailer.send);
 const getUserSettings = p(user.getSettings);
 const getUserFields = p(user.getUserFields);
-const translate = p((text, language, callback) => {
-  translator.translate(text, language, (content) => callback(null, content));
-});
+
+const entities = new Entities();
+const decode = (...args) => entities.decode(...args);
 
 const emailNotification = async ({ uid, event, message, postData }) => {
   if (parseInt(meta.config.disableEmailSubscriptions, 10) === 1) {
     return;
   }
 
-  const [userData, userSettings] = await Promise.all(
+  const [userData, userSettings] = await Promise.all([
     getUserFields(uid, ['username', 'userslug']),
-    getUserSettings(uid)
-  );
+    getUserSettings(uid),
+  ]);
 
   if (userSettings.sendPostNotifications) {
     const parsed = await escapeEvent(event);
-    const lang = userSettings.userLang || meta.config.defaultLang;
-    const content = await translate(postTemplate(parsed), lang);
+    const content = postTemplate(parsed);
 
-    const title = decode(postData.title);
+    const title = decode(postData.title || '');
     // const titleEscaped = title.replace(/%/g, '&#37;').replace(/,/g, '&#44;');
 
     await sendEmail('notif_plugin_calendar_event_reminder', uid, {
@@ -91,24 +88,20 @@ const notify = async ({ event, reminder, message }) => {
 
   const postData = await getPostFields(event.pid, ['tid', 'content', 'title']);
 
-  await Promise.all(
-    createNotif({
-      bodyShort: `[[calendar:event_starting, ${message}, ${event.name}]]`,
-      bodyLong: postData.content,
-      nid: `plugin-calendar:tid:${postData.tid}:pid:${event.pid}:event`,
-      pid: event.pid,
-      tid: postData.tid,
-      from: event.uid,
-      path: `/post/${event.pid}`,
-      importance: 1,
-    }).then((notif) => pushNotif(notif, uids)),
-    ...uids.map((uid) => emailNotification({
-      event,
-      message,
-      uid,
-      postData,
-    })),
-  );
+  const notif = await createNotif({
+    bodyShort: `[[calendar:event_starting, ${message}, ${event.name}]]`,
+    bodyLong: postData.content,
+    nid: `plugin-calendar:events:pid:${event.pid}:event_starting`,
+    pid: event.pid,
+    tid: postData.tid,
+    from: event.uid,
+    path: `/post/${event.pid}`,
+  });
+  await pushNotif(notif, uids);
+
+  await Promise.all(uids.map((uid) =>
+    emailNotification({ uid, event, message, postData })
+  ));
 };
 
 const initNotifierDaemon = async () => {
@@ -119,11 +112,6 @@ const initNotifierDaemon = async () => {
   console.log(`Notifier Daemon initialized with
     interval of ${Math.floor(checkingInterval / 1000)} seconds`);
 
-  const lang = (meta.config.defaultLang || 'en-GB')
-    .toLowerCase()
-    .replace('_', '-');
-  moment.locale(lang);
-
   let lastEnd = Date.now() + checkingInterval;
 
   const checkReminders = async () => {
@@ -131,9 +119,7 @@ const initNotifierDaemon = async () => {
     // so as to avoid sending notifications too late
     const start = lastEnd;
     const end = lastEnd + checkingInterval;
-
     lastEnd += checkingInterval;
-    const s = moment(start);
 
     const events = await getAllEvents();
 
@@ -143,17 +129,10 @@ const initNotifierDaemon = async () => {
         const remDate = event.startDate - r;
         return remDate > start && remDate <= end;
       });
-      if (!reminder) {
+      if (!Number.isFinite(reminder)) {
         return null;
       }
-      if (reminder === 0) {
-        return {
-          event,
-          reminder,
-          message: '[[calendar:now]]',
-        };
-      }
-      const message = s.to(event.startDate);
+      const message = `[[time:in, ${event.startDate - start}]]`;
       return { event, reminder, message };
     })
     .filter(Boolean);

@@ -48,13 +48,14 @@ const getEventsByDate = async (startDate, endDate) => {
 
 const getAllEvents = async () => {
   const keys = await getSortedSetRange(listKey, 0, -1);
-  const events = await getObjectsFields(keys, [
-    'pid',
-    'name',
-    'reminders',
-    'startDate',
-    'mandatory',
-  ]);
+  // const events = await getObjectsFields(keys, [
+  //   'pid',
+  //   'name',
+  //   'reminders',
+  //   'startDate',
+  //   'mandatory',
+  // ]);
+  const events = await getObjects(keys);
 
   return events;
 };
@@ -73,8 +74,8 @@ const eventExists = (pid) => exists(`${listKey}:pid:${pid}`);
 
 const escapeEvent = async (event) => {
   const [location, description] = await Promise.all([
-    fireHook('filter:parse.raw', event.location),
-    fireHook('filter:parse.raw', event.description),
+    fireHook('filter:parse.raw', event.location || ''),
+    fireHook('filter:parse.raw', event.description || ''),
   ]);
 
   return {

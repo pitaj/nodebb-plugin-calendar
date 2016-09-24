@@ -8,7 +8,7 @@
     "build": "rm -r build/lib/* && babel src/lib --out-dir build/lib",
     "build-production": "npm run build && NODE_ENV=production webpack --progress",
     "webpack": "webpack --watch",
-    "watch": "rm -r build/lib/* && babel src/lib --out-dir build/lib --watch",
+    "watch": "rm -r build/lib/* && babel src/lib --out-dir build/lib --watch --source-maps",
     "release": "npm run test && npm run build-production && git commit && git push && npm version prerelease && npm publish",
     "docs": "typedoc --out docs src",
     "compile": "typescript",
@@ -70,6 +70,7 @@
     "fullcalendar": "^2.9.0",
     "html-entities": "^1.2.0",
     "moment": "^2.14.1",
+    "source-map-support": "^0.4.2",
     "validator": "^5.2.0"
   },
   "nbbpm": {

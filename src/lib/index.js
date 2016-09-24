@@ -1,12 +1,20 @@
 // Polyfills
 import 'core-js/shim';
 
+import { install } from 'source-map-support';
+install();
+
 import init from './init';
 import { parsePostCallback, parseRawCallback } from './parseFilters';
 import { postSaveCallback, postEditCallback } from './postSave';
 import { privilegesList, privilegesGroupsList, privilegesListHuman } from './privileges';
 import { deleteEvent } from './event';
 import './sockets';
+
+const Translator = require.main.require('./public/src/modules/translator').Translator;
+import moment from 'moment';
+import { init as initTranslatorModule } from './translatorModule';
+initTranslatorModule(Translator, moment);
 
 const addNavigation = (navs, callback) => {
   navs.push({

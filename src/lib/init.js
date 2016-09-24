@@ -15,9 +15,8 @@ export default ({ router, middleware }, callback) => {
     checkingInterval: 1000 * 60 * 5,
   };
 
-  getSettings('plugin-calendar').then((settings) =>
-    setSettings('plugin-calendar', { ...defaults, ...settings })
-  )
+  getSettings('plugin-calendar')
+  .then((settings) => setSettings('plugin-calendar', { ...defaults, ...settings }))
   .then(() => initNotifierDaemon())
   .asCallback(callback);
 };

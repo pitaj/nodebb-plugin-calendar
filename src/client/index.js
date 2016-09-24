@@ -9,6 +9,7 @@ import createEventFactory from './createEvent';
 import parse from '../lib/parse';
 import initResponses from './responses';
 import initTimeDateViews from './timeDateView';
+import { init as initTranslatorModule } from '../lib/translatorModule';
 
 const lang = config.userLang || config.defaultLang;
 
@@ -19,6 +20,8 @@ const begin = (momentLang) => {
     'translator',
   ], (composer, formatting, translator) =>
   $(document).ready(() => {
+    initTranslatorModule(translator.Translator, moment);
+
     translator.translate(modalTemplate(), lang, (html) => {
       $('body').append(html);
 
@@ -38,6 +41,7 @@ const begin = (momentLang) => {
         allowInputToggle: true,
         locale: momentLang,
         sideBySide: true,
+        useCurrent: true,
       });
       const createEvent = createEventFactory();
 

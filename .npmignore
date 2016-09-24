@@ -5,3 +5,4 @@ src
 webpack.config.js
 tsconfig.json
 ts
+.vscode
