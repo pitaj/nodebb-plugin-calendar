@@ -21,7 +21,7 @@
       "hook": "filter:parse.raw", "method": "parseRaw", "priority": 6
     },
     {
-      "hook": "filter:post.save", "method": "postSave"
+      "hook": "filter:post.create", "method": "postSave"
     },
     {
       "hook": "filter:post.edit", "method": "postEdit"

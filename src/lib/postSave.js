@@ -19,32 +19,32 @@ const regex = new RegExp(
   '(\\[\\s?event\\-invalid?\\s?\\][\\w\\W]*\\[\\s?\\/\\s?event\\-invalid?\\s?\\])'
 );
 
-const postSave = async (postData) => {
-  let event = parse(postData.content);
+const postSave = async (data) => {
+  const { post } = data;
+  let event = parse(post.content);
 
   // delete event if no longer in post
-  if (!postData.content.match(regex)) {
-    const existed = await eventExists(postData.pid);
+  if (!post.content.match(regex)) {
+    const existed = await eventExists(post.pid);
     if (existed) {
       await notify({
-        event: await getEvent(postData.pid),
+        event: await getEvent(post.pid),
         message: '[[calendar:event_deleted]]',
       });
 
-      await deleteEvent(postData.pid);
-      log(`[plugin-calendar] Event (pid:${postData.pid}) deleted`);
+      await deleteEvent(post.pid);
+      log(`[plugin-calendar] Event (pid:${post.pid}) deleted`);
     }
 
-    return postData;
+    return post;
   }
 
   const invalid = () => {
-    const d = postData;
-    d.content = d.content.replace(
+    post.content = post.content.replace(
       /\[\s?(\/?)\s?event\s?\]/g,
       '[$1event-invalid]'
     );
-    return postData;
+    return post;
   };
 
   if (!event) {
@@ -57,11 +57,11 @@ const postSave = async (postData) => {
       ...val,
       [failure]: event[failure],
     }), {});
-    log(`[plugin-calendar] Event (pid:${postData.pid}) validation failed: `, obj);
+    log(`[plugin-calendar] Event (pid:${post.pid}) validation failed: `, obj);
     return invalid();
   }
 
-  const can = await canPostEvent(postData.tid, postData.uid);
+  const can = await canPostEvent(post.tid, post.uid);
   if (!can) {
     return invalid();
   }
@@ -69,14 +69,14 @@ const postSave = async (postData) => {
   event.name = validator.escape(event.name);
   event.location = event.location.trim();
   event.description = event.description.trim();
-  event.pid = postData.pid;
-  event.uid = postData.uid;
+  event.pid = post.pid;
+  event.uid = post.uid;
   event = await fireHook('filter:plugin-calendar.event.post', event);
 
   await saveEvent(event);
   log(`[plugin-calendar] Event (pid:${event.pid}) saved`);
 
-  return postData;
+  return data;
 };
 
 const postSaveCallback = (postData, cb) => postSave(postData).asCallback(cb);

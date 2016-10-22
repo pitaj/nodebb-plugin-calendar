@@ -45,7 +45,8 @@ const emailNotification = async ({ uid, event, message, postData }) => {
 
     await sendEmail('notif_plugin_calendar_event_reminder', uid, {
       pid: event.pid,
-      subject: `[${meta.config.title || 'NodeBB'}] ${title}`,
+      subject: `[${meta.config.title || 'NodeBB'}] ` +
+        `[[calendar:event_starting, ${message}, ${event.name}]]`,
       intro: `[[calendar:event_starting, ${message}, ${event.name}]]`,
       content: content.replace(/"\/\//g, '"https://'),
       site_title: meta.config.title || 'NodeBB',

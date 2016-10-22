@@ -5,7 +5,7 @@
   "main": "library.js",
   "scripts": {
     "test": "babel-node ./src/lib/tests",
-    "build": "rm -r build/lib/* && babel src/lib --out-dir build/lib",
+    "build": "rm -r build/lib/* && babel src/lib --out-dir build/lib --source-maps && webpack",
     "build-production": "npm run build && NODE_ENV=production webpack --progress",
     "webpack": "webpack --watch",
     "watch": "rm -r build/lib/* && babel src/lib --out-dir build/lib --watch --source-maps",

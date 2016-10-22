@@ -28,8 +28,8 @@ export default (composer, translator) => {
       const uuid = find(composer.posts, data);
       setTimeout(() =>
         $(`#cmp-uuid-${uuid}`)
-        .find('.plugin-calendar-composer-edit-event')
-        .toggle(canPost),
+          .find('.plugin-calendar-composer-edit-event')
+          .toggle(canPost),
         200
       );
     });
@@ -48,9 +48,7 @@ export default (composer, translator) => {
       if (eventExisted) {
         const button = comp.find('.composer-submit:visible');
 
-        /* eslint-disable */
-        const orig = $._data(button[0], 'events').click.map(x => x.handler);
-        /* eslint-enable */
+        const orig = $._data(button[0], 'events').click.map(x => x.handler); // eslint-disable-line
         const trigger = (self, e) => {
           orig.forEach((handler) => {
             handler.call(self, e);
@@ -75,10 +73,10 @@ export default (composer, translator) => {
   };
 
   $(window).on('action:composer.post.new action:composer.post.edit action:composer.topic.new',
-  (e, data) => {
-    onChange(data);
-    alterSubmit(data);
-  });
+    (e, data) => {
+      onChange(data);
+      alterSubmit(data);
+    });
   $(document.body).on('change', '.composer .category-list', (e) => {
     const uuid = $(e.target)
       .closest('.composer')

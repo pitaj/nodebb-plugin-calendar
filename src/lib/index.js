@@ -1,8 +1,7 @@
 // Polyfills
 import 'core-js/shim';
 
-import { install } from 'source-map-support';
-install();
+import 'source-map-support/register';
 
 import init from './init';
 import { parsePostCallback, parseRawCallback } from './parseFilters';

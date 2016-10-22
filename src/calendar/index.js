@@ -9,7 +9,10 @@ const convertToFC = (event) => {
     allDay: event.allday,
     start: event.startDate,
     end: event.endDate,
-    className: [`plugin-calendar-cal-event-category-${event.cid}`],
+    className: [
+      `plugin-calendar-cal-event-category-${event.cid}`,
+      `plugin-calendar-cal-event-response-${event.responses[app.user.uid]}`,
+    ],
   };
 
   return ev;
@@ -110,16 +113,35 @@ const begin = (momentLang) => {
     }, 200);
   };
 
+  let justLoaded = false;
   const init = () => {
-    const fc = $('#calendar').fullCalendar(calendarOptions);
-    openEvent(fc);
+    const $calendar = $('#calendar');
+
+    if (!justLoaded) {
+      $calendar.fullCalendar(calendarOptions);
+      const btn = $('#plugin-calendar-cal-only-yes');
+      btn
+        .on('click', (e) => {
+          e.preventDefault();
+          $calendar.toggleClass('plugin-calendar-cal-only-yes');
+          btn.toggleClass('active');
+        })
+        .detach()
+        .appendTo($calendar.find('.fc-toolbar .fc-right'));
+    }
+
+    openEvent($calendar);
   };
 
-  $(document).ready(init);
+  $(document).ready(() => {
+    init();
+    justLoaded = true;
+  });
   $(window).on('action:ajaxify.end popstate', () => {
     if (ajaxify.data.template.calendar) {
       init();
     }
+    justLoaded = false;
   });
 };
 

@@ -1,3 +1,4 @@
+<button type="button" id="plugin-calendar-cal-only-yes" title="[[calendar:only_yes_long]]">[[calendar:only_yes]]</button>
 <div id="calendar"></div>
 
 <script src="{relative_path}/plugins/nodebb-plugin-calendar/bundles/calendar.js"></script>

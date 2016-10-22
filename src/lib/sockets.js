@@ -57,8 +57,20 @@ pluginSockets.calendar.getEventsByDate = ({ uid }, { startDate, endDate }, cb) =
     const events = await getEventsByDate(startDate, endDate);
     const filtered = await filterByPid(events, uid);
     const escaped = await Promise.all(filtered.map(escapeEvent));
+    const withResponses = await Promise.all(
+      escaped.map((event) =>
+        getUserResponse({ pid: event.pid, uid }).then((response) =>
+          ({
+            ...event,
+            responses: {
+              [uid]: response,
+            },
+          })
+        )
+      )
+    );
 
-    return escaped;
+    return withResponses;
   })().asCallback(cb);
 
 pluginSockets.calendar.getParsedEvent = ({ uid }, pid, cb) => {
