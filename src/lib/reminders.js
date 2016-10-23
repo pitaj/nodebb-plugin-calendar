@@ -11,7 +11,6 @@ import { getAllEvents, escapeEvent } from './event';
 import { filterUidsByPid } from './privileges';
 import postTemplate from './template';
 import Promise from 'bluebird';
-import { Html5Entities as Entities } from 'html-entities';
 const p = Promise.promisify;
 
 const createNotif = p(notifications.create);
@@ -23,10 +22,7 @@ const sendEmail = p(emailer.send);
 const getUserSettings = p(user.getSettings);
 const getUserFields = p(user.getUserFields);
 
-const entities = new Entities();
-const decode = (...args) => entities.decode(...args);
-
-const emailNotification = async ({ uid, event, message, postData }) => {
+const emailNotification = async ({ uid, event, message }) => {
   if (parseInt(meta.config.disableEmailSubscriptions, 10) === 1) {
     return;
   }
@@ -40,14 +36,10 @@ const emailNotification = async ({ uid, event, message, postData }) => {
     const parsed = await escapeEvent(event);
     const content = postTemplate(parsed);
 
-    const title = decode(postData.title || '');
-    // const titleEscaped = title.replace(/%/g, '&#37;').replace(/,/g, '&#44;');
-
     await sendEmail('notif_plugin_calendar_event_reminder', uid, {
       pid: event.pid,
       subject: `[${meta.config.title || 'NodeBB'}] ` +
         `[[calendar:event_starting, ${message}, ${event.name}]]`,
-      intro: `[[calendar:event_starting, ${message}, ${event.name}]]`,
       content: content.replace(/"\/\//g, '"https://'),
       site_title: meta.config.title || 'NodeBB',
       username: userData.username,

@@ -1,7 +1,7 @@
 <p>[[email:greeting_with_name, {username}]],</p>
 
-<p>{intro}:</p>
-<blockquote>{content}</blockquote>
+<p>[[calendar:event_starting_soon]]:</p>
+<blockquote>{{content}}</blockquote>
 
 <a href="{url}">[[email:notif.post.cta]]</a>
 

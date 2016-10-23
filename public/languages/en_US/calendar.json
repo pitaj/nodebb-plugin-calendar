@@ -29,6 +29,8 @@
   "only_yes": "Show only \"Yes\"",
   "only_yes_long": "Show only events where you responded affirmatively",
 
+  "event_starting_soon": "The following event is starting soon",
+
   "responses_title": "Responses",
   "response_no": "No",
   "response_maybe": "Maybe",
