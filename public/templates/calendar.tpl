@@ -9,7 +9,7 @@ role="dialog" aria-labelledby="plugin-calendar-cal-event-display-title">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal"
+        <button type="button" class="close dismiss" data-dismiss="modal"
         aria-label="[[global:buttons.close]]">
           <i aria-hidden="true" class="fa fa-times"></i>
         </button>
@@ -21,10 +21,10 @@ role="dialog" aria-labelledby="plugin-calendar-cal-event-display-title">
         <div class="plugin-calendar-event panel panel-success"></div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">
+        <button type="button" class="btn btn-default dismiss" data-dismiss="modal">
           [[global:buttons.close]]
         </button>
-        <a type="button" href="#" class="btn btn-primary" data-dismiss="modal">
+        <a type="button" href="#" itemprop="url" class="btn btn-primary" data-dismiss="modal">
           [[calendar:go_to_post]]
         </a>
       </div>

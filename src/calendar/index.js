@@ -31,7 +31,7 @@ const displayEvent = (event, e, cb) => {
   socket.emit('plugins.calendar.getParsedEvent', pid, (err, { content, parsed }) => {
     if (err) {
       app.alertError(err.message || err);
-      return;
+      throw err;
     }
 
     const div = $(content);
@@ -53,7 +53,8 @@ const displayEvent = (event, e, cb) => {
       .modal({
         backdrop: false,
       });
-    modal.on('hide.bs.modal', () => {
+    modal.off('click').on('click', '.dismiss', () => {
+      modal.modal('hide');
       location.hash = location.hash.replace(globalRegExp, '');
     });
     $(window).trigger('action:calendar.event.display', { pid, modal });
@@ -100,8 +101,7 @@ const begin = (momentLang) => {
         $('#plugin-calendar-cal-event-display').modal({
           backdrop: false,
           show: false,
-          hide: true,
-        });
+        }).modal('hide');
       }, 200);
       return;
     }
@@ -137,7 +137,7 @@ const begin = (momentLang) => {
     init();
     justLoaded = true;
   });
-  $(window).on('action:ajaxify.end popstate', () => {
+  $(window).on('action:ajaxify.end hashchange popstate', () => {
     if (ajaxify.data.template.calendar) {
       init();
     }
