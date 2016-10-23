@@ -16,28 +16,37 @@ const getUserSettings = p(user.getSettings);
 const translate = p((text, language, callback) => {
   translator.translate(text, language, (content) => callback(null, content));
 });
+const getSetting = p(meta.settings.getOne);
+const can = {
+  posts: p(privileges.posts.can),
+  topics: p(privileges.topics.can),
+  categories: p(privileges.categories.can),
+};
 
 const perm = 'plugin-calendar:event:post';
 
 pluginSockets.calendar = {};
-pluginSockets.calendar.canPostEvent = ({ uid }, { pid, tid, cid }, cb) => {
-  if (!uid) {
-    cb(null, false);
-    return;
-  }
-  if (pid) {
-    privileges.posts.can(perm, pid, uid, cb);
-    return;
-  }
-  if (tid) {
-    privileges.topics.can(perm, tid, uid, cb);
-    return;
-  }
-  if (cid) {
-    privileges.categories.can(perm, cid, uid, cb);
-    return;
-  }
-  cb(null, false);
+pluginSockets.calendar.canPostEvent = ({ uid }, { pid, tid, cid, isMain }, cb) => {
+  (async () => {
+    if (!uid) {
+      return false;
+    }
+
+    if (!isMain && await getSetting('plugin-calendar', 'mainPostOnly')) {
+      return false;
+    }
+
+    if (pid) {
+      return can.posts(perm, pid, uid);
+    }
+    if (tid) {
+      return can.topics(perm, tid, uid);
+    }
+    if (cid) {
+      return can.categories(perm, cid, uid);
+    }
+    return false;
+  })().asCallback(cb);
 };
 
 pluginSockets.calendar.getResponses = ({ uid }, pid, cb) => {
@@ -52,7 +61,7 @@ pluginSockets.calendar.getUserResponse = ({ uid }, pid, cb) => {
   getUserResponse({ uid, pid }).asCallback(cb);
 };
 
-pluginSockets.calendar.getEventsByDate = ({ uid }, { startDate, endDate }, cb) =>
+pluginSockets.calendar.getEventsByDate = ({ uid }, { startDate, endDate }, cb) => {
   (async () => {
     const events = await getEventsByDate(startDate, endDate);
     const filtered = await filterByPid(events, uid);
@@ -72,11 +81,12 @@ pluginSockets.calendar.getEventsByDate = ({ uid }, { startDate, endDate }, cb) =
 
     return withResponses;
   })().asCallback(cb);
+};
 
 pluginSockets.calendar.getParsedEvent = ({ uid }, pid, cb) => {
   (async () => {
-    const can = await canViewPost(pid, uid);
-    if (!can) {
+    const canView = await canViewPost(pid, uid);
+    if (!canView) {
       throw new Error('[[error:no-privileges]]');
     }
 

@@ -55,5 +55,8 @@
   "scripts": [
     "build/bundles/commons.js",
     "build/bundles/client.js"
+  ],
+  "acpScripts": [
+    "public/admin.js"
   ]
 }

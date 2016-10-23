@@ -1,4 +1,6 @@
 const plugins = require.main.require('./src/plugins');
+const meta = require.main.require('./src/meta');
+const topics = require.main.require('./src/topics');
 // const winston = require.main.require('winston');
 
 import validator from 'validator';
@@ -13,6 +15,13 @@ const log = (...args) => console.log(...args);
 const p = Promise.promisify;
 
 const fireHook = p(plugins.fireHook);
+const getSetting = p(meta.settings.getOne);
+const getTopicField = p(topics.getTopicField);
+
+const isMainPost = ({ pid, tid }) =>
+  getTopicField(tid, 'mainPid')
+    .then((mainPid) =>
+      parseInt(mainPid, 10) === parseInt(pid, 10));
 
 const regex = new RegExp(
   '(\\[\\s?event\\s?\\][\\w\\W]*\\[\\s?\\/\\s?event\\s?\\])|' +
@@ -44,7 +53,7 @@ const postSave = async (data) => {
       /\[\s?(\/?)\s?event\s?\]/g,
       '[$1event-invalid]'
     );
-    return post;
+    return data;
   };
 
   if (!event) {
@@ -60,6 +69,10 @@ const postSave = async (data) => {
     log(`[plugin-calendar] Event (pid:${post.pid}) validation failed: `, obj);
     return invalid();
   }
+  const main = !await isMainPost(post);
+  if (main && await getSetting('plugin-calendar', 'mainPostOnly')) {
+    return invalid();
+  }
 
   const can = await canPostEvent(post.tid, post.uid);
   if (!can) {
@@ -73,14 +86,15 @@ const postSave = async (data) => {
   event.uid = post.uid;
   event = await fireHook('filter:plugin-calendar.event.post', event);
 
-  await saveEvent(event);
-  log(`[plugin-calendar] Event (pid:${event.pid}) saved`);
+  if (event) {
+    await saveEvent(event);
+    log(`[plugin-calendar] Event (pid:${event.pid}) saved`);
+  }
 
   return data;
 };
 
-const postSaveCallback = (postData, cb) => postSave(postData).asCallback(cb);
-const postEditCallback = (data, cb) =>
-  postSave(data.post).then(() => data).asCallback(cb);
+const postSaveCallback = (data, cb) => postSave(data).asCallback(cb);
+const postEditCallback = postSaveCallback;
 
 export { postSave, postSaveCallback, postEditCallback };

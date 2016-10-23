@@ -13,10 +13,11 @@ export default ({ router, middleware }, callback) => {
 
   const defaults = {
     checkingInterval: 1000 * 60 * 5,
+    mainPostOnly: false,
   };
 
   getSettings('plugin-calendar')
-  .then((settings) => setSettings('plugin-calendar', { ...defaults, ...settings }))
-  .then(() => initNotifierDaemon())
-  .asCallback(callback);
+    .then((settings) => setSettings('plugin-calendar', { ...defaults, ...settings }))
+    .then(() => initNotifierDaemon())
+    .asCallback(callback);
 };

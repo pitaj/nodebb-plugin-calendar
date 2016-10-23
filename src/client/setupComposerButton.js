@@ -29,6 +29,7 @@ export default (composer, translator) => {
       setTimeout(() =>
         $(`#cmp-uuid-${uuid}`)
           .find('.plugin-calendar-composer-edit-event')
+          .parent()
           .toggle(canPost),
         200
       );

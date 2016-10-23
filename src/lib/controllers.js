@@ -1,5 +1,6 @@
 const privileges = require.main.require('./src/privileges');
 const categories = require.main.require('./src/categories');
+const meta = require.main.require('./src/meta');
 
 // import { getEventsByDate, escapeEvent } from './event';
 // import { filterByPid } from './privileges';
@@ -8,6 +9,8 @@ const p = Promise.promisify;
 
 const getAllCategoryFields = p(categories.getAllCategoryFields);
 const filterCids = p(privileges.categories.filterCids);
+const getSettings = p(meta.settings.get);
+const setSettings = p(meta.settings.set);
 
 /* eslint-disable */
 function shadeColor2(color, percent) {
@@ -17,11 +20,24 @@ function shadeColor2(color, percent) {
 /* eslint-enable */
 
 export default (router, middleware) => {
-  const renderAdmin = (req, res) => {
-    res.render('admin/plugins/calendar', {});
+  const renderAdmin = (req, res, next) => {
+    getSettings('plugin-calendar').then((settings) => {
+      res.render('admin/plugins/calendar', {
+        settings,
+      });
+    }).catch(next);
   };
   router.get('/admin/plugins/calendar', middleware.admin.buildHeader, renderAdmin);
   router.get('/api/admin/plugins/calendar', renderAdmin);
+
+  router.get('/api/admin/plugins/calendar/save', (req, res, next) => {
+    Promise.resolve()
+      .then(() => setSettings('plugin-calendar', JSON.parse(req.query.settings)))
+      .then(() => {
+        res.sendStatus(200);
+      })
+      .catch(next);
+  });
 
   const renderPage = (req, res, next) => {
     const cb = (err, data) => {
