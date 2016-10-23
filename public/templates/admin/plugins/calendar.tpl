@@ -1,6 +1,6 @@
 <div class="row">
   <div class="col-lg-9">
-    <form class="form plugin-calendar-settings">
+    <form class="form plugin-calendar-settings" id="plugin-calendar-settings">
       <div class="panel panel-default">
         <div class="panel-heading">Calendar</div>
         <div class="panel-body">
@@ -15,6 +15,12 @@
             <label for="mainPostOnly">
               <input type="checkbox" name="mainPostOnly" id="mainPostOnly" <!-- IF settings.mainPostOnly --> checked <!-- ENDIF settings.mainPostOnly --> />
               Only allow events in the main post of a topic
+            </label>
+          </div>
+          <div class="form-group">
+            <label for="respondIfCanReply">
+              <input type="checkbox" name="respondIfCanReply" id="respondIfCanReply" <!-- IF settings.respondIfCanReply --> checked <!-- ENDIF settings.respondIfCanReply --> />
+              Link the permission to respond to an event to the reply permission, as opposed to (by default) the view permission
             </label>
           </div>
         </div>

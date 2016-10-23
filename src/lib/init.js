@@ -14,6 +14,7 @@ export default ({ router, middleware }, callback) => {
   const defaults = {
     checkingInterval: 1000 * 60 * 5,
     mainPostOnly: false,
+    respondIfCanReply: false,
   };
 
   getSettings('plugin-calendar')

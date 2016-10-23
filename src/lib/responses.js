@@ -1,7 +1,7 @@
 const db = require.main.require('./src/database');
 const user = require.main.require('./src/user');
 
-import { canViewPost } from './privileges';
+import { canRespond, canViewPost } from './privileges';
 import Promise from 'bluebird';
 
 const p = Promise.promisify;
@@ -20,7 +20,7 @@ const submitResponse = async ({ pid, uid, value }) => {
   if (!values.includes(value)) {
     throw new Error('[[error:invalid-data]]');
   }
-  if (!await canViewPost(pid, uid)) {
+  if (!uid || !await canRespond(pid, uid)) {
     throw new Error('[[error:no-privileges]]');
   }
 
