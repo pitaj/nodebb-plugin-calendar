@@ -3,6 +3,8 @@ const pluginSockets = require.main.require('./src/socket.io/plugins');
 const translator = require.main.require('./public/src/modules/translator');
 const user = require.main.require('./src/user');
 const meta = require.main.require('./src/meta');
+const posts = require.main.require('./src/posts');
+const topics = require.main.require('./src/topics');
 
 import { getAll as getAllResponses, submitResponse, getUserResponse } from './responses';
 import { getEventsByDate, escapeEvent, getEvent } from './event';
@@ -22,6 +24,8 @@ const can = {
   topics: p(privileges.topics.can),
   categories: p(privileges.categories.can),
 };
+const tidFromPid = p((pid, cb) => posts.getPostField(pid, 'tid', cb));
+const topicIsDeleted = p((tid, cb) => topics.getTopicField(tid, 'deleted', cb));
 
 const perm = 'plugin-calendar:event:post';
 
@@ -67,16 +71,19 @@ pluginSockets.calendar.getEventsByDate = ({ uid }, { startDate, endDate }, cb) =
     const filtered = await filterByPid(events, uid);
     const escaped = await Promise.all(filtered.map(escapeEvent));
     const withResponses = await Promise.all(
-      escaped.map((event) =>
-        getUserResponse({ pid: event.pid, uid }).then((response) =>
-          ({
-            ...event,
-            responses: {
-              [uid]: response,
-            },
-          })
-        )
-      )
+      escaped.map(async (event) => {
+        const [response, topicDeleted] = await Promise.all([
+          getUserResponse({ pid: event.pid, uid }),
+          tidFromPid(event.pid).then(topicIsDeleted),
+        ]);
+        return {
+          ...event,
+          responses: {
+            [uid]: response,
+          },
+          topicDeleted,
+        };
+      })
     );
 
     return withResponses;

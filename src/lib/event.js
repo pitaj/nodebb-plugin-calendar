@@ -22,20 +22,42 @@ const getCidsByPids = p(posts.getCidsByPids);
 const getCidByPid = p(posts.getCidByPid);
 
 const listKey = 'plugins:calendar:events';
+const listByEndKey = `${listKey}:byEnd`;
 
-const saveEvent = (event) => Promise.all([
-  sortedSetAdd(listKey, event.startDate, `${listKey}:pid:${event.pid}`),
-  setObject(`${listKey}:pid:${event.pid}`, event),
-]);
+const saveEvent = (event) => {
+  const objectKey = `${listKey}:pid:${event.pid}`;
+  return Promise.all([
+    sortedSetAdd(listKey, event.startDate, objectKey),
+    sortedSetAdd(listByEndKey, event.endDate, objectKey),
+    setObject(objectKey, event),
+  ]);
+};
 
-const deleteEvent = (pid) => Promise.all([
-  sortedSetRemove(listKey, `${listKey}:pid:${pid}`),
-  deleteKey(`${listKey}:pid:${pid}`),
-  removeAllResponses(pid),
-]);
+const deleteEvent = (pid) => {
+  const objectKey = `${listKey}:pid:${pid}`;
+  return Promise.all([
+    sortedSetRemove(listKey, objectKey),
+    sortedSetRemove(listByEndKey, objectKey),
+    deleteKey(objectKey),
+    removeAllResponses(pid),
+  ]);
+};
 
 const getEventsByDate = async (startDate, endDate) => {
-  const keys = await getSortedSetRangeByScore(listKey, 0, -1, startDate, endDate);
+  // should be possible eventually
+  // const keys = await getSortedSetRangeByScore([
+  //   listKey,
+  //   listByEndKey,
+  // ], 0, -1, startDate, endDate);
+
+  // for now we have to do this:
+  const [byStart, byEnd] = await Promise.all([
+    getSortedSetRangeByScore(listKey, 0, -1, startDate, endDate),
+    getSortedSetRangeByScore(listByEndKey, 0, -1, startDate, endDate),
+  ]);
+  const temp = byStart.concat(byEnd);
+  const keys = temp.filter((x, i) => temp.indexOf(x) === i);
+
   const events = await getObjects(keys);
 
   const cids = await getCidsByPids(events.map((event) => event.pid));
