@@ -6,13 +6,9 @@
   "scripts": {
     "test": "babel-node ./src/lib/tests",
     "build": "rm -r build/lib/* && babel src/lib --out-dir build/lib --source-maps && webpack",
-    "build-production": "npm run build && NODE_ENV=production webpack --progress",
-    "webpack": "webpack --watch",
-    "watch": "rm -r build/lib/* && babel src/lib --out-dir build/lib --watch --source-maps",
-    "release": "npm run test && npm run build-production && git commit && git push && npm version prerelease && npm publish",
-    "docs": "typedoc --out docs src",
-    "compile": "typescript",
-    "lint": "eslint ./src/; exit 0"
+    "build-production": "rm -r build/lib/* && babel src/lib --out-dir build/lib --source-maps && set NODE_ENV=production && webpack --progress",
+    "release": "npm run test && npm run build-production && npm version prerelease && npm publish",
+    "lint": "eslint ./src/"
   },
   "repository": {
     "type": "git",
@@ -22,8 +18,8 @@
     "nodebb",
     "plugin",
     "calendar",
-    "events",
-    "dates"
+    "event",
+    "date"
   ],
   "author": "PitaJ",
   "license": "MIT",
@@ -43,23 +39,15 @@
     "babel-plugin-transform-es2015-modules-commonjs": "^6.8.0",
     "babel-plugin-transform-object-rest-spread": "^6.8.0",
     "babel-plugin-transform-runtime": "^6.9.0",
-    "babel-preset-es2015": "^6.9.0",
-    "babel-preset-es2015-native-modules": "^6.6.0",
+    "babel-preset-es2015": "^6.16.0",
     "babel-preset-es2015-node4": "^2.1.0",
     "bundle-loader": "^0.5.4",
     "chalk": "^1.1.3",
-    "css-loader": "^0.23.1",
     "eslint": "^2.9.0",
     "eslint-config-airbnb-base": "^3.0.1",
     "eslint-import-resolver-webpack": "^0.3.2",
     "eslint-plugin-babel": "^3.3.0",
     "eslint-plugin-import": "^1.7.0",
-    "exports-loader": "^0.6.3",
-    "file-loader": "^0.9.0",
-    "imports-loader": "^0.6.5",
-    "ts-loader": "^0.8.2",
-    "typedoc": "^0.4.4",
-    "typescript": "^1.8.10",
     "webpack": "^2.1.0-beta.15"
   },
   "dependencies": {
@@ -68,7 +56,6 @@
     "core-js": "^2.4.1",
     "eonasdan-bootstrap-datetimepicker": "^4.15.35",
     "fullcalendar": "^2.9.0",
-    "html-entities": "^1.2.0",
     "moment": "^2.14.1",
     "source-map-support": "^0.4.2",
     "validator": "^5.2.0"

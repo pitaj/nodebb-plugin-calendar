@@ -11,7 +11,7 @@ const convertToFC = (event) => {
     end: event.endDate,
     className: [
       `plugin-calendar-cal-event-category-${event.cid}`,
-      `plugin-calendar-cal-event-response-${event.responses[app.user.uid]}`,
+      `plugin-calendar-cal-event-response-${event.responses[app.user.uid] || 'no'}`,
       event.topicDeleted ? 'plugin-calendar-cal-event-topic-deleted' : '',
     ],
   };

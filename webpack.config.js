@@ -25,20 +25,15 @@ module.exports = {
   module: {
     loaders: [
       {
-        test: /\.css$/,
-        loaders: [
-          'style',
-          'css',
-        ],
-      },
-      {
         test: /\.js$/,
         exclude: /node_modules/,
         loaders: [
           {
             loader: 'babel-loader',
             query: {
-              presets: ['es2015-native-modules'],
+              presets: [
+                ['es2015', { modules: false }],
+              ],
               plugins: [
                 ['transform-runtime', {
                   polyfill: false,
@@ -54,24 +49,10 @@ module.exports = {
         include: /node_modules/,
         loader: './removeAMD',
       },
-      {
-        test: /\.ts$/,
-        exclude: /node_modules/,
-        loaders: [
-          {
-            loader: 'babel-loader',
-            query: {
-              presets: ['es2015-native-modules'],
-              plugins: ['transform-runtime'],
-            },
-          },
-          'ts-loader',
-        ],
-      },
     ],
   },
   resolve: {
-    extensions: ['', '.js', '.ts'],
+    extensions: ['', '.js'],
     modules: [
       'node_modules',
     ],
