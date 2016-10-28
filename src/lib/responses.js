@@ -18,10 +18,10 @@ const values = ['yes', 'maybe', 'no'];
 
 const submitResponse = async ({ pid, uid, value }) => {
   if (!values.includes(value)) {
-    throw new Error('[[error:invalid-data]]');
+    throw Error('[[error:invalid-data]]');
   }
   if (!uid || !await canRespond(pid, uid)) {
-    throw new Error('[[error:no-privileges]]');
+    throw Error('[[error:no-privileges]]');
   }
 
   await Promise.all([
@@ -38,7 +38,7 @@ const removeAll = (pid) => deleteAll(
 
 const getAll = async ({ pid, uid = 0, selection = values } = {}) => {
   if (uid !== 0 && !await canViewPost(pid, uid)) {
-    throw new Error('[[error:no-privileges]]');
+    throw Error('[[error:no-privileges]]');
   }
 
   const responseUids = await getSetsMembers(selection
@@ -57,7 +57,7 @@ const getAll = async ({ pid, uid = 0, selection = values } = {}) => {
 
 const getUserResponse = async ({ pid, uid }) => {
   if (!await canViewPost(pid, uid)) {
-    throw new Error('[[error:no-privileges]]');
+    throw Error('[[error:no-privileges]]');
   }
 
   const arr = await Promise.all(

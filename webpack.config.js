@@ -66,5 +66,3 @@ module.exports = {
     new webpack.IgnorePlugin(/^\.\/(locale|lang)$/, [/(moment|fullcalendar)$/]),
   ],
 };
-
-// console.log(module.exports);

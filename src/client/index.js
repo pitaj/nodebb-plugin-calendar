@@ -88,6 +88,6 @@ try {
     });
   }
 } catch (e) {
-  console.error(`could not load locale data (${momentLang}) for moment`);
   begin('en-us');
+  throw Error(`could not load locale data (${momentLang}) for moment`);
 }

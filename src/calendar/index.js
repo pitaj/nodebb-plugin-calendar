@@ -31,7 +31,9 @@ const displayEvent = (event, e, cb) => {
 
   socket.emit('plugins.calendar.getParsedEvent', pid, (err, { content, parsed }) => {
     if (err) {
-      app.alertError(err.message || err);
+      if (err.message) {
+        app.alertError(err);
+      }
       throw err;
     }
 
@@ -82,8 +84,10 @@ const begin = (momentLang) => {
         endDate: end.valueOf(),
       }, (err, events) => {
         if (err) {
-          app.alertError(err.message || err);
-          return;
+          if (err.message) {
+            app.alertError(err);
+          }
+          throw err;
         }
         callback(events.map(convertToFC));
       });
@@ -160,6 +164,6 @@ try {
     });
   }
 } catch (e) {
-  console.error(`could not load locale data (${momentLang}) for fullcalendar`);
   begin('en-us');
+  throw Error(`could not load locale data (${momentLang}) for fullcalendar`);
 }

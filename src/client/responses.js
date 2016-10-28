@@ -28,8 +28,10 @@ const addResponsesToPost = (pid, cb) => {
 
   socket.emit('plugins.calendar.getResponses', pid, (err, responses) => {
     if (err) {
-      app.alertError(err);
-      return;
+      if (err.message) {
+        app.alertError(err);
+      }
+      throw err;
     }
     if (!responses ||
     !responses.yes ||
@@ -81,8 +83,10 @@ const initResponses = () => {
 
     socket.emit('plugins.calendar.submitResponse', { pid, value }, (err) => {
       if (err) {
-        app.alertError(err);
-        return;
+        if (err.message) {
+          app.alertError(err);
+        }
+        throw err;
       }
       app.alertSuccess();
       button.siblings().removeClass('active');

@@ -94,7 +94,7 @@ pluginSockets.calendar.getParsedEvent = ({ uid }, pid, cb) => {
   (async () => {
     const canView = await canViewPost(pid, uid);
     if (!canView) {
-      throw new Error('[[error:no-privileges]]');
+      throw Error('[[error:no-privileges]]');
     }
 
     const event = await getEvent(pid);
