@@ -23,11 +23,11 @@ const regex = new RegExp(
 );
 
 export default (composer, translator) => {
-  const onChange = (data) => {
+  const onChange = () => {
+    const data = composer.posts[composer.active];
     socket.emit('plugins.calendar.canPostEvent', data, (e, canPost) => {
-      const uuid = find(composer.posts, data);
       setTimeout(() =>
-        $(`#cmp-uuid-${uuid}`)
+        $(`#cmp-uuid-${composer.active}`)
           .find('.plugin-calendar-composer-edit-event')
           .parent()
           .toggle(canPost),
@@ -36,54 +36,47 @@ export default (composer, translator) => {
     });
   };
 
-  const alterSubmit = (data) => {
-    if (!data.pid) {
-      return;
-    }
-    setTimeout(() => {
-      const uuid = find(composer.posts, data);
-      const comp = $(`#cmp-uuid-${uuid}`);
-      const write = comp.find('.write-container textarea.write');
-      const eventExisted = regex.test(write.val());
+  const alterSubmit = () => {
+    const uuid = composer.active;
+    const comp = $(`#cmp-uuid-${uuid}`);
+    const write = comp.find('.write-container textarea.write');
+    const eventExisted = regex.test(write.val());
 
-      if (eventExisted) {
-        const button = comp.find('.composer-submit:visible');
+    if (eventExisted) {
+      const button = comp.find('.composer-submit:visible');
 
-        const orig = $._data(button[0], 'events').click.map(x => x.handler); // eslint-disable-line
-        const trigger = (self, e) => {
-          orig.forEach((handler) => {
-            handler.call(self, e);
-          });
-        };
-        button.off('click').on('click', function onClick(e) {
-          const text = write.val();
-          if (!regex.test(text)) {
-            translator.translate('[[calendar:confirm_delete_event]]', (question) => {
-              bootbox.confirm(question, (okay) => {
-                if (okay) {
-                  trigger(this, e);
-                }
-              });
-            });
-          } else {
-            trigger(this, e);
-          }
+      const orig = $._data(button[0], 'events').click.map(x => x.handler); // eslint-disable-line
+      const trigger = (self, e) => {
+        orig.forEach((handler) => {
+          handler.call(self, e);
         });
-      }
-    }, 200);
+      };
+      button.off('click').on('click', function onClick(e) {
+        const text = write.val();
+        if (!regex.test(text)) {
+          translator.translate('[[calendar:confirm_delete_event]]', (question) => {
+            bootbox.confirm(question, (okay) => {
+              if (okay) {
+                trigger(this, e);
+              }
+            });
+          });
+        } else {
+          trigger(this, e);
+        }
+      });
+    }
   };
 
-  $(window).on('action:composer.post.new action:composer.post.edit action:composer.topic.new',
-    (e, data) => {
-      onChange(data);
-      alterSubmit(data);
-    });
-  $(document.body).on('change', '.composer .category-list', (e) => {
-    const uuid = $(e.target)
-      .closest('.composer')
-      .attr('id')
-      .replace('cmp-uuid-', '');
-    const data = composer.posts[uuid];
-    onChange(data);
+  $(window).on('action:composer.post.new ' +
+    ' action:composer.post.edit ' +
+    'action:composer.topic.new', () => {
+    setTimeout(() => {
+      onChange();
+      alterSubmit();
+    }, 200);
+  });
+  $(document.body).on('change', '.composer .category-list', () => {
+    onChange();
   });
 };
