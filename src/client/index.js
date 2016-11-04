@@ -6,10 +6,10 @@ import moment from 'moment';
 import { eventTemplate, modalTemplate } from './templates';
 import setupComposerButton from './setupComposerButton';
 import createEventFactory from './createEvent';
-import parse from '../lib/parse';
+import { default as parse, inPost } from '../lib/parse';
 import initResponses from './responses';
-import initTimeDateViews from './timeDateView';
-import { init as initTranslatorModule } from '../lib/translatorModule';
+import initTranslation from './clientSideTranslation';
+import initTranslatorModule from '../lib/translatorModule';
 
 const lang = config.userLang || config.defaultLang;
 
@@ -20,7 +20,8 @@ const begin = (momentLang) => {
     'translator',
   ], (composer, formatting, translator) =>
   $(document).ready(() => {
-    initTranslatorModule(translator.Translator, moment);
+    initTranslatorModule(translator.Translator);
+    initTranslation(translator.Translator);
 
     translator.translate(modalTemplate(), lang, (html) => {
       $('body').append(html);
@@ -52,15 +53,19 @@ const begin = (momentLang) => {
 
         formatting.addButtonDispatch('plugin-calendar-event', (textarea) => {
           const $textarea = $(textarea);
-          const old = parse($textarea.val());
-          createEvent(old || {}, (event) => {
+          const oldVal = $textarea.val();
+          const oldEvent = parse(oldVal.replace(/\[(\/?)event-invalid\]/g, '[$1event]'));
+          createEvent(oldEvent || {}, (event) => {
             const text = event ? eventTemplate(event) : '';
-            $textarea.val(
-              $textarea
-              .val()
-              .replace(/\[\s*event\s*\][\w\W]*\[\s*\/\s*event\s*\]/g, '\n') +
-              text
-            );
+            if (inPost.test(oldVal)) {
+              const newVal = oldVal.replace(
+                /\[event(?:-invalid)?\][\s\S]+\[\/event(?:-invalid)?\]/g,
+                text
+              );
+              $textarea.val(newVal);
+            } else {
+              $textarea.val(`${oldVal}\n\n${text}`);
+            }
             $textarea.trigger('input');
           });
         });
@@ -69,7 +74,6 @@ const begin = (momentLang) => {
       $(window).on('action:composer.enhanced', prepareFormattingTools);
 
       initResponses();
-      initTimeDateViews();
     });
   }));
 };

@@ -4,12 +4,12 @@
       <div class="panel panel-default">
         <div class="panel-heading">Calendar</div>
         <div class="panel-body">
-          <div class="form-group">
+          <div class="form-group form-inline">
             <label for="checkingInterval">
               Interval on which to check for events coming up (used for reminders)<br>
               Must restart to take effect
             </label>
-            <input type="number" name="checkingInterval" id="checkingInterval" value="{settings.checkingInterval}" />
+            <input type="tel" class="form-control" name="checkingInterval" id="checkingInterval" value="{settings.checkingInterval}" />
           </div>
           <div class="form-group">
             <label for="mainPostOnly">

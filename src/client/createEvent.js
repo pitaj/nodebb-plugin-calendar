@@ -2,6 +2,7 @@
 
 import remindersFactory from './reminders';
 import validateEvent from '../lib/validateEvent';
+import moment from 'moment';
 
 const defaultEvent = {
   name: '',
@@ -45,8 +46,8 @@ const createEventFactory = () => {
   const setInputs = (event) => {
     inputs.name.val(event.name);
     inputs.allday.prop('checked', event.allday);
-    inputs.startDate.data('DateTimePicker').date(new Date(event.startDate));
-    inputs.endDate.data('DateTimePicker').date(new Date(event.endDate));
+    inputs.startDate.data('DateTimePicker').date(moment(event.startDate));
+    inputs.endDate.data('DateTimePicker').date(moment(event.endDate));
     reminders.setReminders(event.reminders);
     inputs.location.val(event.location);
     inputs.description.val(event.description);
@@ -109,6 +110,7 @@ const createEventFactory = () => {
       submit.off('click', onClick);
       callback(newEvent);
     };
+
     submit.on('click', onClick);
 
     del.one('click', () => {

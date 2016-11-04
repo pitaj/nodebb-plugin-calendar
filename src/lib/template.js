@@ -1,53 +1,10 @@
-import moment from 'moment';
-
-const justDate = 'dddd, LL';
-const justTime = 'LT';
-const dateAndTime = 'LLLL';
-
-const formatDates = (s, e, allday, lang, utc) => {
-  const mom = utc ? moment.utc : moment;
-  moment.locale(lang);
-
-  const start = mom(s);
-  const end = mom(e);
-
-  if (Math.abs(s - e) <= 60 * 1000) {
-    if (allday) {
-      return start.format(justDate);
-    }
-    return start.format(dateAndTime);
-  }
-
-  if (
-    start.dayOfYear() === end.dayOfYear() &&
-    start.year() === end.year()
-  ) {
-    if (allday) {
-      return start.format(justDate);
-    }
-    return `${start.format(justDate)}<br>` +
-      `${start.format(justTime)} - ${end.format(justTime)}`;
-  }
-
-  if (allday) {
-    return `${start.format(justDate)} - ${end.format(justDate)}`;
-  }
-  return `${start.format(dateAndTime)} - ${end.format(dateAndTime)}`;
-};
-
 const makeListElement = (n) => {
   const li = `<li data-value="${n}">[[time:duration, ${n}]]</li>`;
   return li;
 };
 
-const postTemplate = (event, lang) => {
-  const dateStringUTC = formatDates(
-    event.startDate,
-    event.endDate,
-    event.allday,
-    lang,
-    true
-  ).replace('<br>', ' | ');
+const postTemplate = (event) => {
+  const { startDate, endDate, allday } = event;
 
   const responsesTemplate = `
 <div class="plugin-calendar-event-responses">
@@ -118,7 +75,7 @@ const postTemplate = (event, lang) => {
 </div>`;
 
   const html = `
-<div class="plugin-calendar-event panel panel-success">
+<div class="plugin-calendar-event panel panel-success" data-translated="false">
   <div class="plugin-calendar-event-name panel-heading">
     ${event.name}
   </div>
@@ -126,14 +83,9 @@ const postTemplate = (event, lang) => {
     <div class="plugin-calendar-event-date">
       <i class="fa fa-clock-o" aria-hidden="true"></i>
       <a
-        data-parsed="false"
-        data-allday="${event.allday}"
-        data-startDate="${event.startDate}"
-        data-endDate="${event.endDate}"
-        title="${dateStringUTC}"
-        data-original-title="${dateStringUTC}"
+        title="[[time-date-view:utc, ${startDate}, ${endDate}, ${allday}]]"
         class="plugin-calendar-time-date-view"
-      >Hover for UTC date</a>
+      >[[time-date-view:local, ${startDate}, ${endDate}, ${allday}]]</a>
     </div>
     ${event.location.length ? `
     <div class="plugin-calendar-event-location">
@@ -170,4 +122,3 @@ const postTemplate = (event, lang) => {
 };
 
 export default postTemplate;
-export { formatDates };

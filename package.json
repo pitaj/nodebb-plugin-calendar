@@ -5,7 +5,7 @@
   "main": "library.js",
   "scripts": {
     "test": "babel-node ./src/lib/tests",
-    "build": "rm -r build/lib/* && babel src/lib --out-dir build/lib --source-maps && webpack",
+    "build": "babel src/lib --out-dir build/lib --source-maps && webpack --progress",
     "build-production": "rm -r build/lib/* && babel src/lib --out-dir build/lib --source-maps && set NODE_ENV=production && webpack --progress",
     "release": "npm run test && npm run build-production && npm version prerelease && npm publish",
     "lint": "eslint ./src/"

@@ -5,15 +5,14 @@ import 'source-map-support/register';
 
 import init from './init';
 import { parsePostCallback, parseRawCallback } from './parseFilters';
-import { postSaveCallback, postEditCallback } from './postSave';
+import { postSaveCallback } from './postSave';
 import { privilegesList, privilegesGroupsList, privilegesListHuman } from './privileges';
 import { deleteEvent } from './event';
 import './sockets';
 
 const Translator = require.main.require('./public/src/modules/translator').Translator;
-import moment from 'moment';
-import { init as initTranslatorModule } from './translatorModule';
-initTranslatorModule(Translator, moment);
+import initTranslatorModule from './translatorModule';
+initTranslatorModule(Translator);
 
 const addNavigation = (navs, callback) => {
   navs.push({
@@ -52,10 +51,10 @@ export {
   parsePostCallback as parsePost,
   parseRawCallback as parseRaw,
   postSaveCallback as postSave,
+  postSaveCallback as postEdit,
   privilegesList,
   privilegesGroupsList,
   privilegesListHuman,
-  postEditCallback as postEdit,
   composerFormatting,
   postDelete,
 };

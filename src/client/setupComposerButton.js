@@ -1,26 +1,6 @@
 /* global $, socket, app, bootbox */
 
-const find = (posts, data) => {
-  const uuid = Object.keys(posts).find((key) => {
-    const post = posts[key];
-    if (data.pid && parseInt(post.pid, 10) === parseInt(data.pid, 10)) {
-      return true;
-    }
-    if (data.tid && parseInt(post.tid, 10) === parseInt(data.tid, 10)) {
-      return true;
-    }
-    if (data.cid && parseInt(post.cid, 10) === parseInt(data.cid, 10)) {
-      return true;
-    }
-    return false;
-  });
-  return uuid;
-};
-
-const regex = new RegExp(
-  '(\\[\\s?event\\s?\\][\\w\\W]*\\[\\s?\\/\\s?event\\s?\\])|' +
-  '(\\[\\s?event\\-invalid?\\s?\\][\\w\\W]*\\[\\s?\\/\\s?event\\-invalid?\\s?\\])'
-);
+import { inPost } from '../lib/parse';
 
 export default (composer, translator) => {
   const onChange = () => {
@@ -40,7 +20,7 @@ export default (composer, translator) => {
     const uuid = composer.active;
     const comp = $(`#cmp-uuid-${uuid}`);
     const write = comp.find('.write-container textarea.write');
-    const eventExisted = regex.test(write.val());
+    const eventExisted = inPost.test(write.val());
 
     if (eventExisted) {
       const button = comp.find('.composer-submit:visible');
@@ -53,7 +33,7 @@ export default (composer, translator) => {
       };
       button.off('click').on('click', function onClick(e) {
         const text = write.val();
-        if (!regex.test(text)) {
+        if (!inPost.test(text)) {
           translator.translate('[[calendar:confirm_delete_event]]', (question) => {
             bootbox.confirm(question, (okay) => {
               if (okay) {
@@ -68,15 +48,13 @@ export default (composer, translator) => {
     }
   };
 
-  $(window).on('action:composer.post.new ' +
-    ' action:composer.post.edit ' +
-    'action:composer.topic.new', () => {
+  $(window).on('action:composer.post.new' +
+    ' action:composer.post.edit' +
+    ' action:composer.topic.new', () => {
     setTimeout(() => {
       onChange();
       alterSubmit();
     }, 200);
   });
-  $(document.body).on('change', '.composer .category-list', () => {
-    onChange();
-  });
+  $(document.body).on('change', '.composer .category-list', onChange);
 };

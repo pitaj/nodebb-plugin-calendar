@@ -5,7 +5,7 @@ const topics = require.main.require('./src/topics');
 
 import validator from 'validator';
 import Promise from 'bluebird';
-import parse from './parse';
+import { default as parse, inPost } from './parse';
 import { canPostEvent } from './privileges';
 import { deleteEvent, saveEvent, eventExists, getEvent } from './event';
 import validateEvent from './validateEvent';
@@ -18,22 +18,17 @@ const fireHook = p(plugins.fireHook);
 const getSetting = p(meta.settings.getOne);
 const getTopicField = p(topics.getTopicField);
 
-const isMainPost = ({ pid, tid }) =>
-  getTopicField(tid, 'mainPid')
-    .then((mainPid) =>
-      parseInt(mainPid, 10) === parseInt(pid, 10));
-
-const regex = new RegExp(
-  '(\\[\\s?event\\s?\\][\\w\\W]*\\[\\s?\\/\\s?event\\s?\\])|' +
-  '(\\[\\s?event\\-invalid?\\s?\\][\\w\\W]*\\[\\s?\\/\\s?event\\-invalid?\\s?\\])'
-);
+const isMainPost = async ({ pid, tid }) => {
+  const mainPid = await getTopicField(tid, 'mainPid');
+  return parseInt(mainPid, 10) === parseInt(pid, 10);
+};
 
 const postSave = async (data) => {
   const { post } = data;
   let event = parse(post.content);
 
   // delete event if no longer in post
-  if (!post.content.match(regex)) {
+  if (!post.content.match(inPost)) {
     const existed = await eventExists(post.pid);
     if (existed) {
       await notify({
@@ -49,10 +44,7 @@ const postSave = async (data) => {
   }
 
   const invalid = () => {
-    post.content = post.content.replace(
-      /\[\s?(\/?)\s?event\s?\]/g,
-      '[$1event-invalid]'
-    );
+    post.content = post.content.replace(/\[(\/?)event\]/g, '[$1event-invalid]');
     return data;
   };
 
@@ -69,8 +61,9 @@ const postSave = async (data) => {
     log(`[plugin-calendar] Event (pid:${post.pid}) validation failed: `, obj);
     return invalid();
   }
-  const main = !await isMainPost(post);
-  if (main && await getSetting('plugin-calendar', 'mainPostOnly')) {
+
+  const main = post.isMain || await isMainPost(post);
+  if (!main && await getSetting('plugin-calendar', 'mainPostOnly')) {
     return invalid();
   }
 
@@ -95,6 +88,5 @@ const postSave = async (data) => {
 };
 
 const postSaveCallback = (data, cb) => postSave(data).asCallback(cb);
-const postEditCallback = postSaveCallback;
 
-export { postSave, postSaveCallback, postEditCallback };
+export { postSave, postSaveCallback };

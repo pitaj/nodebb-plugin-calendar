@@ -100,7 +100,7 @@ const notify = async ({ event, reminder, message }) => {
 const initNotifierDaemon = async () => {
   // ms between checking for reminders
   // pulled from settings
-  const checkingInterval = await getSetting('plugin-calendar', 'checkingInterval');
+  let checkingInterval = await getSetting('plugin-calendar', 'checkingInterval');
 
   console.log(`Notifier Daemon initialized with
     interval of ${Math.floor(checkingInterval / 1000)} seconds`);
@@ -108,6 +108,7 @@ const initNotifierDaemon = async () => {
   let lastEnd = Date.now() + checkingInterval;
 
   const checkReminders = async () => {
+    checkingInterval = await getSetting('plugin-calendar', 'checkingInterval');
     // timespan we check is a checkingInterval in the future
     // so as to avoid sending notifications too late
     const start = lastEnd;

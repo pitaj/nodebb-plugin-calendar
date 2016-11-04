@@ -8,6 +8,16 @@ const setSettings = p(meta.settings.set);
 import controllers from './controllers';
 import { initNotifierDaemon } from './reminders';
 
+const shallowEqual = (a, b) => {
+  const aKeys = Object.keys(a);
+  for (const key of aKeys) {
+    if (a[key] !== b[key]) {
+      return false;
+    }
+  }
+  return true;
+};
+
 export default ({ router, middleware }, callback) => {
   controllers(router, middleware);
 
@@ -16,9 +26,15 @@ export default ({ router, middleware }, callback) => {
     mainPostOnly: false,
     respondIfCanReply: false,
   };
+  (async () => {
+    const old = await getSettings('plugin-calendar');
+    const settings = { ...defaults, ...old };
 
-  getSettings('plugin-calendar')
-    .then((settings) => setSettings('plugin-calendar', { ...defaults, ...settings }))
-    .then(() => initNotifierDaemon())
-    .asCallback(callback);
+    const changed = !shallowEqual(settings, old);
+    if (changed) {
+      await setSettings('plugin-calendar', settings);
+    }
+
+    await initNotifierDaemon();
+  })().asCallback(callback);
 };

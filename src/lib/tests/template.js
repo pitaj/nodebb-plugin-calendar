@@ -1,4 +1,4 @@
-import { formatDates } from '../template';
+import { formatDates } from '../translatorModule';
 import assert from 'assert';
 
 const lang = 'en-us';
@@ -97,5 +97,3 @@ const lang = 'en-us';
       formatDates(s, e, true, lang));
   },
 ].forEach((x) => x());
-
-// postTemplate is just a template, it doesn't need testing
