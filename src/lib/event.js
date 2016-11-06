@@ -44,19 +44,26 @@ const deleteEvent = (pid) => {
 };
 
 const getEventsByDate = async (startDate, endDate) => {
-  // should be possible eventually
+  // may be possible eventually
+  // except I need to do the intersection, not the union, of the sets
+  // and I want events whose start date could be before the month starts
+  // and whose end date could be after the month ends
+
   // const keys = await getSortedSetRangeByScore([
   //   listKey,
   //   listByEndKey,
   // ], 0, -1, startDate, endDate);
 
-  // for now we have to do this:
+  // for now we have to do this,
+  // and hope it isn't too hard on memory
   const [byStart, byEnd] = await Promise.all([
-    getSortedSetRangeByScore(listKey, 0, -1, startDate, endDate),
-    getSortedSetRangeByScore(listByEndKey, 0, -1, startDate, endDate),
+    // events that start before end date
+    getSortedSetRangeByScore(listKey, 0, -1, 0, endDate),
+    // events that end after start date
+    getSortedSetRangeByScore(listByEndKey, 0, -1, startDate, Infinity),
   ]);
-  const temp = byStart.concat(byEnd);
-  const keys = temp.filter((x, i) => temp.indexOf(x) === i);
+  // filter to events that only start before the endDate and end after the startDate
+  const keys = byStart.filter((x) => byEnd.includes(x));
 
   const events = await getObjects(keys);
 
