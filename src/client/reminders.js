@@ -1,5 +1,3 @@
-/* global $ */
-
 import moment from 'moment';
 
 const zero = moment(0);
@@ -17,16 +15,16 @@ const makeListElement = (n) => {
 
 const factory = ($ul) => {
   const addButtons = $ul
-  .find('#plugin-calendar-event-editor-reminders-add li > a');
+    .find('#plugin-calendar-event-editor-reminders-add li > a');
 
   const obj = {
     setReminders: (reminders) => {
       $ul.find('li.plugin-calendar-event-editor-reminder').remove();
       $ul.data('value', reminders);
       reminders
-      .reverse()
-      .map(makeListElement)
-      .forEach((el) => $ul.prepend(el));
+        .reverse()
+        .map(makeListElement)
+        .forEach((el) => $ul.prepend(el));
     },
     getReminders: () => $ul.data('value'),
     addReminder: (n) => {
@@ -67,9 +65,9 @@ const factory = ($ul) => {
 
   radios.find('.btn').on('click', (e) => {
     $(e.target)
-    .addClass('active')
-    .siblings()
-    .removeClass('active');
+      .addClass('active')
+      .siblings()
+      .removeClass('active');
   });
 
   const promptCustom = (addNotif) => {

@@ -1,5 +1,3 @@
-/* global $, socket, app, bootbox */
-
 import { inPost } from '../lib/parse';
 
 export default (composer, translator) => {

@@ -1,5 +1,3 @@
-/* global $ */
-
 import remindersFactory from './reminders';
 import validateEvent from '../lib/validateEvent';
 import moment from 'moment';

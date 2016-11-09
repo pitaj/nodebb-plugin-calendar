@@ -1,5 +1,3 @@
-/* global $, config */
-
 const translateEvents = (translate) => {
   $('.plugin-calendar-event[data-translated=false]').each((i, elem) => {
     const el = $(elem);

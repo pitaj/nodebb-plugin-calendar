@@ -1,5 +1,3 @@
-/* global $, config */
-
 import 'eonasdan-bootstrap-datetimepicker';
 import moment from 'moment';
 

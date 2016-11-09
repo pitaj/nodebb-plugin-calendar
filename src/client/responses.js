@@ -1,5 +1,3 @@
-/* global $, socket, app, config, ajaxify */
-
 const userTemplate = (user) => (`
   <li class="icon pull-left">
     <a href="${config.relative_path}/user/${user.userslug}">
