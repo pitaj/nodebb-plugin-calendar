@@ -2,8 +2,9 @@ const privileges = require.main.require('./src/privileges');
 const categories = require.main.require('./src/categories');
 const meta = require.main.require('./src/meta');
 
-// import { getEventsByDate, escapeEvent } from './event';
-// import { filterByPid } from './privileges';
+import { getEvent, escapeEvent } from './event';
+import { canViewPost } from './privileges';
+import eventTemplate from './template';
 import Promise from 'bluebird';
 const p = Promise.promisify;
 
@@ -47,25 +48,9 @@ export default (router, middleware) => {
       }
       res.render('calendar', data);
     };
-    //
-    // const startDate = new Date();
-    // const endDate = new Date();
-    // startDate.setDate(-1);
-    // endDate.setDate(32);
-    //
-    // (async uid => {
-    //   const events = await getEventsByDate(startDate.valueOf(), endDate.valueOf());
-    //   const filtered = await filterByPid(events, uid);
-    //   const escaped = await Promise.all(filtered.map(escapeEvent));
-    //
-    //   return {
-    //     cal: JSON.stringify({
-    //       events: escaped,
-    //       startDate: startDate.valueOf(),
-    //       endDate: endDate.valueOf(),
-    //     }),
-    //   };
-    // })(req.uid).asCallback(cb);
+
+    // not using server rendering for events because it could be a lot of info
+    // better to have a fast page load time
 
     (async () => {
       const cats = await getAllCategoryFields(['cid', 'bgColor']);
@@ -74,21 +59,29 @@ export default (router, middleware) => {
       const colors = cats.filter((c) => filtered.includes(c.cid));
 
       const style = colors.map(({ cid, bgColor }) =>
-        `.plugin-calendar-cal-event-category-${cid} {
-          background-color: ${bgColor};
-          border-color: ${shadeColor2(bgColor, -0.2)};
-        }`
+`.plugin-calendar-cal-event-category-${cid} {
+  background-color: ${bgColor};
+  border-color: ${shadeColor2(bgColor, -0.2)};
+}`
       );
+      let event = {};
+      if (req.params.eventPid && await canViewPost(req.params.eventPid, req.uid)) {
+        const raw = await getEvent(req.params.eventPid);
+        event = await escapeEvent(raw);
+      }
 
       return {
         calendarEventsStyle: style.join('\n'),
         title: '[[calendar:calendar]]',
+        eventData: event.pid ? event : null,
+        eventJSON: event.pid ? JSON.stringify(event) : '{}',
+        eventHTML: event.pid ? eventTemplate(event) : '',
       };
     })().asCallback(cb);
-
-    // res.render('calendar', {});
   };
 
+  router.get('/calendar/event/:eventPid', middleware.buildHeader, renderPage);
+  router.get('/api/calendar/event/:eventPid', renderPage);
   router.get('/calendar', middleware.buildHeader, renderPage);
   router.get('/api/calendar', renderPage);
 };

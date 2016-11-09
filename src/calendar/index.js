@@ -1,73 +1,8 @@
-/* global socket, $, config, app, RELATIVE_PATH, ajaxify */
-
 import 'fullcalendar';
+import convertToFC from './convertToFC';
+import displayEvent from './displayEvent';
 
-const convertToFC = (event) => {
-  const ev = {
-    id: event.pid,
-    title: event.name,
-    allDay: event.allday,
-    start: event.startDate,
-    end: event.endDate,
-    className: [
-      `plugin-calendar-cal-event-category-${event.cid}`,
-      `plugin-calendar-cal-event-response-${event.responses[app.user.uid] || 'no'}`,
-      event.topicDeleted ? 'plugin-calendar-cal-event-topic-deleted' : '',
-    ],
-  };
-
-  return ev;
-};
-
-const queryRegExp = /&event=([0-9]+)/;
-const globalRegExp = /&event=([0-9]+)/g;
-
-const displayEvent = (event, e, cb) => {
-  if (e) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
-  const pid = event.id;
-
-  socket.emit('plugins.calendar.getParsedEvent', pid, (err, { content, parsed }) => {
-    if (err) {
-      if (err.message) {
-        app.alertError(err);
-      }
-      throw err;
-    }
-
-    const div = $(content);
-    const modal = $('#plugin-calendar-cal-event-display');
-    modal
-      .find('.modal-body')
-      .empty()
-      .append(div);
-    modal
-      .find('.modal-footer a.btn-primary')
-      .attr('href', `${RELATIVE_PATH}/post/${pid}`);
-    modal
-      .find('.plugin-calendar-event-responses-lists .panel-body')
-      .addClass('topic')
-      .find('ul')
-      .addClass('posts');
-    modal
-      .attr('data-pid', pid)
-      .modal({
-        backdrop: false,
-      });
-    modal.off('click').on('click', '.dismiss', () => {
-      modal.modal('hide');
-      location.hash = location.hash.replace(globalRegExp, '');
-    });
-    $(window).trigger('action:calendar.event.display', { pid, modal });
-    location.hash = `${location.hash.replace(globalRegExp, '') || '#'}&event=${pid}`;
-
-    if (typeof cb === 'function') {
-      cb({ content, parsed });
-    }
-  });
-};
+const queryRegExp = /calendar\/?(?:\/*event\/+([0-9]+))?/;
 
 const begin = (momentLang) => {
   const calendarOptions = {
@@ -89,40 +24,34 @@ const begin = (momentLang) => {
           }
           throw err;
         }
-        callback(events.map(convertToFC));
+        callback(convertToFC(events, start, end));
       });
     },
-    eventClick: displayEvent,
+    eventClick: ({ id: pid }, e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      displayEvent({ pid });
+      ajaxify.updateHistory(`calendar/event/${pid}`);
+    },
     timezone: 'local',
   };
 
-  const openEvent = (fc) => {
-    // TODO: possibly use server rendering instead of sockets
-    const matches = location.hash.match(queryRegExp);
-    const pid = matches && parseInt(matches[1], 10);
+  let shouldHandle = false;
 
-    if (!pid) {
-      setTimeout(() => {
-        $('#plugin-calendar-cal-event-display').modal({
-          backdrop: false,
-          show: false,
-        }).modal('hide');
-      }, 200);
-      return;
+  $(window).on('action:ajaxify.start', (e, data) => {
+    const prevRelative = app.previousUrl.split('/').slice(3).join('/');
+    if (prevRelative.startsWith('calendar') && data.url.startsWith('calendar')) {
+      data.url = null;
+      shouldHandle = true;
+    } else {
+      shouldHandle = false;
     }
+  });
 
-    setTimeout(() => {
-      displayEvent({ id: pid }, null, ({ parsed }) => {
-        fc.fullCalendar('gotoDate', parsed.startDate);
-      });
-    }, 200);
-  };
-
-  let justLoaded = false;
   const init = () => {
     const $calendar = $('#calendar');
 
-    if (!justLoaded) {
+    if ($calendar) {
       $calendar.fullCalendar(calendarOptions);
       const btn = $('#plugin-calendar-cal-only-yes');
       btn
@@ -135,19 +64,28 @@ const begin = (momentLang) => {
         .appendTo($calendar.find('.fc-toolbar .fc-right'));
     }
 
-    openEvent($calendar);
+    const $display = $('#plugin-calendar-cal-event-display');
+    if ($display) {
+      $display.on('click', '.dismiss', () => {
+        $display.modal('hide');
+        ajaxify.updateHistory('calendar');
+      });
+    }
+
+    const matches = location.pathname.match(queryRegExp);
+    const pid = matches && parseInt(matches[1], 10);
+    if (pid) {
+      if (shouldHandle) {
+        displayEvent({ pid });
+      }
+      $calendar.fullCalendar('gotoDate', window.calendarEventData.startDate);
+    } else if (shouldHandle) {
+      $display.modal('hide');
+    }
   };
 
-  $(document).ready(() => {
-    init();
-    justLoaded = true;
-  });
-  $(window).on('action:ajaxify.end hashchange popstate', () => {
-    if (ajaxify.data.template.calendar) {
-      init();
-    }
-    justLoaded = false;
-  });
+  $(document).ready(init);
+  $(window).on('action:ajaxify.end', init);
 };
 
 __webpack_public_path__ = `${RELATIVE_PATH}/plugins/nodebb-plugin-calendar/bundles/`; // eslint-disable-line
@@ -165,5 +103,5 @@ try {
   }
 } catch (e) {
   begin('en-us');
-  throw Error(`could not load locale data (${momentLang}) for fullcalendar`);
+  throw Error(`Could not load locale data (${momentLang}) for fullcalendar`);
 }
