@@ -30,8 +30,8 @@ const topicIsDeleted = p((tid, cb) => topics.getTopicField(tid, 'deleted', cb));
 const perm = 'plugin-calendar:event:post';
 
 pluginSockets.calendar = {};
-pluginSockets.calendar.canPostEvent = ({ uid }, { pid, tid, cid, isMain }, cb) => {
-  (async () => {
+pluginSockets.calendar.canPostEvent = (sock, data, cb) => {
+  (async ({ uid }, { pid, tid, cid, isMain }) => {
     if (!uid) {
       return false;
     }
@@ -50,14 +50,14 @@ pluginSockets.calendar.canPostEvent = ({ uid }, { pid, tid, cid, isMain }, cb) =
       return can.categories(perm, cid, uid);
     }
     return false;
-  })().asCallback(cb);
+  })(sock, data).asCallback(cb);
 };
 
 pluginSockets.calendar.getResponses = ({ uid }, pid, cb) => {
   getAllResponses({ pid, uid }).asCallback(cb);
 };
 
-pluginSockets.calendar.submitResponse = ({ uid }, { pid, value }, cb) => {
+pluginSockets.calendar.submitResponse = ({ uid }, { pid, value } = {}, cb) => {
   submitResponse({ uid, pid, value }).asCallback(cb);
 };
 
@@ -65,8 +65,8 @@ pluginSockets.calendar.getUserResponse = ({ uid }, pid, cb) => {
   getUserResponse({ uid, pid }).asCallback(cb);
 };
 
-pluginSockets.calendar.getEventsByDate = ({ uid }, { startDate, endDate }, cb) => {
-  (async () => {
+pluginSockets.calendar.getEventsByDate = (sock, data, cb) => {
+  (async ({ uid }, { startDate, endDate }) => {
     const events = await getEventsByDate(startDate, endDate);
     const filtered = await filterByPid(events, uid);
     const escaped = await Promise.all(filtered.map(escapeEvent));
@@ -87,7 +87,7 @@ pluginSockets.calendar.getEventsByDate = ({ uid }, { startDate, endDate }, cb) =
     );
 
     return withResponses;
-  })().asCallback(cb);
+  })(sock, data).asCallback(cb);
 };
 
 pluginSockets.calendar.getParsedEvent = ({ uid }, pid, cb) => {

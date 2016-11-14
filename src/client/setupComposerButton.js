@@ -4,13 +4,10 @@ export default (composer, translator) => {
   const onChange = () => {
     const data = composer.posts[composer.active];
     socket.emit('plugins.calendar.canPostEvent', data, (e, canPost) => {
-      setTimeout(() =>
-        $(`#cmp-uuid-${composer.active}`)
-          .find('.plugin-calendar-composer-edit-event')
-          .parent()
-          .toggle(canPost),
-        200
-      );
+      $(`#cmp-uuid-${composer.active}`)
+        .find('.plugin-calendar-composer-edit-event')
+        .parent()
+        .toggle(canPost);
     });
   };
 
@@ -52,7 +49,7 @@ export default (composer, translator) => {
     setTimeout(() => {
       onChange();
       alterSubmit();
-    }, 200);
+    }, 400);
   });
   $(document.body).on('change', '.composer .category-list', onChange);
 };
