@@ -40,7 +40,7 @@ const postSave = async (data) => {
       log(`[plugin-calendar] Event (pid:${post.pid}) deleted`);
     }
 
-    return post;
+    return data;
   }
 
   const invalid = () => {
