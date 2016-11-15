@@ -9,6 +9,7 @@ const topics = require.main.require('./src/topics');
 import { getAll as getAllResponses, submitResponse, getUserResponse } from './responses';
 import { getEventsByDate, escapeEvent, getEvent } from './event';
 import { canViewPost, filterByPid } from './privileges';
+import { getOccurencesOfRepetition } from './repetition';
 import postTemplate from './template';
 import Promise from 'bluebird';
 
@@ -69,8 +70,14 @@ pluginSockets.calendar.getEventsByDate = (sock, data, cb) => {
   (async ({ uid }, { startDate, endDate }) => {
     const events = await getEventsByDate(startDate, endDate);
     const filtered = await filterByPid(events, uid);
+    const occurences = filtered.reduce((prev, event) => {
+      if (event.repeats) {
+        return [...prev, ...getOccurencesOfRepetition(event, startDate, endDate)];
+      }
+      return [...prev, event];
+    }, []);
     const withResponses = await Promise.all(
-      filtered.map(async (event) => {
+      occurences.map(async (event) => {
         const day = event.day;
         const [response, topicDeleted, escaped] = await Promise.all([
           getUserResponse({ pid: event.pid, uid, day }),

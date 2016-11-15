@@ -1,5 +1,3 @@
-import { getOccurencesOfRepetition } from '../lib/repetition.js';
-
 const mapper = (event) => ({
   id: event.pid,
   title: event.name,
@@ -14,11 +12,6 @@ const mapper = (event) => ({
   original: event,
 });
 
-const convertToFC = (events, start, end) => events.reduce((prev, event) => {
-  if (event.repeats) {
-    return [...prev, ...getOccurencesOfRepetition(event, start, end)];
-  }
-  return [...prev, event];
-}, []).map(mapper);
+const convertToFC = (events) => events.map(mapper);
 
 export default convertToFC;
