@@ -1,5 +1,5 @@
 const makeListElement = (n) => {
-  const li = `<li data-value="${n}">[[time:duration, ${n}]]</li>`;
+  const li = `<li data-value="${n}">[[moment:time-duration, ${n}]]</li>`;
   return li;
 };
 
@@ -11,7 +11,7 @@ const postTemplate = (event) => {
   <i class="fa fa-reply" aria-hidden="true"></i>
   <div class="col-xs-12 col-sm-6">
     <div class="plugin-calendar-event-responses-user btn-group">
-      <button data-value="no" type="button" class="btn btn-sm btn-danger">
+      <button data-value="no" type="button" class="btn btn-sm btn-danger active">
         [[calendar:response_no]]
       </button>
       <button data-value="maybe" type="button" class="btn btn-sm btn-default">
@@ -83,9 +83,9 @@ const postTemplate = (event) => {
     <div class="plugin-calendar-event-date">
       <i class="fa fa-clock-o" aria-hidden="true"></i>
       <a
-        title="[[time-date-view:utc, ${startDate}, ${endDate}, ${allday}]]"
+        title="[[moment:time-date-view, utc, ${startDate}, ${endDate}, ${allday}]]"
         class="plugin-calendar-time-date-view"
-      >[[time-date-view:local, ${startDate}, ${endDate}, ${allday}]]</a>
+      >[[moment:time-date-view, local, ${startDate}, ${endDate}, ${allday}]]</a>
     </div>
     ${event.location.length ? `
     <div class="plugin-calendar-event-location">
@@ -115,8 +115,37 @@ const postTemplate = (event) => {
       <span>[[calendar:mandatory]]</span>
     </div>
     ` : responsesTemplate}
+    ${(() => {
+      if (event.repeats) {
+        const key = ['day', 'week', 'month', 'year'].find((x) => event.repeats.every[x]);
+        if (key) {
+          return `<div class="plugin-calendar-event-repeats">
+            <i class="fa fa-repeat" aria-hidden="true"></i>
+            <span>[[calendar:every_${key}]]</span>
+          </div>`;
+        }
+        if (event.repeats.every.daysOfWeek) {
+          const days = event.repeats.every.daysOfWeek
+            .map((day) => `[[moment:locale-data, _weekdaysShort, ${day}]]`)
+            .join(', ');
+          const endDateText = `[[moment:time-date-view, utc, ${event.repeats.endDate}, ` +
+            `${event.repeats.endDate}, true]]`;
+          return `<div class="plugin-calendar-event-repeats">
+            <i class="fa fa-repeat" aria-hidden="true"></i>
+            <span>
+              ${Number.isFinite(event.repeats.endDate) ? `
+              [[calendar:repeats_weekly_on_until, ${endDateText}]] ${days}
+              ` : `
+              [[calendar:repeats_weekly_on_forever]] ${days}
+              `}
+            </span>
+          </div>`;
+        }
+      }
+      return '';
+    })()}
   </div>
-</div>`.trim();
+</div>`;
 
   return html;
 };

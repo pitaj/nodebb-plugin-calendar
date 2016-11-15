@@ -7,8 +7,9 @@ const nconf = require.main.require('nconf');
 
 // import { fork } from 'child_process';
 import { getAll as getResponses } from './responses';
-import { getAllEvents, escapeEvent } from './event';
+import { getEventsEndingAfter, escapeEvent } from './event';
 import { filterUidsByPid } from './privileges';
+import { getOccurencesOfRepetition } from './repetition';
 import postTemplate from './template';
 import Promise from 'bluebird';
 const p = Promise.promisify;
@@ -115,26 +116,31 @@ const initNotifierDaemon = async () => {
     const end = lastEnd + checkingInterval;
     lastEnd += checkingInterval;
 
-    const events = await getAllEvents();
+    const events = await getEventsEndingAfter(start);
 
-    const filtered = events
-    .map((event) => {
-      const reminder = [0, ...event.reminders].find((r) => {
-        const remDate = event.startDate - r;
-        return remDate > start && remDate <= end;
-      });
-      if (!Number.isFinite(reminder)) {
-        return null;
+    const occurences = events.reduce((prev, event) => {
+      const max = Math.max(0, ...event.reminders);
+      if (event.repeats) {
+        return [...prev, ...getOccurencesOfRepetition(event, start, end + max)];
       }
-      const message = `[[time:in, ${event.startDate - start}]]`;
-      return { event, reminder, message };
-    })
-    .filter(Boolean);
+      return [...prev, event];
+    }, []);
 
-    await Promise.all(
-      filtered
-      .map(notify)
-    );
+    const filtered = occurences
+      .map((event) => {
+        const reminder = [0, ...event.reminders].find((r) => {
+          const remDate = event.startDate - r;
+          return remDate > start && remDate <= end;
+        });
+        if (!Number.isFinite(reminder)) {
+          return null;
+        }
+        const message = `[[moment:time-in, ${event.startDate - start}]]`;
+        return { event, reminder, message };
+      })
+      .filter(Boolean);
+
+    await Promise.all(filtered.map(notify));
   };
 
   const daemon = () => {

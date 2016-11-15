@@ -3,7 +3,6 @@ import assert from 'assert';
 
 const lang = 'en-us';
 
-// formatDates
 [
   // same day, same time, not allday
   () => {

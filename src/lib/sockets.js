@@ -53,31 +53,32 @@ pluginSockets.calendar.canPostEvent = (sock, data, cb) => {
   })(sock, data).asCallback(cb);
 };
 
-pluginSockets.calendar.getResponses = ({ uid }, pid, cb) => {
-  getAllResponses({ pid, uid }).asCallback(cb);
+pluginSockets.calendar.getResponses = ({ uid }, { pid, day }, cb) => {
+  getAllResponses({ uid, pid, day }).asCallback(cb);
 };
 
-pluginSockets.calendar.submitResponse = ({ uid }, { pid, value } = {}, cb) => {
-  submitResponse({ uid, pid, value }).asCallback(cb);
+pluginSockets.calendar.submitResponse = ({ uid }, { pid, value, day } = {}, cb) => {
+  submitResponse({ uid, pid, value, day }).asCallback(cb);
 };
 
-pluginSockets.calendar.getUserResponse = ({ uid }, pid, cb) => {
-  getUserResponse({ uid, pid }).asCallback(cb);
+pluginSockets.calendar.getUserResponse = ({ uid }, { pid, day }, cb) => {
+  getUserResponse({ uid, pid, day }).asCallback(cb);
 };
 
 pluginSockets.calendar.getEventsByDate = (sock, data, cb) => {
   (async ({ uid }, { startDate, endDate }) => {
     const events = await getEventsByDate(startDate, endDate);
     const filtered = await filterByPid(events, uid);
-    const escaped = await Promise.all(filtered.map(escapeEvent));
     const withResponses = await Promise.all(
-      escaped.map(async (event) => {
-        const [response, topicDeleted] = await Promise.all([
-          getUserResponse({ pid: event.pid, uid }),
+      filtered.map(async (event) => {
+        const day = event.day;
+        const [response, topicDeleted, escaped] = await Promise.all([
+          getUserResponse({ pid: event.pid, uid, day }),
           tidFromPid(event.pid).then(topicIsDeleted),
+          escapeEvent(event),
         ]);
         return {
-          ...event,
+          ...escaped,
           responses: {
             [uid]: response,
           },

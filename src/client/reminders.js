@@ -1,7 +1,7 @@
 import moment from 'moment';
 
-const zero = moment(0);
 const makeListElement = (n) => {
+  const zero = moment(0);
   const li = $(
     `<li class="plugin-calendar-event-editor-reminder" data-value="${n}">
       ${zero.to(n, true)}
@@ -17,7 +17,7 @@ const factory = ($ul) => {
   const addButtons = $ul
     .find('#plugin-calendar-event-editor-reminders-add li > a');
 
-  const obj = {
+  const methods = {
     setReminders: (reminders) => {
       $ul.find('li.plugin-calendar-event-editor-reminder').remove();
       $ul.data('value', reminders);
@@ -100,19 +100,19 @@ const factory = ($ul) => {
     if (n === 'custom') {
       e.preventDefault();
       e.stopPropagation();
-      promptCustom((notif) => obj.addReminder(notif));
+      promptCustom((notif) => methods.addReminder(notif));
       return;
     }
-    obj.addReminder(n);
+    methods.addReminder(n);
   });
 
   $ul.on('click', 'li.plugin-calendar-event-editor-reminder .remove', (e) => {
     e.preventDefault();
     const n = $(e.target).closest('li').data('value');
-    obj.removeReminder(n);
+    methods.removeReminder(n);
   });
 
-  return obj;
+  return methods;
 };
 
 export default factory;

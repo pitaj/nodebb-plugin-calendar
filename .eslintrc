@@ -12,6 +12,7 @@
     "import/resolver": "webpack"
   },
   "rules": {
-    "babel/arrow-parens": 2
+    "babel/arrow-parens": 2,
+    "no-param-reassign": 1
   }
 }

@@ -2,6 +2,7 @@ const db = require.main.require('./src/database');
 const user = require.main.require('./src/user');
 
 import { canRespond, canViewPost } from './privileges';
+import { listKey } from './event';
 import Promise from 'bluebird';
 
 const p = Promise.promisify;
@@ -13,10 +14,9 @@ const getSetsMembers = p(db.getSetsMembers);
 const isSetMember = p(db.isSetMember);
 const getUsersFields = p(user.getUsersFields);
 
-const listKey = 'plugins:calendar:events';
 const values = ['yes', 'maybe', 'no'];
 
-const submitResponse = async ({ pid, uid, value }) => {
+const submitResponse = async ({ pid, uid, value, day }) => {
   if (!values.includes(value)) {
     throw Error('[[error:invalid-data]]');
   }
@@ -24,25 +24,49 @@ const submitResponse = async ({ pid, uid, value }) => {
     throw Error('[[error:no-privileges]]');
   }
 
-  await Promise.all([
-    setsRemove(values
+  let toAddKey;
+  let toRemoveKeys;
+  if (day) {
+    toAddKey = `${listKey}:pid:${pid}:responses:day:${day}:${value}`;
+    toRemoveKeys = values
       .filter((val) => val !== value)
-      .map((val) => `${listKey}:pid:${pid}:responses:${val}`), uid),
-    setAdd(`${listKey}:pid:${pid}:responses:${value}`, uid),
+      .map((val) => `${listKey}:pid:${pid}:responses:day:${day}:${val}`);
+  } else {
+    toAddKey = `${listKey}:pid:${pid}:responses:${value}`;
+    toRemoveKeys = values
+      .filter((val) => val !== value)
+      .map((val) => `${listKey}:pid:${pid}:responses:${val}`);
+  }
+
+  await Promise.all([
+    setsRemove(toRemoveKeys, uid),
+    setAdd(toAddKey, uid),
+    setAdd(`${listKey}:pid:${pid}:responses:lists`, toAddKey),
   ]);
 };
 
-const removeAll = (pid) => deleteAll(
-  values.map((val) => `${listKey}:pid:${pid}:responses:${val}`)
-);
+const removeAll = async (pid) => {
+  const lists = await getSetsMembers(`${listKey}:pid:${pid}:responses:lists`);
+  const old = values
+    .map((val) => `${listKey}:pid:${pid}:responses:${val}`);
+  await deleteAll([...lists, ...old]);
+};
 
-const getAll = async ({ pid, uid = 0, selection = values } = {}) => {
+const getAll = async ({ pid, uid = 0, selection = values, day } = {}) => {
   if (uid !== 0 && !await canViewPost(pid, uid)) {
     throw Error('[[error:no-privileges]]');
   }
 
-  const responseUids = await getSetsMembers(selection
-    .map((val) => `${listKey}:pid:${pid}:responses:${val}`));
+  let keys;
+  if (day) {
+    keys = selection
+      .map((val) => `${listKey}:pid:${pid}:responses:day:${day}:${val}`);
+  } else {
+    keys = selection
+      .map((val) => `${listKey}:pid:${pid}:responses:${val}`);
+  }
+
+  const responseUids = await getSetsMembers(keys);
   const userFields = ['userslug', 'picture', 'username', 'icon:bgColor', 'icon:text'];
 
   const [yes, maybe, no] = await Promise.all(responseUids
@@ -55,15 +79,21 @@ const getAll = async ({ pid, uid = 0, selection = values } = {}) => {
   };
 };
 
-const getUserResponse = async ({ pid, uid }) => {
-  if (!await canViewPost(pid, uid)) {
+const getUserResponse = async ({ pid, uid, day }) => {
+  if (!uid || !await canRespond(pid, uid)) {
     throw Error('[[error:no-privileges]]');
   }
 
-  const arr = await Promise.all(
-    values.map((val) => isSetMember(`${listKey}:pid:${pid}:responses:${val}`, uid))
-  );
+  let keys;
+  if (day) {
+    keys = values
+      .map((val) => `${listKey}:pid:${pid}:responses:day:${day}:${val}`);
+  } else {
+    keys = values
+      .map((val) => `${listKey}:pid:${pid}:responses:${val}`);
+  }
 
+  const arr = await Promise.all(keys.map((key) => isSetMember(key, uid)));
   return values[arr.findIndex((val) => !!val)];
 };
 

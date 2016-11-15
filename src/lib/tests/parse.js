@@ -1,24 +1,6 @@
 import parse from '../parse';
+import { eventTemplate } from '../../client/templates';
 import assert from 'assert';
-
-const setEquals = (a, b) => {
-  if (a.length !== b.length) {
-    return false;
-  }
-  for (const x of a) {
-    let found = false;
-    for (const y of b) {
-      if (x === y) {
-        found = true;
-        break;
-      }
-    }
-    if (!found) {
-      return false;
-    }
-  }
-  return true;
-};
 
 [
   () => {
@@ -26,25 +8,17 @@ const setEquals = (a, b) => {
     const data = {
       name: 'a test name',
       allday: true,
-      startDate: Date.now() - 3 * 24 * 60 * 60 * 1000,
-      endDate: Date.now(),
-      reminders: [0, 10, 20, 50],
+      startDate: Date.now(),
+      endDate: Date.now() + 3 * 24 * 60 * 60 * 1000,
+      reminders: [50, 20, 10, 0],
       location: 'here somewhere',
       description: 'somewhere else',
+      mandatory: false,
+      repeats: null,
     };
     const result = parse(
       `other things that make sense
-      [event]
-        [name]${data.name}[/name]
-        [allday]${data.allday}[/allday]
-        [startDate]${data.startDate}[/startDate]
-        [endDate]${data.endDate}[/endDate]
-        [reminders]${JSON.stringify(data.reminders)}[/reminders]
-        [location]${data.location}[/location]
-        [description]
-          ${data.description}
-        [/description]
-      [/event]
+      ${eventTemplate(data)}
       and some more *markdown*`
     );
 
@@ -53,44 +27,39 @@ const setEquals = (a, b) => {
     assert.strictEqual(data.allday, result.allday, '`allday` field incorrect');
     assert.strictEqual(data.startDate, result.startDate, '`startDate` field incorrect');
     assert.strictEqual(data.endDate, result.endDate, '`endDate` field incorrect');
-    assert(setEquals(data.reminders, result.reminders),
-      '`reminders` field incorrect');
+    assert.deepEqual(data.reminders, result.reminders, '`reminders` field incorrect');
     assert.strictEqual(data.location, result.location, '`location` field incorrect');
     assert.strictEqual(data.description, result.description, '`description` field incorrect');
+    assert.strictEqual(data.repeats, result.repeats, '`repeats` field incorrect');
   },
   () => {
-    // test allday false
+    // test allday false and repeats as full object
     const data = {
       name: 'a test name',
       allday: false,
       startDate: Date.now() - 3 * 24 * 60 * 60 * 1000,
       endDate: Date.now(),
-      reminders: [0, 10, 20, 50],
+      reminders: [50, 20, 10, 0],
       location: 'here somewhere',
       description: 'somewhere else',
+      mandatory: false,
+      repeats: {
+        every: {
+          week: true,
+        },
+        endDate: null,
+      },
     };
-    const result = parse(
-      `[event]
-        [name]${data.name}[/name]
-        [allday]${data.allday}[/allday]
-        [startDate]${data.startDate}[/startDate]
-        [endDate]${data.endDate}[/endDate]
-        [reminders]${JSON.stringify(data.reminders)}[/reminders]
-        [location]${data.location}[/location]
-        [description]
-          ${data.description}
-        [/description]
-      [/event]`
-    );
-    assert(result && typeof result === 'object', 'Expected Object, got a falsy value');
+    const result = parse(eventTemplate(data));
+    assert(typeof result === 'object', 'Expected Object, got something else');
     assert.strictEqual(data.name, result.name, '`name` field incorrect');
     assert.strictEqual(data.allday, result.allday, '`allday` field incorrect');
     assert.strictEqual(data.startDate, result.startDate, '`startDate` field incorrect');
     assert.strictEqual(data.endDate, result.endDate, '`endDate` field incorrect');
-    assert(setEquals(data.reminders, result.reminders),
-      '`reminders` field incorrect');
+    assert.deepEqual(data.reminders, result.reminders, '`reminders` field incorrect');
     assert.strictEqual(data.location, result.location, '`location` field incorrect');
     assert.strictEqual(data.description, result.description, '`description` field incorrect');
+    assert.deepEqual(data.repeats, result.repeats, '`repeats` field incorrect');
   },
   () => {
     // test bad date failing completely
@@ -99,23 +68,12 @@ const setEquals = (a, b) => {
       allday: false,
       startDate: Date.now() - 3 * 24 * 60 * 60 * 1000,
       endDate: 'a string',
-      reminders: [0, 10, 20, 50],
+      reminders: [50, 20, 10, 0],
       location: 'here somewhere',
       description: 'somewhere else',
+      mandatory: false,
     };
-    const result = parse(
-      `[event]
-        [name]${data.name}[/name]
-        [allday]${data.allday}[/allday]
-        [startDate]${data.startDate}[/startDate]
-        [endDate]${data.endDate}[/endDate]
-        [reminders]${JSON.stringify(data.reminders)}[/reminders]
-        [location]${data.location}[/location]
-        [description]
-          ${data.description}
-        [/description]
-      [/event]`
-    );
+    const result = parse(eventTemplate(data));
     assert.strictEqual(null, result, 'Expected null, got something else');
   },
   () => {
@@ -128,20 +86,9 @@ const setEquals = (a, b) => {
       reminders: 'a string',
       location: 'here somewhere',
       description: 'somewhere else',
+      mandatory: false,
     };
-    const result = parse(
-      `[event]
-        [name]${data.name}[/name]
-        [allday]${data.allday}[/allday]
-        [startDate]${data.startDate}[/startDate]
-        [endDate]${data.endDate}[/endDate]
-        [reminders]${JSON.stringify(data.reminders)}[/reminders]
-        [location]${data.location}[/location]
-        [description]
-          ${data.description}
-        [/description]
-      [/event]`
-    );
+    const result = parse(eventTemplate(data));
     assert.strictEqual(null, result, 'Expected null, got something else');
   },
   () => {
@@ -151,23 +98,12 @@ const setEquals = (a, b) => {
       allday: false,
       startDate: Date.now() - 3 * 24 * 60 * 60 * 1000,
       endDate: Date.now(),
-      reminders: [0, 10, 20, 50],
+      reminders: [50, 20, 10, 0],
       location: 'here somewhere\nhasbbks',
       description: 'somewhere else',
+      mandatory: false,
     };
-    const result = parse(
-      `[event]
-        [name]${data.name}[/name]
-        [allday]${data.allday}[/allday]
-        [startDate]${data.startDate}[/startDate]
-        [endDate]${data.endDate}[/endDate]
-        [reminders]${JSON.stringify(data.reminders)}[/reminders]
-        [location]${data.location}[/location]
-        [description]
-          ${data.description}
-        [/description]
-      [/event]`
-    );
+    const result = parse(eventTemplate(data));
     assert.strictEqual(null, result, 'Expected null, got something else');
   },
   () => {
@@ -177,23 +113,12 @@ const setEquals = (a, b) => {
       allday: false,
       startDate: Date.now() - 3 * 24 * 60 * 60 * 1000,
       endDate: Date.now(),
-      reminders: [0, 10, 20, 50],
+      reminders: [50, 20, 10, 0],
       location: 'here somewhere',
       description: 'somewhere else',
+      mandatory: false,
     };
-    const result = parse(
-      `[event]
-        [name]${data.name}[/name]
-        [allday]${data.allday}[/allday]
-        [startDate]${data.startDate}[/startDate]
-        [endDate]${data.endDate}[/endDate]
-        [reminders]${JSON.stringify(data.reminders)}[/reminders]
-        [location]${data.location}[/location]
-        [description]
-          ${data.description}
-        [/description]
-      [/event]`
-    );
+    const result = parse(eventTemplate(data));
     assert.strictEqual(null, result, 'Expected null, got something else');
   },
 ].forEach((x) => x());

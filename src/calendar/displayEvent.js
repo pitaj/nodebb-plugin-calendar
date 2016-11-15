@@ -1,36 +1,35 @@
-const displayEvent = ({ pid }, cb) => {
-  socket.emit('plugins.calendar.getParsedEvent', pid, (err, { content, parsed }) => {
-    if (err) {
-      if (err.message) {
-        app.alertError(err);
-      }
-      throw err;
-    }
+import postTemplate from '../lib/template';
 
-    const div = $(content);
-    const $display = $('#plugin-calendar-cal-event-display');
-    $display
-      .find('.modal-body')
-      .empty()
-      .append(div);
-    $display
-      .find('.modal-footer a.btn-primary')
-      .attr('href', `${RELATIVE_PATH}/post/${pid}`);
-    $display
-      .find('.plugin-calendar-event-responses-lists .panel-body')
-      .addClass('topic')
-      .find('ul')
-      .addClass('posts');
-    $display
-      .attr('data-pid', pid)
-      .modal('hide')
-      .modal('show');
-    $(window).trigger('action:calendar.event.display', { pid, modal: $display });
+const displayEvent = (event, cb) => {
+  const content = postTemplate(event);
+  const pid = event.pid;
 
-    if (typeof cb === 'function') {
-      cb({ content, parsed });
-    }
-  });
+  const div = $(content);
+  const $display = $('#plugin-calendar-cal-event-display');
+  $display
+    .find('.modal-body')
+    .empty()
+    .append(div);
+  $display
+    .find('.modal-footer a.btn-primary')
+    .attr('href', `${RELATIVE_PATH}/post/${pid}`);
+  $display
+    .find('.plugin-calendar-event-responses-lists .panel-body')
+    .addClass('topic')
+    .find('ul')
+    .addClass('posts');
+  $display
+    .attr('data-pid', pid)
+    .modal('hide')
+    .modal('show');
+  if (event.day) {
+    $display.attr('data-day', event.day);
+  }
+  $(window).trigger('action:calendar.event.display', { pid, day: event.day, modal: $display });
+
+  if (typeof cb === 'function') {
+    cb({ content, parsed: event });
+  }
 };
 
 export default displayEvent;

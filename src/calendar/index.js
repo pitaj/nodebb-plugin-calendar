@@ -1,6 +1,7 @@
 import 'fullcalendar';
 import convertToFC from './convertToFC';
 import displayEvent from './displayEvent';
+import { setUserResponseToPost } from '../client/responses';
 
 const queryRegExp = /calendar\/?(?:\/*event\/+([0-9]+))?/;
 
@@ -24,13 +25,15 @@ const begin = (momentLang) => {
           }
           throw err;
         }
+        start.subtract(1, 'day');
+        end.add(1, 'day');
         callback(convertToFC(events, start, end));
       });
     },
-    eventClick: ({ id: pid }, e) => {
+    eventClick: ({ original, id: pid }, e) => {
       e.preventDefault();
       e.stopPropagation();
-      displayEvent({ pid });
+      displayEvent(original);
       ajaxify.updateHistory(`calendar/event/${pid}`);
     },
     timezone: 'local',
@@ -77,6 +80,8 @@ const begin = (momentLang) => {
     if (pid) {
       if (shouldHandle) {
         displayEvent({ pid });
+      } else {
+        setUserResponseToPost({ pid, day: window.calendarEventData.day });
       }
       $calendar.fullCalendar('gotoDate', window.calendarEventData.startDate);
     } else if (shouldHandle) {

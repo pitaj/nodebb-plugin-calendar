@@ -17,14 +17,14 @@ let noMaybeResponses;
 let noNoResponses;
 
 const addResponsesToPost = (pid, cb) => {
-  const $responses =
-  $(`[data-pid=${pid}] .plugin-calendar-event-responses-lists`);
+  const $responses = $(`[data-pid=${pid}] .plugin-calendar-event-responses-lists`);
+  const day = $(`[data-pid=${pid}]`).attr('data-day');
 
   if (!$responses.length) {
     return;
   }
 
-  socket.emit('plugins.calendar.getResponses', pid, (err, responses) => {
+  socket.emit('plugins.calendar.getResponses', { pid, day }, (err, responses) => {
     if (err) {
       if (err.message) {
         app.alertError(err);
@@ -54,14 +54,15 @@ const addResponsesToPost = (pid, cb) => {
   });
 };
 
-const setUserResponseToPost = (pid, cb) => {
-  const buttonCont = $(`[data-pid=${pid}] .plugin-calendar-event-responses-user`);
+const setUserResponseToPost = ({ pid, day }, cb) => {
+  let buttonCont = $(`[data-pid=${pid}] .plugin-calendar-event-responses-user`);
 
   if (!buttonCont.length) {
     return;
   }
 
-  socket.emit('plugins.calendar.getUserResponse', pid, (err, value) => {
+  socket.emit('plugins.calendar.getUserResponse', { pid, day }, (err, value) => {
+    buttonCont = $(`[data-pid=${pid}] .plugin-calendar-event-responses-user`);
     const button = buttonCont.find(`[data-value=${value}]`);
 
     button.siblings().removeClass('active');
@@ -77,9 +78,11 @@ const initResponses = () => {
   $(document.body).on('click', '.plugin-calendar-event-responses-user .btn', (e) => {
     const button = $(e.target);
     const value = button.data('value');
-    const pid = button.closest('[data-pid]').data('pid');
+    const elem = button.closest('[data-pid]');
+    const pid = elem.attr('data-pid');
+    const day = elem.attr('data-day');
 
-    socket.emit('plugins.calendar.submitResponse', { pid, value }, (err) => {
+    socket.emit('plugins.calendar.submitResponse', { pid, value, day }, (err) => {
       if (err) {
         if (err.message) {
           app.alertError(err);
@@ -93,11 +96,11 @@ const initResponses = () => {
   });
 
   const checkPosts = (e, data) => {
-    const posts = data.posts || (data.post && [data.post]) || ajaxify.data.posts;
+    const posts = data.posts || data.post || ajaxify.data.posts;
 
     if (posts && posts.length > 0) {
       setTimeout(() => {
-        posts.forEach((post) => setUserResponseToPost(post.pid));
+        posts.forEach((post) => setUserResponseToPost({ pid: post.pid }));
       }, 200);
     }
   };
@@ -121,22 +124,23 @@ const initResponses = () => {
       if (notLoaded) {
         addResponsesToPost(pid, toggle);
         target
-        .closest('.plugin-calendar-event-responses-lists')
-        .attr('data-loaded', 'true');
+          .closest('.plugin-calendar-event-responses-lists')
+          .attr('data-loaded', 'true');
       } else {
         toggle();
       }
     }
   );
 
-  $(window).on('action:calendar.event.display', (e, { pid }) => {
-    setUserResponseToPost(pid);
+  $(window).on('action:calendar.event.display', (e, { pid, day }) => {
+    setUserResponseToPost({ pid, day });
   });
 
-  $(window).on(
-    'action:posts.loaded action:ajaxify.end action:posts.edited',
-    checkPosts
-  );
+  $(window).on([
+    'action:posts.loaded',
+    'action:ajaxify.end',
+    'action:posts.edited',
+  ].join(' '), checkPosts);
   checkPosts(null, ajaxify.data);
 
   window.requirejs(['translator'], (translator) => {
@@ -155,3 +159,4 @@ const initResponses = () => {
 };
 
 export default initResponses;
+export { setUserResponseToPost };

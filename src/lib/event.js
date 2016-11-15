@@ -26,9 +26,10 @@ const listByEndKey = `${listKey}:byEnd`;
 
 const saveEvent = (event) => {
   const objectKey = `${listKey}:pid:${event.pid}`;
+  const endDate = event.repeats ? event.repeats.endDate || 9999999999999 : event.endDate;
   return Promise.all([
     sortedSetAdd(listKey, event.startDate, objectKey),
-    sortedSetAdd(listByEndKey, event.endDate, objectKey),
+    sortedSetAdd(listByEndKey, endDate, objectKey),
     setObject(objectKey, event),
   ]);
 };
@@ -60,7 +61,7 @@ const getEventsByDate = async (startDate, endDate) => {
     // events that start before end date
     getSortedSetRangeByScore(listKey, 0, -1, 0, endDate),
     // events that end after start date
-    getSortedSetRangeByScore(listByEndKey, 0, -1, startDate, Infinity),
+    getSortedSetRangeByScore(listByEndKey, 0, -1, startDate, +Infinity),
   ]);
   // filter to events that only start before the endDate and end after the startDate
   const keys = byStart.filter((x) => byEnd.includes(x));
@@ -92,6 +93,13 @@ const getEvent = async (pid) => {
   };
 };
 
+const getEventsEndingAfter = async (endDate) => {
+  const keys = await getSortedSetRangeByScore(listByEndKey, 0, -1, endDate, +Infinity);
+  const events = await getObjects(keys);
+
+  return events;
+};
+
 const eventExists = (pid) => exists(`${listKey}:pid:${pid}`);
 
 const escapeEvent = async (event) => {
@@ -115,4 +123,7 @@ export {
   getEventsByDate,
   escapeEvent,
   getAllEvents,
+  listKey,
+  listByEndKey,
+  getEventsEndingAfter,
 };

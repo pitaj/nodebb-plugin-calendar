@@ -6,7 +6,7 @@ const regExps = [
   { key: 'allday', pattern: 'true|false' },
   { key: 'startDate', pattern: '[0-9]+' },
   { key: 'endDate', pattern: '[0-9]+' },
-  { key: 'reminders', pattern: '\\[[0-9,\\s]*\\]' },
+  { key: 'reminders', pattern: '\\[[0-9, ]*\\]' },
   { key: 'location', pattern: '.*' },
   { key: 'description', pattern: '[\\s\\S]*' },
   { key: 'mandatory', pattern: 'true|false' },
@@ -14,6 +14,11 @@ const regExps = [
   key,
   pattern: tagTemplate(key, pattern),
 }));
+
+regExps.push({
+  key: 'repeats',
+  pattern: '\\s*(?:\\[repeats\\](.*)\\[\\/repeats\\])?\\s*',
+});
 
 const inPost = new RegExp(
   '(\\[event(?:\\-invalid)?\\][\\s\\S]+\\[\\/event(?:\\-invalid)?\\])'
@@ -30,8 +35,12 @@ const parse = (text) => {
   const match = matches[1];
   const results = {};
   regExps.forEach(({ key, pattern }) => {
-    results[key] = match.match(pattern)[1].trim();
+    const m = match.match(pattern);
+    results[key] = m && m[1] && m[1].trim();
   });
+
+  results.repeats = match.match(/\[repeats\](.*)\[\/repeats\]/);
+  results.repeats = results.repeats && results.repeats[1];
 
   return {
     name: results.name,
@@ -42,6 +51,7 @@ const parse = (text) => {
     location: results.location,
     description: results.description,
     mandatory: results.mandatory === 'true',
+    repeats: results.repeats ? JSON.parse(results.repeats.replace(/&quot;/g, '"')) : null,
   };
 };
 

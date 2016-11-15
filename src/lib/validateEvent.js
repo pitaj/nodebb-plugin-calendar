@@ -10,7 +10,7 @@ const isArrayOf = (arr, type) => {
   return true;
 };
 
-const checkDate = (val) => typeof val === 'number' && new Date(val).getTime() === val;
+const checkDate = (val) => Number.isFinite(val) && new Date(val).getTime() === val;
 
 const fields = {
   name: (val) => typeof val === 'string' && (val.length > 5),
@@ -21,6 +21,7 @@ const fields = {
   mandatory: (val) => typeof val === 'boolean',
   location: (val) => typeof val === 'string' && !val.includes('\n'),
   description: (val) => typeof val === 'string',
+  repeats: (val) => val == null || (val && Object.keys(val.every).length),
 };
 
 const validateEvent = (event) => {
@@ -33,6 +34,11 @@ const validateEvent = (event) => {
   }
   if (event.startDate > event.endDate) {
     failures.push('startDate', 'endDate');
+  }
+  if (event.repeats &&
+    Number.isFinite(event.repeats.endDate) &&
+    event.repeats.endDate < event.startDate) {
+    failures.push('repeatEndDate');
   }
 
   // make array unique

@@ -1,4 +1,5 @@
 import remindersFactory from './reminders';
+import repetitionFactory from './repetition';
 import validateEvent from '../lib/validateEvent';
 import moment from 'moment';
 
@@ -11,6 +12,7 @@ const defaultEvent = {
   location: '',
   description: '',
   mandatory: false,
+  repeats: null,
 };
 
 const formats = {
@@ -32,8 +34,11 @@ const createEventFactory = () => {
     location: modal.find('#plugin-calendar-event-editor-location'),
     description: modal.find('#plugin-calendar-event-editor-description'),
     mandatory: modal.find('#plugin-calendar-event-editor-mandatory'),
+    repetition: modal.find('#plugin-calendar-event-editor-repetition'),
+    repeatEndDate: modal.find('#plugin-calendar-event-editor-repetition-endDate'),
   };
   const reminders = remindersFactory(inputs.reminders);
+  const repetition = repetitionFactory(inputs.repetition);
 
   inputs.allday.on('change', () => {
     const format = inputs.allday.prop('checked') ? formats.date : formats.timeDate;
@@ -47,6 +52,7 @@ const createEventFactory = () => {
     inputs.startDate.data('DateTimePicker').date(moment(event.startDate));
     inputs.endDate.data('DateTimePicker').date(moment(event.endDate));
     reminders.setReminders(event.reminders);
+    repetition.setRepeat(event.repeats);
     inputs.location.val(event.location);
     inputs.description.val(event.description);
     inputs.mandatory.prop('checked', event.mandatory);
@@ -62,6 +68,7 @@ const createEventFactory = () => {
       startDate: inputs.startDate.data('DateTimePicker').date().valueOf(),
       endDate: inputs.endDate.data('DateTimePicker').date().valueOf(),
       reminders: reminders.getReminders(),
+      repeats: repetition.getRepeat(),
       location: inputs.location.val().trim(),
       description: inputs.description.val().trim(),
       mandatory: inputs.mandatory.prop('checked'),
