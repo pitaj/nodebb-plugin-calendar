@@ -42,17 +42,21 @@ const parse = (text) => {
   results.repeats = match.match(/\[repeats\](.*)\[\/repeats\]/);
   results.repeats = results.repeats && results.repeats[1];
 
-  return {
-    name: results.name,
-    allday: results.allday === 'true',
-    startDate: parseInt(results.startDate, 10),
-    endDate: parseInt(results.endDate, 10),
-    reminders: JSON.parse(results.reminders).sort((a, b) => b - a),
-    location: results.location,
-    description: results.description,
-    mandatory: results.mandatory === 'true',
-    repeats: results.repeats ? JSON.parse(results.repeats.replace(/&quot;/g, '"')) : null,
-  };
+  try {
+    return {
+      name: results.name,
+      allday: results.allday === 'true',
+      startDate: parseInt(results.startDate, 10),
+      endDate: parseInt(results.endDate, 10),
+      reminders: JSON.parse(results.reminders).sort((a, b) => b - a),
+      location: results.location,
+      description: results.description,
+      mandatory: results.mandatory === 'true',
+      repeats: results.repeats ? JSON.parse(results.repeats.replace(/&quot;/g, '"')) : null,
+    };
+  } catch (e) {
+    return null;
+  }
 };
 
 const templates = {
