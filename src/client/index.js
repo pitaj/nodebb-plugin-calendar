@@ -1,7 +1,7 @@
 import 'eonasdan-bootstrap-datetimepicker';
 import moment from 'moment';
 
-import { eventTemplate, modalTemplate } from './templates';
+import { eventTemplate } from './templates';
 import setupComposerButton from './setupComposerButton';
 import createEventFactory from './createEvent';
 import { default as parse, inPost } from '../lib/parse';
@@ -21,7 +21,8 @@ const begin = (momentLang) => {
     initTranslatorModule(translator.Translator);
     initTranslation(translator.Translator);
 
-    translator.translate(modalTemplate(), lang, (html) => {
+    ajaxify.loadTemplate('partials/calendar/event-creation-modal', (template) =>
+    translator.translate(template, lang, (html) => {
       $('body').append(html);
 
       setupComposerButton(composer, translator);
@@ -72,7 +73,7 @@ const begin = (momentLang) => {
       $(window).on('action:composer.enhanced', prepareFormattingTools);
 
       initResponses();
-    });
+    }));
   }));
 };
 
