@@ -33,10 +33,6 @@ const perm = 'plugin-calendar:event:post';
 pluginSockets.calendar = {};
 pluginSockets.calendar.canPostEvent = (sock, data, cb) => {
   (async ({ uid }, { pid, tid, cid, isMain }) => {
-    if (!uid) {
-      return false;
-    }
-
     if (!isMain && await getSetting('plugin-calendar', 'mainPostOnly')) {
       return false;
     }

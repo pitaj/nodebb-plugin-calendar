@@ -115,45 +115,45 @@
               <li>
                 <div class="radio">
                   <label>
-                    <span>[[calendar:no_repeat]]</span>
                     <input type="radio" name="repetition-select" value="no-repeat" checked>
                     <i class="fa fa-check"></i>
+                    <span>[[calendar:no_repeat]]</span>
                   </label>
                 </div>
               </li>
               <li>
                 <div class="radio">
                   <label>
-                    <span>[[calendar:every_day]]</span>
                     <input type="radio" name="repetition-select" value="day">
                     <i class="fa fa-check"></i>
+                    <span>[[calendar:every_day]]</span>
                   </label>
                 </div>
               </li>
               <li>
                 <div class="radio">
                   <label>
-                    <span>[[calendar:every_week]]</span>
                     <input type="radio" name="repetition-select" value="week">
                     <i class="fa fa-check"></i>
+                    <span>[[calendar:every_week]]</span>
                   </label>
                 </div>
               </li>
               <li>
                 <div class="radio">
                   <label>
-                    <span>[[calendar:every_month]]</span>
                     <input type="radio" name="repetition-select" value="month">
                     <i class="fa fa-check"></i>
+                    <span>[[calendar:every_month]]</span>
                   </label>
                 </div>
               </li>
               <li>
                 <div class="radio">
                   <label>
-                    <span>[[calendar:every_year]]</span>
                     <input type="radio" name="repetition-select" value="year">
                     <i class="fa fa-check"></i>
+                    <span>[[calendar:every_year]]</span>
                   </label>
                 </div>
               </li>
@@ -161,9 +161,9 @@
               <li data-value="custom">
                 <div class="radio">
                   <label>
-                    <span>[[calendar:repetition_custom]]</span>
                     <input type="radio" name="repetition-select" value="custom">
                     <i class="fa fa-check"></i>
+                    <span>[[calendar:repetition_custom]]</span>
                   </label>
                 </div>
                 <!-- IMPORT partials/calendar/event-creation-custom-repeat.tpl -->
