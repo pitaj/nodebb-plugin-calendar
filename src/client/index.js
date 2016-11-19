@@ -10,6 +10,7 @@ import initTranslation from './clientSideTranslation';
 import initTranslatorModule from '../lib/translatorModule';
 
 const lang = config.userLang || config.defaultLang;
+jQuery.fn.size = jQuery.fn.size || function size() { return this.length; };
 
 const begin = (momentLang) => {
   window.requirejs([
