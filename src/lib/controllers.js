@@ -4,7 +4,8 @@ const meta = require.main.require('./src/meta');
 
 import { getEvent, escapeEvent } from './event';
 import { canViewPost } from './privileges';
-import eventTemplate from './template';
+import { eventTemplate } from './templates';
+import { getUserResponse } from './responses';
 import Promise from 'bluebird';
 const p = Promise.promisify;
 
@@ -53,21 +54,24 @@ export default (router, middleware) => {
     // better to have a fast page load time
 
     (async () => {
+      const uid = req.uid;
       const cats = await getAllCategoryFields(['cid', 'bgColor']);
-      const filtered = await filterCids('read', cats.map((c) => c.cid), req.uid);
+      const filtered = await filterCids('read', cats.map((c) => c.cid), uid);
 
       const colors = cats.filter((c) => filtered.includes(c.cid));
 
-      const style = colors.map(({ cid, bgColor }) =>
-`.plugin-calendar-cal-event-category-${cid} {
-  background-color: ${bgColor};
-  border-color: ${shadeColor2(bgColor, -0.2)};
-}`
-      );
+      const style = colors.map(({ cid, bgColor }) => `
+        .plugin-calendar-cal-event-category-${cid} {
+        background-color: ${bgColor};
+        border-color: ${shadeColor2(bgColor, -0.2)};
+      }`);
       let event = {};
-      if (req.params.eventPid && await canViewPost(req.params.eventPid, req.uid)) {
+      if (req.params.eventPid && await canViewPost(req.params.eventPid, uid)) {
         const raw = await getEvent(req.params.eventPid);
         event = await escapeEvent(raw);
+        event.responses = {
+          [uid]: await getUserResponse({ pid: event.pid, uid }),
+        };
       }
 
       return {
@@ -75,7 +79,7 @@ export default (router, middleware) => {
         title: '[[calendar:calendar]]',
         eventData: event.pid ? event : null,
         eventJSON: event.pid ? JSON.stringify(event) : '{}',
-        eventHTML: event.pid ? eventTemplate(event) : '',
+        eventHTML: event.pid ? eventTemplate({ event, uid }) : '',
       };
     })().asCallback(cb);
   };

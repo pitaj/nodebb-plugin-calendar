@@ -1,5 +1,5 @@
 import validator from 'validator';
-import postTemplate from './template';
+import { eventTemplate } from './templates';
 import { default as parse, tagTemplate } from './parse';
 
 const eventRX = new RegExp(tagTemplate('event', '[\\s\\S]*'));
@@ -16,7 +16,7 @@ const parseRaw = async (content) => {
   }
   event.name = validator.escape(event.name);
 
-  const eventText = postTemplate(event);
+  const eventText = eventTemplate({ event });
   const text = input.replace(eventRX, eventText);
   return text;
 };

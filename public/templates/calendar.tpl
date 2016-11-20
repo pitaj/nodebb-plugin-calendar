@@ -16,8 +16,10 @@ role="dialog" aria-labelledby="plugin-calendar-cal-event-display-title">
           [[calendar:event_title]]
         </h4>
       </div>
-      <div class="modal-body">
-        {{eventHTML}}
+      <div class="modal-body topic" data-pid="{eventData.pid}">
+        <div class="posts">
+          {{eventHTML}}
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default dismiss" data-dismiss="modal">

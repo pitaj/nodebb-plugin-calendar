@@ -1,24 +1,17 @@
 const privileges = require.main.require('./src/privileges');
 const pluginSockets = require.main.require('./src/socket.io/plugins');
-const translator = require.main.require('./public/src/modules/translator');
-const user = require.main.require('./src/user');
 const meta = require.main.require('./src/meta');
 const posts = require.main.require('./src/posts');
 const topics = require.main.require('./src/topics');
 
 import { getAll as getAllResponses, submitResponse, getUserResponse } from './responses';
-import { getEventsByDate, escapeEvent, getEvent } from './event';
-import { canViewPost, filterByPid } from './privileges';
+import { getEventsByDate, escapeEvent } from './event';
+import { filterByPid } from './privileges';
 import { getOccurencesOfRepetition } from './repetition';
-import postTemplate from './template';
 import Promise from 'bluebird';
 
 const p = Promise.promisify;
 
-const getUserSettings = p(user.getSettings);
-const translate = p((text, language, callback) => {
-  translator.translate(text, language, (content) => callback(null, content));
-});
 const getSetting = p(meta.settings.getOne);
 const can = {
   posts: p(privileges.posts.can),
@@ -92,20 +85,4 @@ pluginSockets.calendar.getEventsByDate = (sock, data, cb) => {
 
     return withResponses;
   })(sock, data).asCallback(cb);
-};
-
-pluginSockets.calendar.getParsedEvent = ({ uid }, pid, cb) => {
-  (async () => {
-    const canView = await canViewPost(pid, uid);
-    if (!canView) {
-      throw Error('[[error:no-privileges]]');
-    }
-
-    const event = await getEvent(pid);
-    const parsed = await escapeEvent(event);
-    const lang = (await getUserSettings(uid)).userLang || meta.config.defaultLang;
-    const content = await translate(postTemplate(parsed), lang);
-
-    return { parsed, content };
-  })().asCallback(cb);
 };

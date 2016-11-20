@@ -132,10 +132,6 @@ const initResponses = () => {
     }
   );
 
-  $(window).on('action:calendar.event.display', (e, { pid, day }) => {
-    setUserResponseToPost({ pid, day });
-  });
-
   $(window).on([
     'action:posts.loaded',
     'action:ajaxify.end',

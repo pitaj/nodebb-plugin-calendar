@@ -49,6 +49,7 @@
   "response_maybe": "Maybe",
   "response_yes": "Yes",
   "no_x_responses": "No <b>%1</b> responses yet",
+  "you_responded": "You responded with <b>%1</b>",
 
   "confirm_delete_event": "Are you sure you want to delete the event in this post? This action cannot be undone.",
 

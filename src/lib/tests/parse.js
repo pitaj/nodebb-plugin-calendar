@@ -1,5 +1,5 @@
 import parse from '../parse';
-import { eventTemplate } from '../../client/templates';
+import { rawTemplate } from '../../client/templates';
 import assert from 'assert';
 
 [
@@ -18,7 +18,7 @@ import assert from 'assert';
     };
     const result = parse(
       `other things that make sense
-      ${eventTemplate(data)}
+      ${rawTemplate(data)}
       and some more *markdown*`
     );
 
@@ -50,7 +50,7 @@ import assert from 'assert';
         endDate: null,
       },
     };
-    const result = parse(eventTemplate(data));
+    const result = parse(rawTemplate(data));
     assert(typeof result === 'object', 'Expected Object, got something else');
     assert.strictEqual(data.name, result.name, '`name` field incorrect');
     assert.strictEqual(data.allday, result.allday, '`allday` field incorrect');
@@ -73,7 +73,7 @@ import assert from 'assert';
       description: 'somewhere else',
       mandatory: false,
     };
-    const result = parse(eventTemplate(data));
+    const result = parse(rawTemplate(data));
     assert.strictEqual(null, result, 'Expected null, got something else');
   },
   () => {
@@ -88,7 +88,7 @@ import assert from 'assert';
       description: 'somewhere else',
       mandatory: false,
     };
-    const result = parse(eventTemplate(data));
+    const result = parse(rawTemplate(data));
     assert.strictEqual(null, result, 'Expected null, got something else');
   },
   () => {
@@ -103,7 +103,7 @@ import assert from 'assert';
       description: 'somewhere else',
       mandatory: false,
     };
-    const result = parse(eventTemplate(data));
+    const result = parse(rawTemplate(data));
     assert.strictEqual(null, result, 'Expected null, got something else');
   },
   () => {
@@ -118,7 +118,7 @@ import assert from 'assert';
       description: 'somewhere else',
       mandatory: false,
     };
-    const result = parse(eventTemplate(data));
+    const result = parse(rawTemplate(data));
     assert.strictEqual(null, result, 'Expected null, got something else');
   },
 ].forEach((x) => x());

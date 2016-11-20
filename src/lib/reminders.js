@@ -10,7 +10,7 @@ import { getAll as getResponses } from './responses';
 import { getEventsEndingAfter, escapeEvent } from './event';
 import { filterUidsByPid } from './privileges';
 import { getOccurencesOfRepetition } from './repetition';
-import postTemplate from './template';
+import { eventTemplate } from './templates';
 import Promise from 'bluebird';
 const p = Promise.promisify;
 
@@ -35,7 +35,7 @@ const emailNotification = async ({ uid, event, message }) => {
 
   if (userSettings.sendPostNotifications) {
     const parsed = await escapeEvent(event);
-    const content = postTemplate(parsed);
+    const content = eventTemplate({ event: parsed, uid, isEmail: true });
 
     await sendEmail('notif_plugin_calendar_event_reminder', uid, {
       pid: event.pid,

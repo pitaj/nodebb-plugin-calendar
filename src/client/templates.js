@@ -1,4 +1,4 @@
-const eventTemplate = (event) => {
+const rawTemplate = (event) => {
   const repeats = event.repeats && {
     ...event.repeats,
     endDate: event.repeats.endDate ? event.repeats.endDate.valueOf() : null,
@@ -11,6 +11,4 @@ const eventTemplate = (event) => {
   `${repeats ? `[repeats]${JSON.stringify(repeats)}[/repeats]` : ''}[/event]`;
 };
 
-export {
-  eventTemplate,
-};
+export { rawTemplate };

@@ -1,7 +1,8 @@
 import 'eonasdan-bootstrap-datetimepicker';
 import moment from 'moment';
 
-import { eventTemplate } from './templates';
+import './locationHistory';
+import { rawTemplate } from './templates';
 import setupComposerButton from './setupComposerButton';
 import createEventFactory from './createEvent';
 import { default as parse, inPost } from '../lib/parse';
@@ -56,7 +57,7 @@ const begin = (momentLang) => {
           const oldVal = $textarea.val();
           const oldEvent = parse(oldVal.replace(/\[(\/?)event-invalid\]/g, '[$1event]'));
           createEvent(oldEvent || {}, (event) => {
-            const text = event ? eventTemplate(event) : '';
+            const text = event ? rawTemplate(event) : '';
             if (inPost.test(oldVal)) {
               const newVal = oldVal.replace(
                 /\[event(?:-invalid)?\][\s\S]+\[\/event(?:-invalid)?\]/g,

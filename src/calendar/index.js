@@ -1,7 +1,7 @@
 import 'fullcalendar';
 import convertToFC from './convertToFC';
 import displayEvent from './displayEvent';
-import { setUserResponseToPost } from '../client/responses';
+import locationHistory from '../client/locationHistory';
 
 const queryRegExp = /calendar\/?(?:\/*event\/+([0-9]+))?/;
 
@@ -41,9 +41,8 @@ const begin = (momentLang) => {
 
   let shouldHandle = false;
 
-  $(window).on('action:ajaxify.start', (e, data) => {
-    const prevRelative = app.previousUrl.split('/').slice(3).join('/');
-    if (prevRelative.startsWith('calendar') && data.url.startsWith('calendar')) {
+  locationHistory.listen((state, data) => {
+    if (state.prev.startsWith('calendar') && state.current.startsWith('calendar')) {
       data.url = null;
       shouldHandle = true;
     } else {
@@ -54,7 +53,7 @@ const begin = (momentLang) => {
   const init = () => {
     const $calendar = $('#calendar');
 
-    if ($calendar) {
+    if ($calendar && !shouldHandle) {
       $calendar.fullCalendar(calendarOptions);
       const btn = $('#plugin-calendar-cal-only-yes');
       btn
@@ -78,12 +77,20 @@ const begin = (momentLang) => {
     const matches = location.pathname.match(queryRegExp);
     const pid = matches && parseInt(matches[1], 10);
     if (pid) {
+      const el = $calendar
+        .data('fullCalendar')
+        .getEventCache()
+        .find((x) => x.id === pid);
+
       if (shouldHandle) {
-        displayEvent({ pid });
-      } else {
-        setUserResponseToPost({ pid, day: window.calendarEventData.day });
+        if (event) {
+          const event = el && el.original;
+          displayEvent(event);
+        } else {
+          history.replaceState({}, '', `${RELATIVE_PATH}/calendar`);
+        }
       }
-      $calendar.fullCalendar('gotoDate', window.calendarEventData.startDate);
+      $calendar.fullCalendar('gotoDate', el ? el.start : window.calendarEventData.startDate);
     } else if (shouldHandle) {
       $display.modal('hide');
     }

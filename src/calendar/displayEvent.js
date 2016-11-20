@@ -1,7 +1,7 @@
-import postTemplate from '../lib/template';
+import { eventTemplate } from '../lib/templates';
 
 const displayEvent = (event, cb) => {
-  const content = postTemplate(event);
+  const content = eventTemplate({ event, uid: app.user.uid });
   const pid = event.pid;
 
   const div = $(content);
@@ -13,11 +13,6 @@ const displayEvent = (event, cb) => {
   $display
     .find('.modal-footer a.btn-primary')
     .attr('href', `${RELATIVE_PATH}/post/${pid}`);
-  $display
-    .find('.plugin-calendar-event-responses-lists .panel-body')
-    .addClass('topic')
-    .find('ul')
-    .addClass('posts');
   $display
     .attr('data-pid', pid)
     .modal('hide')

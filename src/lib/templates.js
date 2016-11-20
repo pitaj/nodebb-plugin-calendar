@@ -3,23 +3,38 @@ const makeListElement = (n) => {
   return li;
 };
 
-const postTemplate = (event) => {
+const eventTemplate = ({ event, isEmail, uid }) => {
   const { startDate, endDate, allday } = event;
 
-  const responsesTemplate = `
+  let response = 'no';
+  if (uid && event.responses && event.responses[uid]) {
+    response = event.responses[uid];
+  }
+  const responsesTemplate = () => `
 <div class="plugin-calendar-event-responses">
   <i class="fa fa-reply" aria-hidden="true"></i>
   <div class="col-xs-12 col-sm-6">
     <div class="plugin-calendar-event-responses-user btn-group">
-      <button data-value="no" type="button" class="btn btn-sm btn-danger active">
+      ${(() => {
+        const active = {
+          no: '',
+          maybe: '',
+          yes: '',
+        };
+        active[response] = 'active';
+
+        return `
+      <button data-value="no" type="button" class="btn btn-sm btn-danger ${active.no}">
         [[calendar:response_no]]
       </button>
-      <button data-value="maybe" type="button" class="btn btn-sm btn-default">
+      <button data-value="maybe" type="button" class="btn btn-sm btn-default ${active.maybe}">
         [[calendar:response_maybe]]
       </button>
-      <button data-value="yes" type="button" class="btn btn-sm btn-success">
+      <button data-value="yes" type="button" class="btn btn-sm btn-success ${active.yes}">
         [[calendar:response_yes]]
       </button>
+        `;
+      })()}
     </div>
     <div class="panel-group plugin-calendar-event-responses-lists" data-loaded="false">
       <div class="panel panel-default closed">
@@ -73,6 +88,12 @@ const postTemplate = (event) => {
     </div>
   </div>
 </div>`;
+  const responses = isEmail ? `
+  <div class="plugin-calendar-event-responses">
+    <i class="fa fa-reply" aria-hidden="true"></i>
+    [[calendar:you_responded, [[calendar:response_${response}]]]]
+  </div>
+  ` : responsesTemplate();
 
   const html = `
 <div class="plugin-calendar-event panel panel-success" data-translated="false">
@@ -114,7 +135,7 @@ const postTemplate = (event) => {
       <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
       <span>[[calendar:mandatory]]</span>
     </div>
-    ` : responsesTemplate}
+    ` : responses}
     ${(() => {
       if (event.repeats) {
         const key = ['day', 'week', 'month', 'year'].find((x) => event.repeats.every[x]);
@@ -150,4 +171,4 @@ const postTemplate = (event) => {
   return html;
 };
 
-export default postTemplate;
+export { eventTemplate };
