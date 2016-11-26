@@ -61,6 +61,11 @@ const setUserResponseToPost = ({ pid, day }, cb) => {
     return;
   }
 
+  if (!app.user.uid) {
+    buttonCont.remove();
+    return;
+  }
+
   socket.emit('plugins.calendar.getUserResponse', { pid, day }, (err, value) => {
     buttonCont = $(`[data-pid=${pid}] .plugin-calendar-event-responses-user`);
     const button = buttonCont.find(`[data-value=${value}]`);

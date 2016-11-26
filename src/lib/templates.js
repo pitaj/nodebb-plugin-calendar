@@ -14,6 +14,7 @@ const eventTemplate = ({ event, isEmail, uid }) => {
 <div class="plugin-calendar-event-responses">
   <i class="fa fa-reply" aria-hidden="true"></i>
   <div class="col-xs-12 col-sm-6">
+    ${uid === 0 ? '' : `
     <div class="plugin-calendar-event-responses-user btn-group">
       ${(() => {
         const active = {
@@ -36,6 +37,7 @@ const eventTemplate = ({ event, isEmail, uid }) => {
         `;
       })()}
     </div>
+    `}
     <div class="panel-group plugin-calendar-event-responses-lists" data-loaded="false">
       <div class="panel panel-default closed">
         <div class="panel-heading">
