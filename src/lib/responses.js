@@ -53,7 +53,7 @@ const removeAll = async (pid) => {
 };
 
 const getAll = async ({ pid, uid = 0, selection = values, day } = {}) => {
-  if (uid !== 0 && !await canViewPost(pid, uid)) {
+  if (!await canViewPost(pid, uid)) {
     throw Error('[[error:no-privileges]]');
   }
 

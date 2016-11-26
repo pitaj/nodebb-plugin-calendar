@@ -69,7 +69,7 @@ pluginSockets.calendar.getEventsByDate = (sock, data, cb) => {
       occurences.map(async (event) => {
         const day = event.day;
         const [response, topicDeleted, escaped] = await Promise.all([
-          getUserResponse({ pid: event.pid, uid, day }),
+          getUserResponse({ pid: event.pid, uid, day }).catch(() => null),
           tidFromPid(event.pid).then(topicIsDeleted),
           escapeEvent(event),
         ]);
