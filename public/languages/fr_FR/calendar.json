@@ -35,7 +35,7 @@
   "every_week": "Hebdomadaire",
   "every_month": "Mensuel",
   "every_year": "Annuel",
-  "repeats_weekly_on_until": "Hebdomadaire jusqu'au %1",
+  "repeats_weekly_on_until": "Répéter toutes les semaines jusqu'au %1 tous les",
   "repeats_weekly_on_forever": "Répéter sans date de fin le",
 
   "today": "Aujourd'hui",

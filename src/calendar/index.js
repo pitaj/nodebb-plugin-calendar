@@ -109,11 +109,17 @@ try {
   if (momentLang === 'en-us') {
     begin('en-us');
   } else {
-    require(`bundle!fullcalendar/dist/lang/${momentLang}`)(() => { // eslint-disable-line
+    require(`bundle-loader!fullcalendar/dist/lang/${momentLang}`)(() => { // eslint-disable-line
       begin(momentLang);
     });
   }
 } catch (e) {
-  begin('en-us');
-  throw Error(`Could not load locale data (${momentLang}) for fullcalendar`);
+  try {
+    require(`bundle-loader!fullcalendar/dist/lang/${momentLang.split('-')[0]}`)(() => { // eslint-disable-line
+      begin(momentLang);
+    });
+  } catch (er) {
+    begin('en-us');
+    throw Error(`Could not load locale data (${momentLang}) for fullcalendar`);
+  }
 }

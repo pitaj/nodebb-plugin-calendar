@@ -48,8 +48,5 @@ module.exports = function loader(content) {
     const output = dtp(content);
     return output;
   }
-  // if (this.resourcePath.includes('moment/locales')) {
-  //   return momentLocales(content);
-  // }
   return content;
 };

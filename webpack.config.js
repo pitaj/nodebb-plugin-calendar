@@ -12,7 +12,7 @@ if (deleted.length) {
 }
 
 module.exports = {
-  devtool: isProd ? 'hidden-source-map' : 'eval-source-map',
+  devtool: isProd ? 'hidden-source-map' : 'inline-source-map',
   context: __dirname,
   entry: {
     client: ['core-js/shim', './src/client/index.js'],
@@ -52,11 +52,10 @@ module.exports = {
     ],
   },
   resolve: {
-    extensions: ['', '.js'],
+    extensions: ['.js'],
     modules: [
       'node_modules',
     ],
-    root: [],
   },
   plugins: [
     new webpack.optimize.CommonsChunkPlugin({
