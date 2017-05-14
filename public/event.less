@@ -141,8 +141,16 @@
 
   .plugin-calendar-event-editor-dates {
     display: flex;
-    flex-direction: row;
     justify-content: space-between;
+    flex-direction: row;
+
+    @media (max-width: @screen-xs-max) {
+      flex-direction: column;
+    }
+
+    .input-group-addon i.fa {
+      width: 12px;
+    }
   }
 
   .plugin-calendar-event-editor-reminder,
