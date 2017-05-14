@@ -12,7 +12,7 @@ const meta = require.main.require('./src/meta');
 const getSetting = p(meta.settings.getOne);
 
 const privilegeNames = {
-  canPost: 'plugin-calendar.event.post',
+  canPost: 'plugin_calendar:event:post',
 };
 
 const canViewPost = (pid, uid) => privilegesPostCan('read', pid, uid);
