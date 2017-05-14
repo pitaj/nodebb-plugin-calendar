@@ -83,7 +83,7 @@ const initResponses = () => {
   $(document.body).on('click', '.plugin-calendar-event-responses-user .btn', (e) => {
     const button = $(e.target);
     const value = button.data('value');
-    const elem = button.closest('[data-pid!=""]');
+    const elem = button.closest('[data-pid]:not([data-pid=""])');
     const pid = elem.attr('data-pid');
     const day = elem.attr('data-day');
 
