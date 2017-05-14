@@ -11,8 +11,12 @@ const meta = require.main.require('./src/meta');
 
 const getSetting = p(meta.settings.getOne);
 
+const privilegeNames = {
+  canPost: 'plugin-calendar.event.post',
+};
+
 const canViewPost = (pid, uid) => privilegesPostCan('read', pid, uid);
-const canPostEvent = (tid, uid) => privilegesTopicCan('plugin-calendar:event:post', tid, uid);
+const canPostEvent = (tid, uid) => privilegesTopicCan(privilegeNames.canPost, tid, uid);
 const getCidByPid = p(posts.getCidByPid);
 
 const canRespond = (pid, uid) =>
@@ -33,9 +37,9 @@ const filterByPid = (events, uid) =>
   .then((filtered) => events.filter((e) => filtered.includes(e.pid)));
 
 const privilegesList = (list, callback) =>
-  callback(null, [...list, 'plugin-calendar:event:post']);
+  callback(null, [...list, privilegeNames.canPost]);
 const privilegesGroupsList = (list, callback) =>
-  callback(null, [...list, 'groups:plugin-calendar:event:post']);
+  callback(null, [...list, `groups:${privilegeNames.canPost}`]);
 const privilegesListHuman = (list, callback) =>
   callback(null, [...list, { name: 'Post events' }]);
 
@@ -48,4 +52,5 @@ export {
   privilegesListHuman,
   filterByPid,
   canRespond,
+  privilegeNames,
 };

@@ -6,7 +6,7 @@ const topics = require.main.require('./src/topics');
 
 import { getAll as getAllResponses, submitResponse, getUserResponse } from './responses';
 import { getEventsByDate, escapeEvent } from './event';
-import { filterByPid } from './privileges';
+import { filterByPid, privilegeNames } from './privileges';
 import { getOccurencesOfRepetition } from './repetition';
 import Promise from 'bluebird';
 
@@ -21,8 +21,6 @@ const can = {
 const tidFromPid = p((pid, cb) => posts.getPostField(pid, 'tid', cb));
 const topicIsDeleted = p((tid, cb) => topics.getTopicField(tid, 'deleted', cb));
 
-const perm = 'plugin-calendar:event:post';
-
 pluginSockets.calendar = {};
 pluginSockets.calendar.canPostEvent = (sock, data, cb) => {
   (async ({ uid }, { pid, tid, cid, isMain }) => {
@@ -31,13 +29,13 @@ pluginSockets.calendar.canPostEvent = (sock, data, cb) => {
     }
 
     if (pid) {
-      return can.posts(perm, pid, uid);
+      return can.posts(privilegeNames.canPost, pid, uid);
     }
     if (tid) {
-      return can.topics(perm, tid, uid);
+      return can.topics(privilegeNames.canPost, tid, uid);
     }
     if (cid) {
-      return can.categories(perm, cid, uid);
+      return can.categories(privilegeNames.canPost, cid, uid);
     }
     return false;
   })(sock, data).asCallback(cb);
