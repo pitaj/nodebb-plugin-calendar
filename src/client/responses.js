@@ -116,7 +116,7 @@ const initResponses = () => {
     (e) => {
       const target = $(e.target).closest('a');
       const notLoaded = target.is('[data-loaded=false] a');
-      const pid = parseInt(target.closest('[data-pid]').attr('data-pid'), 10);
+      const pid = parseInt(target.closest('[data-pid]:not([data-pid=""])').attr('data-pid'), 10);
 
       const toggle = () => {
         const panel = target.closest('.panel');
