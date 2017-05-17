@@ -9,7 +9,7 @@
   ],
   "extends": "airbnb-base",
   "settings": {
-    "import/resolver": "webpack"
+    // "import/resolver": "webpack"
   },
   "rules": {
     "babel/arrow-parens": 2,
