@@ -7,7 +7,7 @@ const displayEvent = (event, cb) => {
   const div = $(content);
   const $display = $('#plugin-calendar-cal-event-display');
   $display
-    .find('.modal-body')
+    .find('.modal-body .posts')
     .empty()
     .append(div);
   $display
