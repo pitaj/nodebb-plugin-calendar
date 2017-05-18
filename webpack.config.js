@@ -60,7 +60,7 @@ module.exports = {
       name: 'commons',
       minChunks: 2,
     }),
-    new webpack.IgnorePlugin(/^\.\/(locale|lang)$/, [/(moment|fullcalendar)$/]),
+    new webpack.IgnorePlugin(/^\.\/(locale|lang)$/, /(moment|fullcalendar)$/),
     ...(isProd ? [new UglifyJSPlugin()] : []),
   ],
 };

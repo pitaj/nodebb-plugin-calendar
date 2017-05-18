@@ -33,6 +33,7 @@ const replaceWithDTP =
 const dtp = (text) =>
   text
     .replace(replaceInDTP, replaceWithDTP)
+    .replace(/if \(typeof module !== 'undefined'\)[\s\S]*?\}/, '')
     .replace(/'use strict';/g, '');
 
 module.exports = function loader(content) {
