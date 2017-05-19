@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 const userTemplate = (user) => (`
   <li class="icon pull-left">
     <a href="${config.relative_path}/user/${user.userslug}">
@@ -18,7 +20,7 @@ let noNoResponses;
 
 const addResponsesToPost = (pid, cb) => {
   const $responses = $(`[data-pid=${pid}] .plugin-calendar-event-responses-lists`);
-  const day = $(`[data-pid=${pid}]`).attr('data-day');
+  const day = $(`[data-pid=${pid}] [data-day]`).attr('data-day');
 
   if (!$responses.length) {
     return;
@@ -54,8 +56,38 @@ const addResponsesToPost = (pid, cb) => {
   });
 };
 
-const setUserResponseToPost = ({ pid, day }, cb) => {
+const setupDTP = (responses, day) => {
+  const dayInput = responses.find('.plugin-calendar-event-responses-day input');
+  if (!dayInput.length) {
+    return;
+  }
+  const m = moment(day || Date.now());
+
+  dayInput.datetimepicker({
+    icons: {
+      time: 'fa fa-clock-o',
+      date: 'fa fa-calendar',
+      up: 'fa fa-arrow-up',
+      down: 'fa fa-arrow-down',
+      previous: 'fa fa-arrow-left',
+      next: 'fa fa-arrow-right',
+      today: 'fa fa-crosshairs',
+      clear: 'fa fa-trash',
+      close: 'fa fa-times',
+    },
+    allowInputToggle: true,
+    locale: (config.userLang || config.defaultLang).toLowerCase().replace(/_/g, '-'),
+    format: 'L',
+    useCurrent: true,
+  })
+  .data('DateTimePicker')
+  .date(m);
+};
+
+const setupPost = ({ pid }, cb) => {
   let buttonCont = $(`[data-pid=${pid}] .plugin-calendar-event-responses-user`);
+  const responses = buttonCont.closest('[data-day]');
+  const day = responses.attr('data-day') || null;
 
   if (!buttonCont.length) {
     return;
@@ -66,9 +98,11 @@ const setUserResponseToPost = ({ pid, day }, cb) => {
     return;
   }
 
+  setupDTP(responses, day);
+
   socket.emit('plugins.calendar.getUserResponse', { pid, day }, (err, value) => {
     buttonCont = $(`[data-pid=${pid}] .plugin-calendar-event-responses-user`);
-    const button = buttonCont.find(`[data-value=${value}]`);
+    const button = buttonCont.find(`[data-value=${value || 'no'}]`);
 
     button.siblings().removeClass('active');
     button.addClass('active');
@@ -83,9 +117,8 @@ const initResponses = () => {
   $(document.body).on('click', '.plugin-calendar-event-responses-user .btn', (e) => {
     const button = $(e.target);
     const value = button.data('value');
-    const elem = button.closest('[data-pid]:not([data-pid=""])');
-    const pid = elem.attr('data-pid');
-    const day = elem.attr('data-day');
+    const pid = button.closest('[data-pid]').attr('data-pid');
+    const day = button.closest('[data-day]').attr('data-day');
 
     socket.emit('plugins.calendar.submitResponse', { pid, value, day }, (err) => {
       if (err) {
@@ -100,12 +133,31 @@ const initResponses = () => {
     });
   });
 
+  $(document.body).on('change dp.change', '.plugin-calendar-event-responses-day input', (e) => {
+    const input = $(e.target);
+    const day = input
+      .data('DateTimePicker').date()
+      .toISOString()
+      .split('T')[0];
+    const pid = input.closest('[data-pid]').attr('data-pid');
+    const responses = input.closest('[data-day]');
+    responses.attr('data-day', day);
+
+    responses
+      .find('.plugin-calendar-event-responses-lists')
+      .attr('data-loaded', 'false')
+      .find('.panel')
+      .addClass('closed');
+
+    setupPost({ pid });
+  });
+
   const checkPosts = (e, data) => {
     const posts = data.posts || data.post || ajaxify.data.posts;
 
     if (posts && posts.length > 0) {
       setTimeout(() => {
-        posts.forEach((post) => setUserResponseToPost({ pid: post.pid }));
+        posts.forEach((post) => setupPost({ pid: post.pid }));
       }, 200);
     }
   };
@@ -116,7 +168,7 @@ const initResponses = () => {
     (e) => {
       const target = $(e.target).closest('a');
       const notLoaded = target.is('[data-loaded=false] a');
-      const pid = parseInt(target.closest('[data-pid]:not([data-pid=""])').attr('data-pid'), 10);
+      const pid = parseInt(target.closest('[data-pid]').attr('data-pid'), 10);
 
       const toggle = () => {
         const panel = target.closest('.panel');
@@ -160,4 +212,4 @@ const initResponses = () => {
 };
 
 export default initResponses;
-export { setUserResponseToPost };
+export { setupPost, setupDTP };

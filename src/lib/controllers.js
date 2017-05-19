@@ -65,25 +65,47 @@ export default (router, middleware) => {
         background-color: ${bgColor};
         border-color: ${shadeColor2(bgColor, -0.2)};
       }`);
-      let event = {};
-      if (req.params.eventPid && await canViewPost(req.params.eventPid, uid)) {
-        const raw = await getEvent(req.params.eventPid);
-        event = await escapeEvent(raw);
-        event.responses = {
-          [uid]: await getUserResponse({ pid: event.pid, uid }),
+
+      const { eventPid: pid, eventDay: day } = req.params;
+
+      if (!pid || !(await canViewPost(pid, uid))) {
+        return {
+          calendarEventsStyle: style.join('\n'),
+          title: '[[calendar:calendar]]',
         };
       }
+
+      const raw = await getEvent(pid);
+      const event = await escapeEvent(raw);
+      event.day = day || null;
+
+      const { startDate, endDate } = event;
+      const occurenceDate = new Date(day);
+      const s = new Date(startDate);
+
+      s.setUTCFullYear(occurenceDate.getUTCFullYear());
+      s.setUTCDate(occurenceDate.getUTCDate());
+      s.setUTCMonth(occurenceDate.getUTCMonth());
+
+      event.startDate = s.valueOf();
+      event.endDate = event.startDate + (endDate - startDate);
+
+      event.responses = {
+        [uid]: await getUserResponse({ pid, day, uid }),
+      };
 
       return {
         calendarEventsStyle: style.join('\n'),
         title: '[[calendar:calendar]]',
-        eventData: event.pid ? event : null,
-        eventJSON: event.pid ? JSON.stringify(event) : '{}',
-        eventHTML: event.pid ? eventTemplate({ event, uid }) : '',
+        eventData: event,
+        eventJSON: JSON.stringify(event),
+        eventHTML: eventTemplate({ event, uid }),
       };
     })().asCallback(cb);
   };
 
+  router.get('/calendar/event/:eventPid/:eventDay', middleware.buildHeader, renderPage);
+  router.get('/api/calendar/event/:eventPid/:eventDay', renderPage);
   router.get('/calendar/event/:eventPid', middleware.buildHeader, renderPage);
   router.get('/api/calendar/event/:eventPid', renderPage);
   router.get('/calendar', middleware.buildHeader, renderPage);

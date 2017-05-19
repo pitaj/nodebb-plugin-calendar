@@ -11,9 +11,17 @@ const eventTemplate = ({ event, isEmail, uid }) => {
     response = event.responses[uid];
   }
   const responsesTemplate = () => `
-<div class="plugin-calendar-event-responses">
+<div class="plugin-calendar-event-responses" data-day="${event.day || ''}">
   <i class="fa fa-reply" aria-hidden="true"></i>
   <div class="col-xs-12 col-sm-6">
+    ${event.repeats ? `
+    <div class="input-group plugin-calendar-event-responses-day">
+      <input class="form-control" title="[[calendar:select_day]]" type="text">
+      <span class="input-group-addon">
+        <i class="fa fa-calendar-check-o"></i>
+      </span>
+    </div>
+    ` : ''}
     ${uid === 0 ? '' : `
     <div class="plugin-calendar-event-responses-user btn-group">
       ${(() => {
@@ -21,8 +29,8 @@ const eventTemplate = ({ event, isEmail, uid }) => {
           no: '',
           maybe: '',
           yes: '',
+          [response]: 'active',
         };
-        active[response] = 'active';
 
         return `
       <button data-value="no" type="button" class="btn btn-sm btn-danger ${active.no}">
@@ -132,12 +140,6 @@ const eventTemplate = ({ event, isEmail, uid }) => {
       </ul>
     </div>
     ` : ''}
-    ${event.mandatory ? `
-    <div class="plugin-calendar-event-mandatory">
-      <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
-      <span>[[calendar:mandatory]]</span>
-    </div>
-    ` : responses}
     ${(() => {
       if (event.repeats) {
         const key = ['day', 'week', 'month', 'year'].find((x) => event.repeats.every[x]);
@@ -167,6 +169,12 @@ const eventTemplate = ({ event, isEmail, uid }) => {
       }
       return '';
     })()}
+    ${event.mandatory ? `
+    <div class="plugin-calendar-event-mandatory">
+      <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+      <span>[[calendar:mandatory]]</span>
+    </div>
+    ` : responses}
   </div>
 </div>`;
 

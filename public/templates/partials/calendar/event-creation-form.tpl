@@ -24,7 +24,7 @@
           <div class="input-group date plugin-calendar-event-editor-date"
           id="plugin-calendar-event-editor-startDate">
             <input type="text" class="form-control"
-            placeholder="[[calendar:start_date]]"/>
+            title="[[calendar:start_date]]"/>
             <span class="input-group-addon">
               <i class="fa fa-play"></i>
             </span>
@@ -32,7 +32,7 @@
           <div class="input-group date plugin-calendar-event-editor-date"
           id="plugin-calendar-event-editor-endDate">
             <input type="text" class="form-control"
-            placeholder="[[calendar:end_date]]"/>
+            title="[[calendar:end_date]]"/>
             <span class="input-group-addon">
               <i class="fa fa-stop"></i>
             </span>

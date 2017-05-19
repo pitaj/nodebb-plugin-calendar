@@ -1,4 +1,5 @@
 import { eventTemplate } from '../lib/templates';
+import { setupPost } from '../client/responses';
 
 const displayEvent = (event, cb) => {
   const content = eventTemplate({ event, uid: app.user.uid });
@@ -7,6 +8,7 @@ const displayEvent = (event, cb) => {
   const div = $(content);
   const $display = $('#plugin-calendar-cal-event-display');
   $display
+    .modal('hide')
     .find('.modal-body .posts')
     .empty()
     .append(div);
@@ -14,17 +16,21 @@ const displayEvent = (event, cb) => {
     .find('.modal-footer a.btn-primary')
     .attr('href', `${RELATIVE_PATH}/post/${pid}`);
   $display
-    .attr('data-pid', pid)
-    .modal('hide')
+    .find('.modal-body')
+    .attr('data-pid', pid);
+  if (event.repeats) {
+    $display.find('[data-day]').attr('data-day', event.day);
+  }
+  $display
     .modal('show');
-  if (event.day) {
-    $display.attr('data-day', event.day);
-  }
-  $(window).trigger('action:calendar.event.display', { pid, day: event.day, modal: $display });
 
-  if (typeof cb === 'function') {
-    cb({ content, parsed: event });
-  }
+  setupPost({ pid }, () => {
+    $(window).trigger('action:calendar.event.display', { pid, day: event.day, modal: $display });
+
+    if (typeof cb === 'function') {
+      cb({ content, parsed: event });
+    }
+  });
 };
 
 export default displayEvent;

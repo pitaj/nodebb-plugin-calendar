@@ -2,6 +2,7 @@ import 'fullcalendar';
 import convertToFC from './convertToFC';
 import displayEvent from './displayEvent';
 import locationHistory from '../client/locationHistory';
+import { setupDTP } from '../client/responses';
 
 const queryRegExp = /calendar\/?(?:\/*event\/+([0-9]+))?/;
 
@@ -34,7 +35,11 @@ const begin = (momentLang) => {
       e.preventDefault();
       e.stopPropagation();
       displayEvent(original);
-      ajaxify.updateHistory(`calendar/event/${pid}`);
+      if (original.repeats) {
+        ajaxify.updateHistory(`calendar/event/${pid}/${original.day}`);
+      } else {
+        ajaxify.updateHistory(`calendar/event/${pid}`);
+      }
     },
     timezone: 'local',
   };
@@ -89,8 +94,12 @@ const begin = (momentLang) => {
         } else {
           history.replaceState({}, '', `${RELATIVE_PATH}/calendar`);
         }
+      } else {
+        setupDTP($display.find('[data-day]'), window.calendarEventData.day);
       }
-      $calendar.fullCalendar('gotoDate', el ? el.start : window.calendarEventData.startDate);
+      $calendar.fullCalendar('gotoDate', el ? el.start : (
+        window.calendarEventData.day || window.calendarEventData.startDate
+      ));
     } else if (shouldHandle) {
       $display.modal('hide');
     }
