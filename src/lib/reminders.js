@@ -6,7 +6,7 @@ const emailer = require.main.require('./src/emailer');
 const nconf = require.main.require('nconf');
 
 // import { fork } from 'child_process';
-import { getAll as getResponses } from './responses';
+import { getAll as getResponses, getUserResponse } from './responses';
 import { getEventsEndingAfter, escapeEvent } from './event';
 import { filterUidsByPid } from './privileges';
 import { getOccurencesOfRepetition } from './repetition';
@@ -28,13 +28,18 @@ const emailNotification = async ({ uid, event, message }) => {
     return;
   }
 
-  const [userData, userSettings] = await Promise.all([
+  const [userData, userSettings, response] = await Promise.all([
     getUserFields(uid, ['username', 'userslug']),
     getUserSettings(uid),
+    getUserResponse({ pid: event.pid, uid, day: event.day }),
   ]);
 
   if (userSettings.sendPostNotifications) {
     const parsed = await escapeEvent(event);
+    parsed.responses = {
+      [uid]: response,
+    };
+
     const content = eventTemplate({ event: parsed, uid, isEmail: true });
 
     await sendEmail('notif_plugin_calendar_event_reminder', uid, {
@@ -113,8 +118,8 @@ const initNotifierDaemon = async () => {
     // timespan we check is a checkingInterval in the future
     // so as to avoid sending notifications too late
     const start = lastEnd;
-    const end = lastEnd + checkingInterval;
-    lastEnd += checkingInterval;
+    const end = Date.now() + checkingInterval;
+    lastEnd = end;
 
     const events = await getEventsEndingAfter(start);
 
