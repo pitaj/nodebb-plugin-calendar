@@ -1,7 +1,7 @@
 const plugins = require.main.require('./src/plugins');
 const meta = require.main.require('./src/meta');
 const topics = require.main.require('./src/topics');
-// const winston = require.main.require('winston');
+const winston = require.main.require('winston');
 
 import validator from 'validator';
 import Promise from 'bluebird';
@@ -11,7 +11,6 @@ import { deleteEvent, saveEvent, eventExists, getEvent } from './event';
 import validateEvent from './validateEvent';
 import { notify } from './reminders';
 
-const log = (...args) => console.log(...args);
 const p = Promise.promisify;
 
 const fireHook = p(plugins.fireHook);
@@ -37,7 +36,7 @@ const postSave = async (data) => {
       });
 
       await deleteEvent(post.pid);
-      log(`[plugin-calendar] Event (pid:${post.pid}) deleted`);
+      winston.verbose(`[plugin-calendar] Event (pid:${post.pid}) deleted`);
     }
 
     return data;
@@ -58,7 +57,7 @@ const postSave = async (data) => {
       ...val,
       [failure]: event[failure],
     }), {});
-    log(`[plugin-calendar] Event (pid:${post.pid}) validation failed: `, obj);
+    winston.verbose(`[plugin-calendar] Event (pid:${post.pid}) validation failed: `, obj);
     return invalid();
   }
 
@@ -81,7 +80,7 @@ const postSave = async (data) => {
 
   if (event) {
     await saveEvent(event);
-    log(`[plugin-calendar] Event (pid:${event.pid}) saved`);
+    winston.verbose(`[plugin-calendar] Event (pid:${event.pid}) saved`);
   }
 
   return data;

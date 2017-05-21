@@ -4,6 +4,7 @@ const meta = require.main.require('./src/meta');
 const user = require.main.require('./src/user');
 const emailer = require.main.require('./src/emailer');
 const nconf = require.main.require('nconf');
+const winston = require.main.require('winston');
 
 // import { fork } from 'child_process';
 import { getAll as getResponses, getUserResponse } from './responses';
@@ -108,7 +109,7 @@ const initNotifierDaemon = async () => {
   // pulled from settings
   let checkingInterval = await getSetting('plugin-calendar', 'checkingInterval');
 
-  console.log(`Notifier Daemon initialized with
+  winston.verbose(`Notifier Daemon initialized with
     interval of ${Math.floor(checkingInterval / 1000)} seconds`);
 
   let lastEnd = Date.now() + checkingInterval;
@@ -151,7 +152,7 @@ const initNotifierDaemon = async () => {
   const daemon = () => {
     checkReminders().asCallback((err) => {
       if (err) {
-        console.error(err);
+        winston.error(err);
       }
       setTimeout(daemon, checkingInterval);
     });
