@@ -26,9 +26,8 @@ const begin = (momentLang) => {
           }
           throw err;
         }
-        start.subtract(1, 'day');
-        end.add(1, 'day');
-        callback(convertToFC(events, start, end));
+
+        callback(convertToFC(events));
       });
     },
     eventClick: ({ original, id: pid }, e) => {
