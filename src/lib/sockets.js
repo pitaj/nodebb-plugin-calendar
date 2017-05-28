@@ -58,7 +58,7 @@ pluginSockets.calendar.getEventsByDate = (sock, data, cb) => {
     const events = await getEventsByDate(startDate, endDate);
     const filtered = await filterByPid(events, uid);
     const occurences = filtered.reduce((prev, event) => {
-      if (event.repeats) {
+      if (event.repeats && event.repeats.every) {
         return [...prev, ...getOccurencesOfRepetition(event, startDate, endDate)];
       }
       return [...prev, event];
