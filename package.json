@@ -1,6 +1,6 @@
 {
   "name": "nodebb-plugin-calendar",
-  "version": "1.0.0-alpha.28",
+  "version": "1.0.0-alpha.29",
   "description": "Calendar and events for NodeBB",
   "main": "library.js",
   "scripts": {
@@ -29,41 +29,40 @@
   },
   "homepage": "https://github.com/pitaj/nodebb-plugin-calendar#readme",
   "devDependencies": {
-    "babel": "^6.5.2",
-    "babel-cli": "^6.8.0",
-    "babel-core": "^6.10.4",
-    "babel-eslint": "^6.0.4",
-    "babel-loader": "^6.2.4",
-    "babel-plugin-transform-async-to-module-method": "^6.8.0",
-    "babel-plugin-transform-es2015-destructuring": "^6.8.0",
-    "babel-plugin-transform-es2015-function-name": "^6.8.0",
-    "babel-plugin-transform-es2015-modules-commonjs": "^6.8.0",
-    "babel-plugin-transform-object-rest-spread": "^6.8.0",
-    "babel-plugin-transform-runtime": "^6.9.0",
-    "babel-preset-es2015": "^6.16.0",
-    "babel-preset-es2015-node4": "^2.1.0",
-    "bundle-loader": "^0.5.4",
+    "babel-cli": "^6.24.1",
+    "babel-core": "^6.24.1",
+    "babel-eslint": "^7.2.3",
+    "babel-loader": "^7.0.0",
+    "babel-plugin-transform-async-to-module-method": "^6.24.1",
+    "babel-plugin-transform-es2015-destructuring": "^6.23.0",
+    "babel-plugin-transform-es2015-function-name": "^6.24.1",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.24.1",
+    "babel-plugin-transform-object-rest-spread": "^6.23.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-es2015-node4": "^2.1.1",
+    "bundle-loader": "^0.5.5",
     "chalk": "^1.1.3",
-    "eslint": "^2.9.0",
-    "eslint-config-airbnb-base": "^3.0.1",
-    "eslint-import-resolver-webpack": "^0.3.2",
-    "eslint-plugin-babel": "^3.3.0",
-    "eslint-plugin-import": "^1.7.0",
+    "eslint": "^3.19.0",
+    "eslint-config-airbnb-base": "^11.2.0",
+    "eslint-import-resolver-webpack": "^0.8.1",
+    "eslint-plugin-babel": "^4.1.1",
+    "eslint-plugin-import": "^2.3.0",
     "uglify-js": "^2.8.26",
     "uglifyjs-webpack-plugin": "^0.4.3",
-    "webpack": "^2.5.1"
+    "webpack": "^2.6.1"
   },
   "dependencies": {
-    "babel-runtime": "^6.9.2",
-    "bluebird": "^3.4.0",
+    "babel-runtime": "^6.23.0",
+    "bluebird": "^3.5.0",
     "core-js": "^2.4.1",
-    "eonasdan-bootstrap-datetimepicker": "^4.15.35",
-    "fullcalendar": "^2.9.0",
-    "moment": "^2.14.1",
-    "source-map-support": "^0.4.2",
-    "validator": "^5.2.0"
+    "eonasdan-bootstrap-datetimepicker": "^4.17.47",
+    "fullcalendar": "^3.4.0",
+    "moment": "^2.18.1",
+    "source-map-support": "^0.4.15",
+    "validator": "^7.0.0"
   },
   "nbbpm": {
-    "compatibility": "^1.5.0"
+    "compatibility": "^1.5.1"
   }
 }
