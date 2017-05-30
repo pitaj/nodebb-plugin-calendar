@@ -73,6 +73,9 @@ const getEventsByDate = async (startDate, endDate) => {
   return events.map((event, i) => ({
     ...event,
     cid: cids[i],
+    start: parseInt(event.start, 10),
+    end: parseInt(event.end, 10),
+    repeats: (typeof event.repeats === 'string') ? JSON.parse(event.repeats) : event.repeats,
   }));
 };
 

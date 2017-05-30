@@ -76,7 +76,7 @@ pluginSockets.calendar.getEventsByDate = (sock, data, cb) => {
           responses: {
             [uid]: response,
           },
-          topicDeleted,
+          topicDeleted: !!parseInt(topicDeleted, 10),
         };
       })
     );
