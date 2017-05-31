@@ -84,7 +84,9 @@ const setupDTP = (responses, day) => {
   .date(m);
 };
 
-const setupPost = ({ pid }, cb) => {
+const noop = () => {};
+
+const setupPost = ({ pid }, cb = noop) => {
   let buttonCont = $(`[data-pid=${pid}] .plugin-calendar-event-responses-user`);
   const responses = buttonCont.closest('[data-day]');
   const day = responses.attr('data-day') || null;
@@ -114,9 +116,7 @@ const setupPost = ({ pid }, cb) => {
     button.siblings().removeClass('active');
     button.addClass('active');
 
-    if (typeof cb === 'function') {
-      cb();
-    }
+    cb();
   });
 };
 
