@@ -1,4 +1,5 @@
 import Promise from 'bluebird';
+import { getSetting } from './settings';
 
 const p = Promise.promisify;
 
@@ -8,9 +9,6 @@ const privilegesPostCan = p(privileges.posts.can);
 const privilegesTopicCan = p(privileges.topics.can);
 const filterUidsByCid = p(privileges.categories.filterUids);
 const filterPids = p(privileges.posts.filter);
-const meta = require.main.require('./src/meta');
-
-const getSetting = p(meta.settings.getOne);
 
 const privilegeNames = {
   canPost: 'plugin_calendar:event:post',
@@ -21,7 +19,7 @@ const canPostEvent = (tid, uid) => privilegesTopicCan(privilegeNames.canPost, ti
 const getCidByPid = p(posts.getCidByPid);
 
 const canRespond = (pid, uid) =>
-  getSetting('plugin-calendar', 'respondIfCanReply')
+  getSetting('respondIfCanReply')
     .then((respondIfCanReply) => {
       if (respondIfCanReply) {
         return privilegesPostCan('reply', pid, uid);

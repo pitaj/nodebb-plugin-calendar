@@ -1,13 +1,6 @@
-import Promise from 'bluebird';
 import controllers from './controllers';
 import { initNotifierDaemon } from './reminders';
-
-const meta = require.main.require('./src/meta');
-
-const p = Promise.promisify;
-
-const getSettings = p(meta.settings.get);
-const setSettings = p(meta.settings.set);
+import { getSettings, setSettings } from './settings';
 
 const shallowEqual = (a, b) => Object.keys(a).every(key => a[key] === b[key]);
 
@@ -20,12 +13,12 @@ export default ({ router, middleware }, callback) => {
     respondIfCanReply: false,
   };
   (async () => {
-    const old = await getSettings('plugin-calendar');
+    const old = await getSettings();
     const settings = { ...defaults, ...old };
 
     const changed = !shallowEqual(settings, old);
     if (changed) {
-      await setSettings('plugin-calendar', settings);
+      await setSettings(settings);
     }
 
     await initNotifierDaemon();

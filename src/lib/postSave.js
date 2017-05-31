@@ -5,16 +5,15 @@ import { canPostEvent } from './privileges';
 import { deleteEvent, saveEvent, eventExists, getEvent } from './event';
 import validateEvent from './validateEvent';
 import { notify } from './reminders';
+import { getSetting } from './settings';
 
 const plugins = require.main.require('./src/plugins');
-const meta = require.main.require('./src/meta');
 const topics = require.main.require('./src/topics');
 const winston = require.main.require('winston');
 
 const p = Promise.promisify;
 
 const fireHook = p(plugins.fireHook);
-const getSetting = p(meta.settings.getOne);
 const getTopicField = p(topics.getTopicField);
 
 const isMainPost = async ({ pid, tid }) => {
@@ -62,7 +61,7 @@ const postSave = async (data) => {
   }
 
   const main = post.isMain || await isMainPost(post);
-  if (!main && await getSetting('plugin-calendar', 'mainPostOnly')) {
+  if (!main && await getSetting('mainPostOnly')) {
     return invalid();
   }
 

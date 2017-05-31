@@ -3,17 +3,15 @@ import { getEvent, escapeEvent } from './event';
 import { canViewPost } from './privileges';
 import { eventTemplate } from './templates';
 import { getUserResponse } from './responses';
+import { getSettings, setSettings } from './settings';
 
 const privileges = require.main.require('./src/privileges');
 const categories = require.main.require('./src/categories');
-const meta = require.main.require('./src/meta');
 
 const p = Promise.promisify;
 
 const getAllCategoryFields = p(categories.getAllCategoryFields);
 const filterCids = p(privileges.categories.filterCids);
-const getSettings = p(meta.settings.get);
-const setSettings = p(meta.settings.set);
 
 /* eslint-disable */
 function shadeColor2(color, percent) {
@@ -24,7 +22,7 @@ function shadeColor2(color, percent) {
 
 export default (router, middleware) => {
   const renderAdmin = (req, res, next) => {
-    getSettings('plugin-calendar').then((settings) => {
+    getSettings().then((settings) => {
       res.render('admin/plugins/calendar', {
         settings,
       });
@@ -35,7 +33,7 @@ export default (router, middleware) => {
 
   router.get('/api/admin/plugins/calendar/save', (req, res, next) => {
     Promise.resolve()
-      .then(() => setSettings('plugin-calendar', JSON.parse(req.query.settings)))
+      .then(() => setSettings(JSON.parse(req.query.settings)))
       .then(() => {
         res.sendStatus(200);
       })

@@ -5,6 +5,7 @@ import { getEventsEndingAfter, escapeEvent } from './event';
 import { filterUidsByPid } from './privileges';
 import { getOccurencesOfRepetition } from './repetition';
 import { eventTemplate } from './templates';
+import { getSetting } from './settings';
 
 const notifications = require.main.require('./src/notifications');
 const posts = require.main.require('./src/posts');
@@ -19,7 +20,6 @@ const p = Promise.promisify;
 const createNotif = p(notifications.create);
 const pushNotif = p(notifications.push);
 const getPostFields = p(posts.getPostFields);
-const getSetting = p(meta.settings.getOne);
 const getUidsFromSet = p(user.getUidsFromSet);
 const sendEmail = p(emailer.send);
 const getUserSettings = p(user.getSettings);
@@ -108,7 +108,7 @@ const notify = async ({ event, reminder, message }) => {
 const initNotifierDaemon = async () => {
   // ms between checking for reminders
   // pulled from settings
-  let checkingInterval = await getSetting('plugin-calendar', 'checkingInterval');
+  let checkingInterval = await getSetting('checkingInterval');
 
   winston.verbose(`Notifier Daemon initialized with
     interval of ${Math.floor(checkingInterval / 1000)} seconds`);
@@ -116,7 +116,7 @@ const initNotifierDaemon = async () => {
   let lastEnd = Date.now() + checkingInterval;
 
   const checkReminders = async () => {
-    checkingInterval = await getSetting('plugin-calendar', 'checkingInterval');
+    checkingInterval = await getSetting('checkingInterval');
     // timespan we check is a checkingInterval in the future
     // so as to avoid sending notifications too late
     const start = lastEnd;

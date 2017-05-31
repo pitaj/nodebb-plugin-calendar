@@ -3,16 +3,15 @@ import { getAll as getAllResponses, submitResponse, getUserResponse } from './re
 import { getEventsByDate, escapeEvent } from './event';
 import { filterByPid, privilegeNames } from './privileges';
 import { getOccurencesOfRepetition } from './repetition';
+import { getSetting } from './settings';
 
 const privileges = require.main.require('./src/privileges');
 const pluginSockets = require.main.require('./src/socket.io/plugins');
-const meta = require.main.require('./src/meta');
 const posts = require.main.require('./src/posts');
 const topics = require.main.require('./src/topics');
 
 const p = Promise.promisify;
 
-const getSetting = p(meta.settings.getOne);
 const can = {
   posts: p(privileges.posts.can),
   topics: p(privileges.topics.can),
@@ -24,7 +23,7 @@ const topicIsDeleted = p((tid, cb) => topics.getTopicField(tid, 'deleted', cb));
 pluginSockets.calendar = {};
 pluginSockets.calendar.canPostEvent = (sock, data, cb) => {
   (async ({ uid }, { pid, tid, cid, isMain }) => {
-    if (!isMain && await getSetting('plugin-calendar', 'mainPostOnly')) {
+    if (!isMain && await getSetting('mainPostOnly')) {
       return false;
     }
 
