@@ -90,17 +90,24 @@ const setupPost = ({ pid }, cb) => {
   const day = responses.attr('data-day') || null;
 
   if (!buttonCont.length) {
+    cb();
     return;
   }
 
   if (!app.user.uid) {
     buttonCont.remove();
+    cb();
     return;
   }
 
   setupDTP(responses, day);
 
   socket.emit('plugins.calendar.getUserResponse', { pid, day }, (err, value) => {
+    if (err) {
+      app.alertError(err);
+      throw err;
+    }
+
     buttonCont = $(`[data-pid=${pid}] .plugin-calendar-event-responses-user`);
     const button = buttonCont.find(`[data-value=${value || 'no'}]`);
 
