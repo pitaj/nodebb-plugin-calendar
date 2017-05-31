@@ -1,9 +1,9 @@
+import Promise from 'bluebird';
+import { removeAll as removeAllResponses } from './responses';
+
 const db = require.main.require('./src/database');
 const plugins = require.main.require('./src/plugins');
 const posts = require.main.require('./src/posts');
-
-import Promise from 'bluebird';
-import { removeAll as removeAllResponses } from './responses';
 
 const p = Promise.promisify;
 
@@ -64,11 +64,11 @@ const getEventsByDate = async (startDate, endDate) => {
     getSortedSetRangeByScore(listByEndKey, 0, -1, startDate, +Infinity),
   ]);
   // filter to events that only start before the endDate and end after the startDate
-  const keys = byStart.filter((x) => byEnd.includes(x));
+  const keys = byStart.filter(x => byEnd.includes(x));
 
   const events = await getObjects(keys);
 
-  const cids = await getCidsByPids(events.map((event) => event.pid));
+  const cids = await getCidsByPids(events.map(event => event.pid));
 
   return events.map((event, i) => ({
     ...event,
@@ -76,6 +76,8 @@ const getEventsByDate = async (startDate, endDate) => {
     startDate: parseInt(event.startDate, 10),
     endDate: parseInt(event.endDate, 10),
     repeats: (typeof event.repeats === 'string') ? JSON.parse(event.repeats) : event.repeats,
+    mandatory: !!parseInt(event.mandatory, 10),
+    allday: !!parseInt(event.allday, 10),
   }));
 };
 
@@ -103,7 +105,7 @@ const getEventsEndingAfter = async (endDate) => {
   return events;
 };
 
-const eventExists = (pid) => exists(`${listKey}:pid:${pid}`);
+const eventExists = pid => exists(`${listKey}:pid:${pid}`);
 
 const escapeEvent = async (event) => {
   const [location, description] = await Promise.all([
