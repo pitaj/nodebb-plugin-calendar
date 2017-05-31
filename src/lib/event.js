@@ -76,8 +76,8 @@ const getEventsByDate = async (startDate, endDate) => {
     startDate: parseInt(event.startDate, 10),
     endDate: parseInt(event.endDate, 10),
     repeats: (typeof event.repeats === 'string') ? JSON.parse(event.repeats) : event.repeats,
-    mandatory: !!parseInt(event.mandatory, 10),
-    allday: !!parseInt(event.allday, 10),
+    mandatory: event.mandatory === true || event.mandatory === 'true',
+    allday: event.allday === true || event.allday === 'true',
   }));
 };
 
