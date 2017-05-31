@@ -2,7 +2,7 @@ import 'eonasdan-bootstrap-datetimepicker';
 import moment from 'moment';
 
 import './locationHistory';
-import { rawTemplate } from './templates';
+import rawTemplate from './templates';
 import setupComposerButton from './setupComposerButton';
 import createEventFactory from './createEvent';
 import parse, { inPost } from '../lib/parse';

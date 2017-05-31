@@ -1,6 +1,6 @@
-import parse from '../parse';
-import { rawTemplate } from '../../client/templates';
 import assert from 'assert';
+import parse from '../parse';
+import rawTemplate from '../../client/templates';
 
 [
   () => {
@@ -9,7 +9,7 @@ import assert from 'assert';
       name: 'a test name',
       allday: true,
       startDate: Date.now(),
-      endDate: Date.now() + 3 * 24 * 60 * 60 * 1000,
+      endDate: Date.now() + (3 * 24 * 60 * 60 * 1000),
       reminders: [50, 20, 10, 0],
       location: 'here somewhere',
       description: 'somewhere else',
@@ -37,7 +37,7 @@ import assert from 'assert';
     const data = {
       name: 'a test name',
       allday: false,
-      startDate: Date.now() - 3 * 24 * 60 * 60 * 1000,
+      startDate: Date.now() - (3 * 24 * 60 * 60 * 1000),
       endDate: Date.now(),
       reminders: [50, 20, 10, 0],
       location: 'here somewhere',
@@ -66,7 +66,7 @@ import assert from 'assert';
     const data = {
       name: 'a test name',
       allday: false,
-      startDate: Date.now() - 3 * 24 * 60 * 60 * 1000,
+      startDate: Date.now() - (3 * 24 * 60 * 60 * 1000),
       endDate: 'a string',
       reminders: [50, 20, 10, 0],
       location: 'here somewhere',
@@ -81,7 +81,7 @@ import assert from 'assert';
     const data = {
       name: 'a test name',
       allday: false,
-      startDate: Date.now() - 3 * 24 * 60 * 60 * 1000,
+      startDate: Date.now() - (3 * 24 * 60 * 60 * 1000),
       endDate: Date.now(),
       reminders: 'a string',
       location: 'here somewhere',
@@ -96,7 +96,7 @@ import assert from 'assert';
     const data = {
       name: 'a test name',
       allday: false,
-      startDate: Date.now() - 3 * 24 * 60 * 60 * 1000,
+      startDate: Date.now() - (3 * 24 * 60 * 60 * 1000),
       endDate: Date.now(),
       reminders: [50, 20, 10, 0],
       location: 'here somewhere\nhasbbks',
@@ -111,7 +111,7 @@ import assert from 'assert';
     const data = {
       name: 'a test name\ndsjvhoaho',
       allday: false,
-      startDate: Date.now() - 3 * 24 * 60 * 60 * 1000,
+      startDate: Date.now() - (3 * 24 * 60 * 60 * 1000),
       endDate: Date.now(),
       reminders: [50, 20, 10, 0],
       location: 'here somewhere',
@@ -121,4 +121,4 @@ import assert from 'assert';
     const result = parse(rawTemplate(data));
     assert.strictEqual(null, result, 'Expected null, got something else');
   },
-].forEach((x) => x());
+].forEach(x => x());

@@ -58,9 +58,9 @@ const getOccurencesOfRepetition = (event, start, end) => {
         if (current < start) {
           current.setDate(current.getDate() + 1);
         }
-        const mod = (current - startDate) % num * dayMS;
+        const mod = ((current - startDate) % num) * dayMS;
         if (mod !== 0) {
-          current.setDate(current.getDate() + num - mod / dayMS);
+          current.setDate(((current.getDate() + num) - mod) / dayMS);
         }
       }
 
@@ -142,7 +142,7 @@ const getOccurencesOfRepetition = (event, start, end) => {
     dates = out;
   }
 
-  const occurences = dates.map((date) => ({
+  const occurences = dates.map(date => ({
     ...event,
     startDate: date,
     endDate: date + duration,
@@ -151,6 +151,4 @@ const getOccurencesOfRepetition = (event, start, end) => {
   return occurences;
 };
 
-export {
-  getOccurencesOfRepetition,
-};
+export { getOccurencesOfRepetition };

@@ -1,15 +1,15 @@
-const plugins = require.main.require('./src/plugins');
-const meta = require.main.require('./src/meta');
-const topics = require.main.require('./src/topics');
-const winston = require.main.require('winston');
-
 import validator from 'validator';
 import Promise from 'bluebird';
-import { default as parse, inPost } from './parse';
+import parse, { inPost } from './parse';
 import { canPostEvent } from './privileges';
 import { deleteEvent, saveEvent, eventExists, getEvent } from './event';
 import validateEvent from './validateEvent';
 import { notify } from './reminders';
+
+const plugins = require.main.require('./src/plugins');
+const meta = require.main.require('./src/meta');
+const topics = require.main.require('./src/topics');
+const winston = require.main.require('winston');
 
 const p = Promise.promisify;
 

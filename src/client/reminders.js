@@ -24,7 +24,7 @@ const factory = ($ul) => {
       reminders
         .reverse()
         .map(makeListElement)
-        .forEach((el) => $ul.prepend(el));
+        .forEach(el => $ul.prepend(el));
     },
     getReminders: () => $ul.data('value'),
     addReminder: (n) => {
@@ -51,7 +51,7 @@ const factory = ($ul) => {
         return;
       }
 
-      const reminders = nots.filter((not) => not !== n);
+      const reminders = nots.filter(not => not !== n);
       $ul.data('value', reminders);
 
       $ul.find(`li.plugin-calendar-event-editor-reminder[data-value=${n}]`).remove();
@@ -100,7 +100,7 @@ const factory = ($ul) => {
     if (n === 'custom') {
       e.preventDefault();
       e.stopPropagation();
-      promptCustom((notif) => methods.addReminder(notif));
+      promptCustom(notif => methods.addReminder(notif));
       return;
     }
     methods.addReminder(n);

@@ -1,5 +1,5 @@
-import { formatDates } from '../translatorModule';
 import assert from 'assert';
+import { formatDates } from '../translatorModule';
 
 const lang = 'en-us';
 
@@ -7,7 +7,7 @@ const lang = 'en-us';
   // same day, same time, not allday
   () => {
     const s = 1465186294775;
-    const e = s + 1000 * 60 * 43 + 1000 * 60 * 60 * 2; // offset 2 hours 43 min
+    const e = s + (1000 * 60 * 43) + (1000 * 60 * 60 * 2); // offset 2 hours 43 min
 
     const start = new Date(s);
 
@@ -23,7 +23,7 @@ const lang = 'en-us';
   // same day, time separation, not allday
   () => {
     const s = 1465186294775;
-    const e = s + 1000 * 60 * 43 + 1000 * 60 * 60 * 2; // offset 2 hours 43 min
+    const e = s + (1000 * 60 * 43) + (1000 * 60 * 60 * 2); // offset 2 hours 43 min
 
     const start = new Date(s);
     const end = new Date(e);
@@ -47,7 +47,7 @@ const lang = 'en-us';
   // same day, time separation, allday
   () => {
     const s = 1465186294775;
-    const e = s + 1000 * 60 * 43 + 1000 * 60 * 60 * 2; // offset 2 hours 43 min
+    const e = s + (1000 * 60 * 43) + (1000 * 60 * 60 * 2); // offset 2 hours 43 min
 
     const start = new Date(s);
 
@@ -57,9 +57,9 @@ const lang = 'en-us';
   () => {
     const s = 1465186294775;
     const e = s +
-      1000 * 60 * 60 * 24 +
-      1000 * 60 * 60 * 2 +
-      1000 * 60 * 43; // offset 1 day 2 hours 43 min
+      (1000 * 60 * 60 * 24) +
+      (1000 * 60 * 60 * 2) +
+      (1000 * 60 * 43); // offset 1 day 2 hours 43 min
 
     const start = new Date(s);
     const end = new Date(e);
@@ -85,9 +85,9 @@ const lang = 'en-us';
   () => {
     const s = 1465186294775;
     const e = s +
-      1000 * 60 * 60 * 24 +
-      1000 * 60 * 60 * 2 +
-      1000 * 60 * 43; // offset 1 day 2 hours 43 min
+      (1000 * 60 * 60 * 24) +
+      (1000 * 60 * 60 * 2) +
+      (1000 * 60 * 43); // offset 1 day 2 hours 43 min
 
     const start = new Date(s);
     const end = new Date(e);
@@ -95,4 +95,4 @@ const lang = 'en-us';
     assert(`${start.toLocaleDateString(lang)} - ${end.toLocaleDateString(lang)}`,
       formatDates(s, e, true, lang));
   },
-].forEach((x) => x());
+].forEach(x => x());

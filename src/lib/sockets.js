@@ -1,14 +1,14 @@
+import Promise from 'bluebird';
+import { getAll as getAllResponses, submitResponse, getUserResponse } from './responses';
+import { getEventsByDate, escapeEvent } from './event';
+import { filterByPid, privilegeNames } from './privileges';
+import { getOccurencesOfRepetition } from './repetition';
+
 const privileges = require.main.require('./src/privileges');
 const pluginSockets = require.main.require('./src/socket.io/plugins');
 const meta = require.main.require('./src/meta');
 const posts = require.main.require('./src/posts');
 const topics = require.main.require('./src/topics');
-
-import { getAll as getAllResponses, submitResponse, getUserResponse } from './responses';
-import { getEventsByDate, escapeEvent } from './event';
-import { filterByPid, privilegeNames } from './privileges';
-import { getOccurencesOfRepetition } from './repetition';
-import Promise from 'bluebird';
 
 const p = Promise.promisify;
 

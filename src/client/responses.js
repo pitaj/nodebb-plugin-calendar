@@ -1,16 +1,16 @@
 import moment from 'moment';
 
-const userTemplate = (user) => (`
+const userTemplate = user => (`
   <li class="icon pull-left">
     <a href="${config.relative_path}/user/${user.userslug}">
-  		${user.picture ? `
+      ${user.picture ? `
       <img title="${user.username}" class="img-rounded user-img not-responsive"
         src="${user.picture}">
-      `	: `
+      ` : `
       <div class="user-icon user-img" style="background-color: ${user['icon:bgColor']};"
         title="${user.username}">${user['icon:text']}</div>
       `}
-  	</a>
+    </a>
   </li>
 `);
 
@@ -157,7 +157,7 @@ const initResponses = () => {
 
     if (posts && posts.length > 0) {
       setTimeout(() => {
-        posts.forEach((post) => setupPost({ pid: post.pid }));
+        posts.forEach(post => setupPost({ pid: post.pid }));
       }, 200);
     }
   };

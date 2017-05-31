@@ -9,9 +9,9 @@ import { postSaveCallback } from './postSave';
 import { privilegesList, privilegesGroupsList, privilegesListHuman } from './privileges';
 import { deleteEvent } from './event';
 import './sockets';
+import initTranslatorModule from './translatorModule';
 
 const Translator = require.main.require('./public/src/modules/translator').Translator;
-import initTranslatorModule from './translatorModule';
 initTranslatorModule(Translator);
 
 const addNavigation = (navs, callback) => {

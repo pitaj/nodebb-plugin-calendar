@@ -1,4 +1,5 @@
 import Promise from 'bluebird';
+
 const p = Promise.promisify;
 
 const privileges = require.main.require('./src/privileges');
@@ -30,11 +31,11 @@ const canRespond = (pid, uid) =>
 
 const filterUidsByPid = (uids, pid) =>
   getCidByPid(pid)
-  .then((cid) => filterUidsByCid('read', cid, uids));
+  .then(cid => filterUidsByCid('read', cid, uids));
 
 const filterByPid = (events, uid) =>
-  filterPids('read', events.map((e) => e.pid), uid)
-  .then((filtered) => events.filter((e) => filtered.includes(e.pid)));
+  filterPids('read', events.map(e => e.pid), uid)
+  .then(filtered => events.filter(e => filtered.includes(e.pid)));
 
 const privilegesList = (list, callback) =>
   callback(null, [...list, privilegeNames.canPost]);

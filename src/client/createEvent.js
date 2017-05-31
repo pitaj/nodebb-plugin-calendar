@@ -1,13 +1,13 @@
+import moment from 'moment';
 import remindersFactory from './reminders';
 import repetitionFactory from './repetition';
 import validateEvent from '../lib/validateEvent';
-import moment from 'moment';
 
 const defaultEvent = {
   name: '',
   allday: false,
   startDate: Date.now(),
-  endDate: Date.now() + 1000 * 60 * 60,
+  endDate: Date.now() + (1000 * 60 * 60),
   reminders: [],
   location: '',
   description: '',
@@ -107,7 +107,7 @@ const createEventFactory = () => {
 
       const [failed, failures] = validateEvent(newEvent);
       if (failed) {
-        failures.map((failure) => inputs[failure]).forEach(alertFailure);
+        failures.map(failure => inputs[failure]).forEach(alertFailure);
         return;
       }
 
@@ -130,7 +130,7 @@ const createEventFactory = () => {
 
       const [failed, failures] = validateEvent(newEvent);
       if (failed) {
-        failures.map((failure) => inputs[failure]).forEach(alertFailure);
+        failures.map(failure => inputs[failure]).forEach(alertFailure);
       }
     };
     modal.on('change dp.change', onChange);

@@ -62,7 +62,7 @@ const factory = ($ul) => {
       }
 
       const key = ['day', 'week', 'month', 'year']
-        .find((x) => repeat.every[x]);
+        .find(x => repeat.every[x]);
       custom.toggle(!key);
       if (key) {
         const elem = list
@@ -113,7 +113,7 @@ const factory = ($ul) => {
       const selected = 'weekly';
       if (selected === 'weekly') {
         const days = [...daysOfWeek.find('li > a.active').parent()]
-          .map((elem) => parseInt(elem.dataset.value, 10));
+          .map(elem => parseInt(elem.dataset.value, 10));
         const forever = customEnd
           .find('[name=repetition-end]:checked')
           .val() === 'forever';

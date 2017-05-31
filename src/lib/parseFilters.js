@@ -1,6 +1,6 @@
 import validator from 'validator';
 import { eventTemplate } from './templates';
-import { default as parse, tagTemplate } from './parse';
+import parse, { tagTemplate } from './parse';
 
 const eventRX = new RegExp(tagTemplate('event', '[\\s\\S]*'));
 const invalidRX = new RegExp(`(${tagTemplate('event-invalid', '[\\s\\S]*')})`);

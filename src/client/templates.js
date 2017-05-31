@@ -11,4 +11,4 @@ const rawTemplate = (event) => {
   `${repeats ? `[repeats]${JSON.stringify(repeats)}[/repeats]` : ''}[/event]`;
 };
 
-export { rawTemplate };
+export default rawTemplate;

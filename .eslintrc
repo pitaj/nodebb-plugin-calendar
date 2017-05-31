@@ -12,7 +12,6 @@
     // "import/resolver": "webpack"
   },
   "rules": {
-    "babel/arrow-parens": 2,
     "no-param-reassign": 1,
     "comma-dangle": ["error", {
       "arrays": "always-multiline",
@@ -20,6 +19,7 @@
       "imports": "always-multiline",
       "exports": "always-multiline",
       "functions": "never"
-    }]
+    }],
+    "import/prefer-default-export": "warn"
   }
 }

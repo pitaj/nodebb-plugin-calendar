@@ -142,7 +142,7 @@ const eventTemplate = ({ event, isEmail, uid }) => {
     ` : ''}
     ${(() => {
       if (event.repeats) {
-        const key = ['day', 'week', 'month', 'year'].find((x) => event.repeats.every[x]);
+        const key = ['day', 'week', 'month', 'year'].find(x => event.repeats.every[x]);
         if (key) {
           return `<div class="plugin-calendar-event-repeats">
             <i class="fa fa-repeat" aria-hidden="true"></i>
@@ -151,7 +151,7 @@ const eventTemplate = ({ event, isEmail, uid }) => {
         }
         if (event.repeats.every.daysOfWeek) {
           const days = event.repeats.every.daysOfWeek
-            .map((day) => `[[moment:locale-data, _weekdaysShort, ${day}]]`)
+            .map(day => `[[moment:locale-data, _weekdaysShort, ${day}]]`)
             .join(', ');
           const endDateText = `[[moment:time-date-view, utc, ${event.repeats.endDate}, ` +
             `${event.repeats.endDate}, true]]`;

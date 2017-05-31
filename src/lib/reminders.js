@@ -1,3 +1,11 @@
+// import { fork } from 'child_process';
+import Promise from 'bluebird';
+import { getAll as getResponses, getUserResponse } from './responses';
+import { getEventsEndingAfter, escapeEvent } from './event';
+import { filterUidsByPid } from './privileges';
+import { getOccurencesOfRepetition } from './repetition';
+import { eventTemplate } from './templates';
+
 const notifications = require.main.require('./src/notifications');
 const posts = require.main.require('./src/posts');
 const meta = require.main.require('./src/meta');
@@ -6,13 +14,6 @@ const emailer = require.main.require('./src/emailer');
 const nconf = require.main.require('nconf');
 const winston = require.main.require('winston');
 
-// import { fork } from 'child_process';
-import { getAll as getResponses, getUserResponse } from './responses';
-import { getEventsEndingAfter, escapeEvent } from './event';
-import { filterUidsByPid } from './privileges';
-import { getOccurencesOfRepetition } from './repetition';
-import { eventTemplate } from './templates';
-import Promise from 'bluebird';
 const p = Promise.promisify;
 
 const createNotif = p(notifications.create);
@@ -83,7 +84,7 @@ const notify = async ({ event, reminder, message }) => {
       });
       users = responses.yes;
     }
-    uids = users.map((u) => u.uid);
+    uids = users.map(u => u.uid);
   }
 
   const postData = await getPostFields(event.pid, ['tid', 'content', 'title']);
@@ -99,7 +100,7 @@ const notify = async ({ event, reminder, message }) => {
   });
   await pushNotif(notif, uids);
 
-  await Promise.all(uids.map((uid) =>
+  await Promise.all(uids.map(uid =>
     emailNotification({ uid, event, message, postData })
   ));
 };

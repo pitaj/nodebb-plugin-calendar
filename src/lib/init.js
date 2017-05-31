@@ -1,22 +1,15 @@
+import Promise from 'bluebird';
+import controllers from './controllers';
+import { initNotifierDaemon } from './reminders';
+
 const meta = require.main.require('./src/meta');
 
-import Promise from 'bluebird';
 const p = Promise.promisify;
 
 const getSettings = p(meta.settings.get);
 const setSettings = p(meta.settings.set);
-import controllers from './controllers';
-import { initNotifierDaemon } from './reminders';
 
-const shallowEqual = (a, b) => {
-  const aKeys = Object.keys(a);
-  for (const key of aKeys) {
-    if (a[key] !== b[key]) {
-      return false;
-    }
-  }
-  return true;
-};
+const shallowEqual = (a, b) => Object.keys(a).every(key => a[key] === b[key]);
 
 export default ({ router, middleware }, callback) => {
   controllers(router, middleware);
