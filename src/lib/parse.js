@@ -24,7 +24,7 @@ const inPost = new RegExp(
   '(\\[event(?:\\-invalid)?\\][\\s\\S]+\\[\\/event(?:\\-invalid)?\\])'
 );
 
-const full = regExps.map((r) => r.pattern).join('');
+const full = regExps.map(r => r.pattern).join('');
 const eventRegExp = tagTemplate('event', full);
 
 const parse = (text) => {

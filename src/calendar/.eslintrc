@@ -8,5 +8,8 @@
         "RELATIVE_PATH": true,
         "ajaxify": true,
         "bootbox": true
+    },
+    "env": {
+        "browser": true
     }
 }

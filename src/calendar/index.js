@@ -47,7 +47,7 @@ const begin = (momentLang) => {
 
   locationHistory.listen((state, data) => {
     if (state.prev.startsWith('calendar') && state.current.startsWith('calendar')) {
-      data.url = null;
+      data.url = null; // eslint-disable-line no-param-reassign
       shouldHandle = true;
     } else {
       shouldHandle = false;
@@ -84,7 +84,7 @@ const begin = (momentLang) => {
       const el = $calendar
         .data('fullCalendar')
         .getEventCache()
-        .find((x) => x.id === pid);
+        .find(x => x.id === pid);
 
       if (shouldHandle) {
         if (event) {
@@ -117,13 +117,13 @@ try {
   if (momentLang === 'en-us') {
     begin('en-us');
   } else {
-    require(`bundle-loader!fullcalendar/dist/lang/${momentLang}`)(() => { // eslint-disable-line
+    require(`bundle-loader!fullcalendar/dist/locale/${momentLang}`)(() => { // eslint-disable-line
       begin(momentLang);
     });
   }
 } catch (e) {
   try {
-    require(`bundle-loader!fullcalendar/dist/lang/${momentLang.split('-')[0]}`)(() => { // eslint-disable-line
+    require(`bundle-loader!fullcalendar/dist/locale/${momentLang.split('-')[0]}`)(() => { // eslint-disable-line
       begin(momentLang);
     });
   } catch (er) {

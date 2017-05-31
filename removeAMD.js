@@ -1,25 +1,23 @@
-const replaceInFCLang = /!function\(a\)\{[\w\W]+\}\(function\(a,b\)\{/;
+const replaceInFCLang = /!function\(e\)\{.*?moment\)\}/;
 
-const replaceWithFCLang = 'import moment from "moment";' +
-'!function(a){a(jQuery,moment)}(function(a,b){';
+const replaceWithFCLang = 'import moment from "moment"; (function (e) { e(jQuery, moment); })';
 
-const fullCalendarLang = (text) =>
+const fullCalendarLang = text =>
   text
     .replace(replaceInFCLang, replaceWithFCLang)
-    .replace(/'use strict';/g, '');
+    .replace(/defineLocale/, 'updateLocale');
 
 const replaceInFC = /\(function\(factory\) \{[\w\W]+\}\)\(function\(\$, moment\) \{/;
 
 const replaceWithFC =
 `import moment from "moment";
 (function(factory) {
-	factory(jQuery, moment);
+  factory(jQuery, moment);
 })(function($, moment) {`;
 
-const fullCalendar = (text) =>
+const fullCalendar = text =>
   text
-    .replace(replaceInFC, replaceWithFC)
-    .replace(/'use strict';/g, '');
+    .replace(replaceInFC, replaceWithFC);
 
 const replaceInDTP = /\(function \(factory\) \{[\w\W]+\}\(function \(\$, moment\) \{/;
 
@@ -30,14 +28,12 @@ const replaceWithDTP =
 }(function ($, moment) {
 `;
 
-const dtp = (text) =>
+const dtp = text =>
   text
-    .replace(replaceInDTP, replaceWithDTP)
-    .replace(/if \(typeof module !== 'undefined'\)[\s\S]*?\}/, '')
-    .replace(/'use strict';/g, '');
+    .replace(replaceInDTP, replaceWithDTP);
 
 module.exports = function loader(content) {
-  if (this.resourcePath.match(/fullcalendar[\/\\]+dist[\/\\]+lang/)) {
+  if (this.resourcePath.match(/fullcalendar[/\\]+dist[/\\]+locale/)) {
     const output = fullCalendarLang(content);
     return output;
   }

@@ -5,7 +5,7 @@ import './locationHistory';
 import { rawTemplate } from './templates';
 import setupComposerButton from './setupComposerButton';
 import createEventFactory from './createEvent';
-import { default as parse, inPost } from '../lib/parse';
+import parse, { inPost } from '../lib/parse';
 import initResponses from './responses';
 import initTranslation from './clientSideTranslation';
 import initTranslatorModule from '../lib/translatorModule';
@@ -23,7 +23,7 @@ const begin = (momentLang) => {
     initTranslatorModule(translator.Translator);
     initTranslation(translator.Translator);
 
-    ajaxify.loadTemplate('partials/calendar/event-creation-modal', (template) =>
+    ajaxify.loadTemplate('partials/calendar/event-creation-modal', template =>
     translator.translate(template, lang, (html) => {
       $('body').append(html);
 
