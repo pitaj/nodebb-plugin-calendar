@@ -1,12 +1,13 @@
-const privileges = require.main.require('./src/privileges');
-const categories = require.main.require('./src/categories');
-const meta = require.main.require('./src/meta');
-
+import Promise from 'bluebird';
 import { getEvent, escapeEvent } from './event';
 import { canViewPost } from './privileges';
 import { eventTemplate } from './templates';
 import { getUserResponse } from './responses';
-import Promise from 'bluebird';
+
+const privileges = require.main.require('./src/privileges');
+const categories = require.main.require('./src/categories');
+const meta = require.main.require('./src/meta');
+
 const p = Promise.promisify;
 
 const getAllCategoryFields = p(categories.getAllCategoryFields);
@@ -56,9 +57,9 @@ export default (router, middleware) => {
     (async () => {
       const uid = req.uid;
       const cats = await getAllCategoryFields(['cid', 'bgColor']);
-      const filtered = await filterCids('read', cats.map((c) => c.cid), uid);
+      const filtered = await filterCids('read', cats.map(c => c.cid), uid);
 
-      const colors = cats.filter((c) => filtered.includes(c.cid));
+      const colors = cats.filter(c => filtered.includes(c.cid));
 
       const style = colors.map(({ cid, bgColor }) => `
         .plugin-calendar-cal-event-category-${cid} {
@@ -79,16 +80,18 @@ export default (router, middleware) => {
       const event = await escapeEvent(raw);
       event.day = day || null;
 
-      const { startDate, endDate } = event;
-      const occurenceDate = new Date(day);
-      const s = new Date(startDate);
+      if (event.repeats && event.day) {
+        const { startDate, endDate } = event;
+        const occurenceDate = new Date(day);
+        const s = new Date(startDate);
 
-      s.setUTCFullYear(occurenceDate.getUTCFullYear());
-      s.setUTCDate(occurenceDate.getUTCDate());
-      s.setUTCMonth(occurenceDate.getUTCMonth());
+        s.setUTCFullYear(occurenceDate.getUTCFullYear());
+        s.setUTCDate(occurenceDate.getUTCDate());
+        s.setUTCMonth(occurenceDate.getUTCMonth());
 
-      event.startDate = s.valueOf();
-      event.endDate = event.startDate + (endDate - startDate);
+        event.startDate = s.valueOf();
+        event.endDate = event.startDate + (endDate - startDate);
+      }
 
       event.responses = {
         [uid]: await getUserResponse({ pid, day, uid }),
