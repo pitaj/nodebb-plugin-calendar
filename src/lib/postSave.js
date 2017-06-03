@@ -60,7 +60,7 @@ const postSave = async (data) => {
     return invalid();
   }
 
-  const main = post.isMain || await isMainPost(post);
+  const main = post.isMain || data.data.isMain || await isMainPost(post);
   if (!main && await getSetting('mainPostOnly')) {
     return invalid();
   }
