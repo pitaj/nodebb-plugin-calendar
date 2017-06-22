@@ -3,7 +3,7 @@ const mapper = event => ({
   title: event.name,
   allDay: event.allday,
   start: event.startDate,
-  end: event.endDate,
+  end: event.endDate + 1,
   className: [
     `plugin-calendar-cal-event-category-${event.cid}`,
     `plugin-calendar-cal-event-response-${event.responses[app.user.uid] || 'no'}`,
