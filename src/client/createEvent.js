@@ -75,11 +75,11 @@ const createEventFactory = () => {
     };
 
     if (event.allday) {
-      const s = moment(event.startDate);
-      const e = moment(event.endDate);
+      const s = new Date(event.startDate);
+      const e = new Date(event.endDate);
 
-      s.startOf('day');
-      e.startOf('day').add(1, 'day');
+      s.setHours(0, 0, 0, 0);
+      e.setHours(23, 59, 59, 999);
 
       event.startDate = s.valueOf();
       event.endDate = e.valueOf();

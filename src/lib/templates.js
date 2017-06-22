@@ -114,9 +114,9 @@ const eventTemplate = ({ event, isEmail, uid }) => {
     <div class="plugin-calendar-event-date">
       <i class="fa fa-clock-o" aria-hidden="true"></i>
       <a
-        title="[[moment:time-date-view, utc, ${startDate}, ${allday ? endDate - 1 : endDate}, ${allday}]] UTC"
+        title="[[moment:time-date-view, utc, ${startDate}, ${endDate}, ${allday}]] UTC"
         class="plugin-calendar-time-date-view"
-      >[[moment:time-date-view, local, ${startDate}, ${allday ? endDate - 1 : endDate}, ${allday}]]</a>
+      >[[moment:time-date-view, local, ${startDate}, ${endDate}, ${allday}]]</a>
     </div>
     ${event.location.length ? `
     <div class="plugin-calendar-event-location">
