@@ -14,7 +14,6 @@
   "dates": "Daten",
   "start_date": "Startzeit/-datum",
   "end_date": "Endzeit/-datum",
-  "start_typing": "Start typing...",
   "when": "Wenn",
   "starts": "Startet",
   "ends": "Endet",
@@ -28,7 +27,7 @@
 
   "repetition_custom": "Angepasst...",
   "repeat_weekly": "Wöchentlich wiederholen",
-  "repeat_forever": "Fürimmer",
+  "repeat_forever": "Für immer",
   "repeat_until_date": "Bis zum",
   "repetition": "Wiederholung",
   "no_repeat": "Einmalig",
