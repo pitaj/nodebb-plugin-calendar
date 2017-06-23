@@ -7,7 +7,7 @@
   "event_starting": "Event startet %1: %2",
   "now": "jetzt",
   "go_to_post": "Gehe zum Beitrag",
-  "select_day": "Select day for responses",
+  "select_day": "Wähle Tag für Antworten",
 
   "event_name": "Eventtitel",
   "all_day": "Ganztägig",
@@ -37,7 +37,7 @@
   "every_month": "Jeden Monat",
   "every_year": "Jedes Jahr",
   "repeats_weekly_on_until": "Wiederholt sich wöchentlich bis zum %1 am",
-  "repeats_weekly_on_forever": "Wiederholt sich Fürimmer am",
+  "repeats_weekly_on_forever": "Wiederholt sich fürimmer am",
 
   "today": "heute",
   "only_yes": "Zeige nur \"Ja\"",
