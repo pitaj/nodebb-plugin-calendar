@@ -155,8 +155,6 @@ const initResponses = () => {
       .attr('data-loaded', 'false')
       .find('.panel')
       .addClass('closed');
-
-    setupPost({ pid });
   });
 
   const checkPosts = (e, data) => {
