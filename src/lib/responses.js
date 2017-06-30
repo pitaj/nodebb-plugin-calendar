@@ -45,10 +45,10 @@ const submitResponse = async ({ pid, uid, value, day }) => {
   ]);
 };
 
-const removeAll = async (pid) => {
-  const lists = await getSetsMembers(`${listKey}:pid:${pid}:responses:lists`);
+const removeAll = async (data) => {
+  const lists = await getSetsMembers(`${listKey}:pid:${data.post.pid}:responses:lists`);
   const old = values
-    .map(val => `${listKey}:pid:${pid}:responses:${val}`);
+    .map(val => `${listKey}:pid:${data.post.pid}:responses:${val}`);
   await deleteAll([...lists, ...old]);
 };
 
