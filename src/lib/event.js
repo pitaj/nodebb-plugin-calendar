@@ -40,7 +40,7 @@ const deleteEvent = (data) => {
     sortedSetRemove(listKey, objectKey),
     sortedSetRemove(listByEndKey, objectKey),
     deleteKey(objectKey),
-    removeAllResponses(data),
+    removeAllResponses(data.post.pid),
   ]);
 };
 
