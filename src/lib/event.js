@@ -34,13 +34,13 @@ const saveEvent = (event) => {
   ]);
 };
 
-const deleteEvent = (pid) => {
-  const objectKey = `${listKey}:pid:${pid}`;
+const deleteEvent = (data) => {
+  const objectKey = `${listKey}:pid:${data.post.pid}`;
   return Promise.all([
     sortedSetRemove(listKey, objectKey),
     sortedSetRemove(listByEndKey, objectKey),
     deleteKey(objectKey),
-    removeAllResponses(pid),
+    removeAllResponses(data.post.pid),
   ]);
 };
 
