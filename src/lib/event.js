@@ -35,7 +35,7 @@ const saveEvent = (event) => {
 };
 
 const deleteEvent = (pid) => {
-  const objectKey = `${listKey}:pid:${pid}`;
+  const objectKey = `${listKey}:pid:${pid.post.pid}`;
   return Promise.all([
     sortedSetRemove(listKey, objectKey),
     sortedSetRemove(listByEndKey, objectKey),
