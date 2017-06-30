@@ -50,8 +50,6 @@ const removeAll = async (pid) => {
   const old = values
     .map(val => `${listKey}:pid:${pid}:responses:${val}`);
   await deleteAll([`${listKey}:pid:${pid}:responses:lists`, ...lists, ...old]);
-    .map(val => `${listKey}:pid:${pid}:responses:${val}`);
-  await deleteAll([...lists, ...old]);
 };
 
 const getAll = async ({ pid, uid = 0, selection = values, day } = {}) => {
