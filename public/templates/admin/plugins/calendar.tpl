@@ -1,14 +1,16 @@
 <div class="row">
   <div class="col-lg-9">
-    <form class="form plugin-calendar-settings" id="plugin-calendar-settings">
+    <form class="plugin-calendar-settings" id="plugin-calendar-settings">
       <div class="panel panel-default">
         <div class="panel-heading">Calendar</div>
         <div class="panel-body">
-          <div class="form-group form-inline">
-            <label for="checkingInterval">
-              Interval on which to check for events coming up (used for reminders)
+          <div class="form-group row">
+            <label for="checkingInterval" class="col-xs-12 col-sm-8">
+              Interval on which to check for upcoming events (used for reminders)
             </label>
-            <input type="tel" class="form-control" name="checkingInterval" id="checkingInterval" value="{settings.checkingInterval}" />
+            <div class="col-xs-12 col-sm-4">
+              <input type="tel" class="form-control" name="checkingInterval" id="checkingInterval" value="{settings.checkingInterval}" />
+            </div>
           </div>
           <div class="form-group">
             <label for="mainPostOnly">
