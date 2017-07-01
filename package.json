@@ -58,6 +58,7 @@
     "core-js": "^2.4.1",
     "eonasdan-bootstrap-datetimepicker": "^4.17.47",
     "fullcalendar": "^3.4.0",
+    "ical.js": "^1.2.2",
     "moment": "^2.18.1",
     "source-map-support": "^0.4.15",
     "validator": "^7.0.0"
