@@ -86,7 +86,7 @@ const setupDTP = (responses, day) => {
 
 const noop = () => {};
 
-const setupPost = ({ pid }, cb = noop) => {
+const setupPost = ({ pid, e }, cb = noop) => {
   let buttonCont = $(`[data-pid=${pid}] .plugin-calendar-event-responses-user`);
   const responses = buttonCont.closest('[data-day]');
   const day = responses.attr('data-day') || null;
@@ -102,7 +102,9 @@ const setupPost = ({ pid }, cb = noop) => {
     return;
   }
 
-  setupDTP(responses, day);
+  if (!e) {
+    setupDTP(responses, day);
+  }
 
   socket.emit('plugins.calendar.getUserResponse', { pid, day }, (err, value) => {
     if (err) {
@@ -156,7 +158,7 @@ const initResponses = () => {
       .find('.panel')
       .addClass('closed');
 
-    setupPost({ pid });
+    setupPost({ pid, e });
   });
 
   const checkPosts = (e, data) => {
