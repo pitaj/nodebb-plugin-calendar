@@ -55,5 +55,8 @@
 
   "name_too_short": "Event name must be more than five characters long",
   "invalid_date": "Selected dates are invalid",
-  "invalid_location": "Location can only be one line"
+  "invalid_location": "Location can only be one line",
+
+  "tabs.settings": "Global Settings",
+  "tabs.icals": "ICals"
 }
