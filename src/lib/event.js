@@ -1,4 +1,6 @@
 import Promise from 'bluebird';
+import ICAL from 'ical.js';
+import rp from 'request-promise';
 import { removeAll as removeAllResponses } from './responses';
 
 const db = require.main.require('./src/database');
@@ -11,7 +13,6 @@ const sortedSetAdd = p(db.sortedSetAdd);
 const sortedSetRemove = p(db.sortedSetRemove);
 const getSortedSetRangeByScore = p(db.getSortedSetRangeByScore);
 const getSortedSetRange = p(db.getSortedSetRange);
-// const getObjectsFields = p(db.getObjectsFields);
 const setObject = p(db.setObject);
 const getObject = p(db.getObject);
 const getObjects = p(db.getObjects);
@@ -22,6 +23,7 @@ const getCidsByPids = p(posts.getCidsByPids);
 const getCidByPid = p(posts.getCidByPid);
 
 const listKey = 'plugins:calendar:events';
+const listExternalKey = 'plugins:calendar:icals';
 const listByEndKey = `${listKey}:byEnd`;
 
 const saveEvent = (event) => {
@@ -81,6 +83,60 @@ const getEventsByDate = async (startDate, endDate) => {
   }));
 };
 
+const getExternalEventsByDate = async (startDate, endDate) => {
+  const keys = await getSortedSetRange(listExternalKey, 0, -1);
+  const events = await getObjects(keys.map((key) => 'plugins:calendar:ical:' + key));
+  const preparedEvents = [];
+
+  await Promise.all(
+    events.filter((event) => event.url).map(async (event) => {
+      const body = await rp(event.url);
+      const jcalData = ICAL.parse(body);
+      const vcalendar = new ICAL.Component(jcalData);
+      const vevents = await Promise.all(
+        vcalendar.getAllSubcomponents('vevent').filter((vevent) => {
+          const dtstart = vevent.getFirstPropertyValue('dtstart');
+          const dtend = vevent.getFirstPropertyValue('dtend');
+
+          return (dtstart.toUnixTime() + '000') >= startDate && (dtend.toUnixTime() + '999') <= endDate;
+        }).map(async (vevent) => {
+          const dtstart = vevent.getFirstPropertyValue('dtstart');
+          const dtend = vevent.getFirstPropertyValue('dtend');
+          const summary = vevent.getFirstPropertyValue('summary') || '';
+          let description = vevent.getFirstPropertyValue('description') || '';
+
+          description = description
+            .replace(/^\s+/g, '')
+            .replace(/\n/g, '<br>');
+
+          return {
+            external: true,
+            allday: true,
+            // cid: "0",
+            day: dtstart.toString().substring(0,10),
+            description: description,
+            endDate: Number(dtend.toUnixTime() + '999'),
+            // location: "",
+            // mandatory: true,
+            name: summary,
+            // pid: 0,
+            // reminders: [],
+            // responses: {},
+            startDate: Number(dtstart.toUnixTime() + '000'),
+            // topicDeleted: false,
+            // uid: 1
+          }
+        })
+      );
+
+      preparedEvents.push(...vevents);
+      return
+    })
+  );
+
+  return preparedEvents;
+};
+
 const getAllEvents = async () => {
   const keys = await getSortedSetRange(listKey, 0, -1);
   const events = await getObjects(keys);
@@ -126,9 +182,11 @@ export {
   eventExists,
   getEvent,
   getEventsByDate,
+  getExternalEventsByDate,
   escapeEvent,
   getAllEvents,
   listKey,
+  listExternalKey,
   listByEndKey,
   getEventsEndingAfter,
 };

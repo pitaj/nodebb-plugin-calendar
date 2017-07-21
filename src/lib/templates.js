@@ -98,12 +98,16 @@ const eventTemplate = ({ event, isEmail, uid }) => {
     </div>
   </div>
 </div>`;
-  const responses = isEmail ? `
+  let responses = isEmail ? `
   <div class="plugin-calendar-event-responses">
     <i class="fa fa-reply" aria-hidden="true"></i>
     [[calendar:you_responded, [[calendar:response_${response}]]]]
   </div>
   ` : responsesTemplate();
+
+  if (event.external) {
+    responses = '';
+  }
 
   const html = `
 <div class="plugin-calendar-event panel panel-success" data-translated="false">
@@ -118,19 +122,25 @@ const eventTemplate = ({ event, isEmail, uid }) => {
         class="plugin-calendar-time-date-view"
       >[[moment:time-date-view, local, ${startDate}, ${endDate}, ${allday}]]</a>
     </div>
-    ${event.location.length ? `
+    ${event.external ? `
+    <div class="plugin-calendar-event-location">
+      <i class="fa fa-location-arrow" aria-hidden="true"></i>
+      <span>External<span>
+    </div>
+    ` : ''}
+    ${event.location ? `
     <div class="plugin-calendar-event-location">
       <i class="fa fa-location-arrow" aria-hidden="true"></i>
       <span>${event.location}<span>
     </div>
     ` : ''}
-    ${event.description.length ? `
+    ${event.description ? `
     <div class="plugin-calendar-event-description">
       <i class="fa fa-info-circle" aria-hidden="true"></i>
       <div>${event.description}</div>
     </div>
     ` : ''}
-    ${event.reminders.length ? `
+    ${!event.external && event.reminders ? `
     <div class="plugin-calendar-event-reminders">
       <i class="fa fa-bell" aria-hidden="true"></i>
       <ul>

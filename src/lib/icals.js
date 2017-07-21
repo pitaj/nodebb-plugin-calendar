@@ -11,13 +11,13 @@ const getSortedSetRange = p(db.getSortedSetRange);
 
 const addICal = async (data) => {
   const icalId = utils.generateUUID();
-  const count = await sortedSetCard('plugin-calendar:icals');
-  const err = await sortedSetAdd('plugin-calendar:icals', count+1, icalId);
-  const asd = await setObject('plugin-calendar:ical:' + icalId, data);
+  const count = await sortedSetCard('plugins:calendar:icals');
+  const err = await sortedSetAdd('plugins:calendar:icals', count+1, icalId);
+  const asd = await setObject('plugins:calendar:ical:' + icalId, data);
 };
 
 const getICals = async () => {
-  const icals = await getSortedSetRange('plugin-calendar:icals');
+  const icals = await getSortedSetRange('plugins:calendar:icals');
   console.log(icals);
 }
 

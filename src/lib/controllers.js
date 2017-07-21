@@ -35,16 +35,15 @@ export default (router, middleware) => {
   router.get('/api/admin/plugins/calendar/save', (req, res, next) => {
     Promise.resolve()
       .then(() => setSettings(JSON.parse(req.query.settings)))
-      .then(() => {
-        res.sendStatus(200);
-      })
+      .then(() => res.sendStatus(200))
       .catch(next);
   });
 
 	router.post('/api/admin/plugins/calendar/add', (req, res, next) => {
     Promise.resolve()
       .then(() => addICal(req.body))
-      .then(() => res.sendStatus(201));
+      .then(() => res.sendStatus(201))
+      .catch(next);
   });
 
   const renderPage = (req, res, next) => {

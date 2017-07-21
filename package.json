@@ -60,6 +60,8 @@
     "fullcalendar": "^3.4.0",
     "ical.js": "^1.2.2",
     "moment": "^2.18.1",
+    "request": "^2.81.0",
+    "request-promise": "^4.2.1",
     "source-map-support": "^0.4.15",
     "validator": "^7.0.0"
   },
