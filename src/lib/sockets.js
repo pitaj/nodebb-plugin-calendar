@@ -20,17 +20,6 @@ const can = {
 };
 const tidFromPid = p((pid, cb) => posts.getPostField(pid, 'tid', cb));
 const topicIsDeleted = p((tid, cb) => topics.getTopicField(tid, 'deleted', cb));
-const doRequest = async (options) => {
-  return new Promise ((resolve, reject) => {
-    let req = require('http').request(options);
-    req.on('response', res => {
-      resolve(res);
-    });
-    req.on('error', err => {
-      reject(err);
-    });
-  });
-}
 
 pluginSockets.calendar = {};
 pluginSockets.calendar.canPostEvent = (sock, data, cb) => {
@@ -92,7 +81,7 @@ pluginSockets.calendar.getEventsByDate = (sock, data, cb) => {
       })
     );
 
-		const externalEvents = await getExternalEventsByDate(startDate, endDate);
+    const externalEvents = await getExternalEventsByDate(startDate, endDate);
 
     return [...withResponses, ...externalEvents];
   })(sock, data).asCallback(cb);
