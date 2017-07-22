@@ -7,18 +7,26 @@ const displayEvent = (event, cb) => {
 
   const div = $(content);
   const $display = $('#plugin-calendar-cal-event-display');
+  const $goToPost = $display.find('.modal-footer a.btn-primary.gotopost');
+  const $goToUrl = $display.find('.modal-footer a.btn-primary.gotourl');
   $display
     .modal('hide')
     .find('.modal-body .posts')
     .empty()
     .append(div);
   if (event.external) {
-    $display
-      .find('.modal-footer a.btn-primary')
-      .hide();
+    $goToPost.hide();
+
+    if (event.url) {
+      $goToUrl
+        .show()
+        .attr('href', event.url);
+    } else {
+      $goToUrl.hide();
+    }
   } else {
-    $display
-      .find('.modal-footer a.btn-primary')
+    $goToUrl.hide();
+    $goToPost
       .show()
       .attr('href', `${RELATIVE_PATH}/post/${pid}`);
   }

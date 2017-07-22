@@ -103,6 +103,8 @@ const getExternalEventsByDate = async (startDate, endDate) => {
           const dtstart = vevent.getFirstPropertyValue('dtstart');
           const dtend = vevent.getFirstPropertyValue('dtend');
           const summary = vevent.getFirstPropertyValue('summary') || '';
+          const location = vevent.getFirstPropertyValue('location') || '';
+          const url = vevent.getFirstPropertyValue('url') || '';
           let description = vevent.getFirstPropertyValue('description') || '';
 
           description = description
@@ -111,20 +113,16 @@ const getExternalEventsByDate = async (startDate, endDate) => {
 
           return {
             external: true,
+            source: event.name,
+            url: url,
+
             allday: true,
-            // cid: "0",
             day: dtstart.toString().substring(0,10),
             description: description,
             endDate: Number(dtend.toUnixTime() + '999'),
-            location: event.name,
-            // mandatory: true,
+            location: location,
             name: summary,
-            // pid: 0,
-            // reminders: [],
-            // responses: {},
             startDate: Number(dtstart.toUnixTime() + '000'),
-            // topicDeleted: false,
-            // uid: 1
           }
         })
       );

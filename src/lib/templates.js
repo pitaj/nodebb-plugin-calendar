@@ -122,16 +122,16 @@ const eventTemplate = ({ event, isEmail, uid }) => {
         class="plugin-calendar-time-date-view"
       >[[moment:time-date-view, local, ${startDate}, ${endDate}, ${allday}]]</a>
     </div>
-    ${event.external && !event.location ? `
+    ${event.external ? `
     <div class="plugin-calendar-event-location">
       <i class="fa fa-location-arrow" aria-hidden="true"></i>
-      <span>External<span>
+      <span>External: ${event.source}<span>
     </div>
     ` : ''}
     ${event.location ? `
     <div class="plugin-calendar-event-location">
       <i class="fa fa-location-arrow" aria-hidden="true"></i>
-      <span>${event.external ? 'External: ' + event.location : event.location}<span>
+      <span>${event.location}<span>
     </div>
     ` : ''}
     ${event.description ? `
