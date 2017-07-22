@@ -116,7 +116,7 @@ const getExternalEventsByDate = async (startDate, endDate) => {
             day: dtstart.toString().substring(0,10),
             description: description,
             endDate: Number(dtend.toUnixTime() + '999'),
-            // location: "",
+            location: event.name,
             // mandatory: true,
             name: summary,
             // pid: 0,
