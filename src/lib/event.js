@@ -105,9 +105,7 @@ const getExternalEventsByDate = async (startDate, endDate) => {
           const summary = vevent.getFirstPropertyValue('summary') || '';
           const location = vevent.getFirstPropertyValue('location') || '';
           const url = vevent.getFirstPropertyValue('url') || '';
-          let description = vevent.getFirstPropertyValue('description') || '';
-
-          description = description
+          const description = (vevent.getFirstPropertyValue('description') || '')
             .replace(/^\s+/g, '')
             .replace(/\n/g, '<br>');
 
