@@ -11,8 +11,10 @@ const utils = require.main.require('./public/src/utils');
 
 const sortedSetAdd = p(db.sortedSetAdd);
 const sortedSetCard = p(db.sortedSetCard);
+const sortedSetRemove = p(db.sortedSetRemove);
 const setObject = p(db.setObject);
 const getObjects = p(db.getObjects);
+const dbDelete = p(db.delete);
 const getSortedSetRange = p(db.getSortedSetRange);
 
 const tmpDir = [os.tmpdir(), "nodebb-calendar"].join(path.sep);
@@ -37,7 +39,12 @@ const getICals = async () => {
 const getICalBody = async (ical) => {
   const body = await fs.readFile([tmpDir, ical._key + ".ical"].join(path.sep));
   return body;
-}
+};
+
+const deleteICal = async (icalId) => {
+  await dbDelete('plugins:calendar:ical:' + icalId);
+  await sortedSetRemove('plugins:calendar:icals', icalId);
+};
 
 const downloadICal = async (ical) => {
   const body = await rp(ical.url);
@@ -70,4 +77,6 @@ export {
   addICal,
   getICals,
   getICalBody,
+  deleteICal,
+  updateICalJob,
 };
