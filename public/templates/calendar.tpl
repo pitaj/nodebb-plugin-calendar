@@ -28,7 +28,7 @@ role="dialog" aria-labelledby="plugin-calendar-cal-event-display-title">
         <a type="button" href="{relative_path}/post/{eventData.pid}" itemprop="url" class="btn btn-primary gotopost" data-dismiss="modal">
           [[calendar:go_to_post]]
         </a>
-        <a type="button" href="{eventData.url}" target="_self" itemprop="url" class="btn btn-primary gotourl">
+        <a type="button" href="{eventData.url}" target="_self" itemprop="url" class="btn btn-primary gotourl" style="display: none;">
           [[calendar:go_to_url]]
         </a>
       </div>
