@@ -128,7 +128,6 @@ const getExternalEventsByDate = async (startDate, endDate) => {
 
         preparedEvents.push(...vevents);
       } catch (e) {
-        console.error(e);
         return false;
       }
       return true;
