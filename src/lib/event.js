@@ -2,6 +2,7 @@ import Promise from 'bluebird';
 import ICAL from 'ical.js';
 import rp from 'request-promise';
 import { removeAll as removeAllResponses } from './responses';
+import { getICals, getICalBody } from './icals';
 
 const db = require.main.require('./src/database');
 const plugins = require.main.require('./src/plugins');
@@ -84,49 +85,53 @@ const getEventsByDate = async (startDate, endDate) => {
 };
 
 const getExternalEventsByDate = async (startDate, endDate) => {
-  const keys = await getSortedSetRange(listExternalKey, 0, -1);
-  const events = await getObjects(keys.map((key) => 'plugins:calendar:ical:' + key));
+  const icals = await getICals();
   const preparedEvents = [];
 
   await Promise.all(
-    events.filter((event) => event.url).map(async (event) => {
-      const body = await rp(event.url);
-      const jcalData = ICAL.parse(body);
-      const vcalendar = new ICAL.Component(jcalData);
-      const vevents = await Promise.all(
-        vcalendar.getAllSubcomponents('vevent').filter((vevent) => {
-          const dtstart = vevent.getFirstPropertyValue('dtstart');
-          const dtend = vevent.getFirstPropertyValue('dtend');
+    icals.map(async (ical) => {
+      try {
+        const body = await getICalBody(ical);
+        const jcalData = ICAL.parse(body.toString());
+        const vcalendar = new ICAL.Component(jcalData);
+        const vevents = await Promise.all(
+          vcalendar.getAllSubcomponents('vevent').filter((vevent) => {
+            const dtstart = vevent.getFirstPropertyValue('dtstart');
+            const dtend = vevent.getFirstPropertyValue('dtend');
 
-          return (dtstart.toUnixTime() + '000') >= startDate && (dtend.toUnixTime() + '999') <= endDate;
-        }).map(async (vevent) => {
-          const dtstart = vevent.getFirstPropertyValue('dtstart');
-          const dtend = vevent.getFirstPropertyValue('dtend');
-          const summary = vevent.getFirstPropertyValue('summary') || '';
-          const location = vevent.getFirstPropertyValue('location') || '';
-          const url = vevent.getFirstPropertyValue('url') || '';
-          const description = (vevent.getFirstPropertyValue('description') || '')
-            .replace(/^\s+/g, '')
-            .replace(/\n/g, '<br>');
+            return (dtstart.toUnixTime() + '000') >= startDate && (dtend.toUnixTime() + '999') <= endDate;
+          }).map(async (vevent) => {
+            const dtstart = vevent.getFirstPropertyValue('dtstart');
+            const dtend = vevent.getFirstPropertyValue('dtend');
+            const summary = vevent.getFirstPropertyValue('summary') || '';
+            const location = vevent.getFirstPropertyValue('location') || '';
+            const url = vevent.getFirstPropertyValue('url') || '';
+            const description = (vevent.getFirstPropertyValue('description') || '')
+              .replace(/^\s+/g, '')
+              .replace(/\n/g, '<br>');
 
-          return {
-            external: true,
-            source: event.name,
-            url: url,
+            return {
+              external: true,
+              source: ical.name,
+              url: url,
 
-            allday: true,
-            day: dtstart.toString().substring(0,10),
-            description: description,
-            endDate: Number(dtend.toUnixTime() + '999'),
-            location: location,
-            name: summary,
-            startDate: Number(dtstart.toUnixTime() + '000'),
-          }
-        })
-      );
+              allday: true,
+              day: dtstart.toString().substring(0,10),
+              description: description,
+              endDate: Number(dtend.toUnixTime() + '999'),
+              location: location,
+              name: summary,
+              startDate: Number(dtstart.toUnixTime() + '000'),
+            }
+          })
+        );
 
-      preparedEvents.push(...vevents);
-      return
+        preparedEvents.push(...vevents);
+      } catch (e) {
+        console.error(e);
+        return false;
+      }
+      return true;
     })
   );
 

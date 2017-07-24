@@ -140,7 +140,7 @@ const eventTemplate = ({ event, isEmail, uid }) => {
       <div>${event.description}</div>
     </div>
     ` : ''}
-    ${!event.external && event.reminders ? `
+    ${!event.external && event.reminders.length ? `
     <div class="plugin-calendar-event-reminders">
       <i class="fa fa-bell" aria-hidden="true"></i>
       <ul>
