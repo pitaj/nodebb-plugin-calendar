@@ -9,16 +9,14 @@ const setObject = p(db.setObject);
 
 const convert = {
   checkingInterval: x => parseInt(x, 10) || 1000 * 60 * 5,
-  checkingICalInterval: x => parseInt(x, 10) || 60 * 24,
   respondIfCanReply: x => x === true || x === 'true',
   mainPostOnly: x => x === true || x === 'true',
 };
 
 const getSettings = async () => {
-  const { checkingInterval, checkingICalInterval, respondIfCanReply, mainPostOnly } = await getObject('plugin-calendar:settings') || {};
+  const { checkingInterval, respondIfCanReply, mainPostOnly } = await getObject('plugin-calendar:settings') || {};
   return {
     checkingInterval: convert.checkingInterval(checkingInterval),
-    checkingICalInterval: convert.checkingICalInterval(checkingICalInterval),
     respondIfCanReply: convert.respondIfCanReply(respondIfCanReply),
     mainPostOnly: convert.mainPostOnly(mainPostOnly),
   };

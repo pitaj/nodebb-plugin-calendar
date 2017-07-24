@@ -5,7 +5,6 @@ define('admin/plugins/calendar', [], function() {
   $('#save').on('click', function() {
     var settings = {
       checkingInterval: parseInt($('#checkingInterval').val(), 10),
-      checkingICalInterval: parseInt($('#checkingICalInterval').val(), 10),
       mainPostOnly: !!$('#mainPostOnly')[0].checked,
       respondIfCanReply: !!$('#respondIfCanReply')[0].checked,
     };

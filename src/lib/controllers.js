@@ -39,7 +39,7 @@ export default (router, middleware) => {
       .catch(next);
   });
 
-	router.post('/api/admin/plugins/calendar/add', (req, res, next) => {
+  router.post('/api/admin/plugins/calendar/add', (req, res, next) => {
     Promise.resolve()
       .then(() => addICal(req.body))
       .then(() => res.sendStatus(201))

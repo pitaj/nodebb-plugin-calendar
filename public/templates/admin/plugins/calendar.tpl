@@ -18,14 +18,6 @@
                   <input type="tel" class="form-control" name="checkingInterval" id="checkingInterval" value="{settings.checkingInterval}" />
                 </div>
               </div>
-              <div class="form-group row">
-                <label for="checkingICalInterval" class="col-xs-12 col-sm-8">
-                  Interval on which to check for ical updates (in minutes)
-                </label>
-                <div class="col-xs-12 col-sm-4">
-                  <input type="tel" class="form-control" name="checkingICalInterval" id="checkingICalInterval" value="{settings.checkingICalInterval}" />
-                </div>
-              </div>
               <div class="form-group">
                 <label for="mainPostOnly">
                   <input type="checkbox" name="mainPostOnly" id="mainPostOnly" <!-- IF settings.mainPostOnly --> checked <!-- ENDIF settings.mainPostOnly --> />
