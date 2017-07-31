@@ -130,14 +130,14 @@ const getOccurencesOfRepetition = (event, start, end) => {
       current.setFullYear(s.getFullYear());
 
       if (current < start) {
-        current.setYear(current.getYear() + 1);
+        current.setFullYear(current.getFullYear() + 1);
       }
     }
 
     const out = [];
     while (current < end && (!endDate || current < endDate)) {
       out.push(current.valueOf());
-      current.setYear(current.getYear() + 1);
+      current.setFullYear(current.getFullYear() + 1);
     }
     dates = out;
   }
@@ -146,7 +146,7 @@ const getOccurencesOfRepetition = (event, start, end) => {
     ...event,
     startDate: date,
     endDate: date + duration,
-    day: (new Date(date)).toISOString().split('T')[0],
+    day: new Date(date - (new Date(date).getTimezoneOffset()) * 60000).toISOString().split('T')[0],
   }));
   return occurences;
 };
