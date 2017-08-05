@@ -87,8 +87,8 @@ const begin = (momentLang) => {
         .find(x => x.id === pid);
 
       if (shouldHandle) {
+        const event = el && el.original;
         if (event) {
-          const event = el && el.original;
           displayEvent(event);
         } else {
           history.replaceState({}, '', `${RELATIVE_PATH}/calendar`);
