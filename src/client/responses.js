@@ -144,10 +144,9 @@ const initResponses = () => {
 
   $(document.body).on('change dp.change', '.plugin-calendar-event-responses-day input', (e) => {
     const input = $(e.target);
-    const day = input
-      .data('DateTimePicker').date()
-      .toISOString()
-      .split('T')[0];
+    const evday = new Date(input.data('DateTimePicker').date());
+    evday.setTime(evday.getTime() - evday.getTimezoneOffset() * 60000);
+    const day = evday.toISOString().split('T')[0];
     const pid = input.closest('[data-pid]').attr('data-pid');
     const responses = input.closest('[data-day]');
     responses.attr('data-day', day);
