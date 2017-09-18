@@ -21,7 +21,7 @@
           <i class="fa fa-clock-o" aria-hidden="true"></i> [[calendar:dates]]
         </label>
         <div class="form-inline plugin-calendar-event-editor-dates">
-          <div class="input-group date plugin-calendar-event-editor-date"
+          <div class="input-group plugin-calendar-event-editor-date"
           id="plugin-calendar-event-editor-startDate">
             <input type="text" class="form-control"
             title="[[calendar:start_date]]"/>
@@ -29,7 +29,7 @@
               <i class="fa fa-play"></i>
             </span>
           </div>
-          <div class="input-group date plugin-calendar-event-editor-date"
+          <div class="input-group plugin-calendar-event-editor-date"
           id="plugin-calendar-event-editor-endDate">
             <input type="text" class="form-control"
             title="[[calendar:end_date]]"/>
