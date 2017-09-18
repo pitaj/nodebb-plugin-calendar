@@ -61,7 +61,7 @@ const setupDTP = (responses, day) => {
   if (!dayInput.length) {
     return;
   }
-  const m = moment(day || Date.now());
+  const m = day ? moment.utc(day) : moment();
 
   dayInput.datetimepicker({
     icons: {
@@ -146,8 +146,8 @@ const initResponses = () => {
     const input = $(e.target);
     const day = input
       .data('DateTimePicker').date()
-      .toISOString()
-      .split('T')[0];
+      .utc()
+      .format('YYYY-MM-DD');
     const pid = input.closest('[data-pid]').attr('data-pid');
     const responses = input.closest('[data-day]');
     responses.attr('data-day', day);

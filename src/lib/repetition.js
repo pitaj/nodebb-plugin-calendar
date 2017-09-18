@@ -28,6 +28,8 @@
   event.endDate; // end of the first occurrence
 */
 
+import moment from 'moment';
+
 const dayMS = 24 * 60 * 60 * 1000;
 
 // get occurences of `event` over the interval from `start` to `end`
@@ -130,14 +132,14 @@ const getOccurencesOfRepetition = (event, start, end) => {
       current.setFullYear(s.getFullYear());
 
       if (current < start) {
-        current.setYear(current.getYear() + 1);
+        current.setFullYear(current.getFullYear() + 1);
       }
     }
 
     const out = [];
     while (current < end && (!endDate || current < endDate)) {
       out.push(current.valueOf());
-      current.setYear(current.getYear() + 1);
+      current.setFullYear(current.getFullYear() + 1);
     }
     dates = out;
   }
@@ -146,7 +148,7 @@ const getOccurencesOfRepetition = (event, start, end) => {
     ...event,
     startDate: date,
     endDate: date + duration,
-    day: (new Date(date)).toISOString().split('T')[0],
+    day: moment.utc(date).format('YYYY-MM-DD'),
   }));
   return occurences;
 };
