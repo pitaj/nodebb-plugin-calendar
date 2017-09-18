@@ -71,6 +71,7 @@ export default (router, middleware) => {
         return {
           calendarEventsStyle: style.join('\n'),
           title: '[[calendar:calendar]]',
+          eventJSON: 'null',
         };
       }
 

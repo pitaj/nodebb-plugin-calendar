@@ -18,12 +18,13 @@ const begin = (momentLang) => {
     'composer',
     'composer/formatting',
     'translator',
-  ], (composer, formatting, translator) =>
+    'benchpress',
+  ], (composer, formatting, translator, benchpress) =>
   $(document).ready(() => {
     initTranslatorModule(translator.Translator);
     initTranslation(translator.Translator);
 
-    ajaxify.loadTemplate('partials/calendar/event-creation-modal', template =>
+    benchpress.parse('partials/calendar/event-creation-modal', {}, template =>
     translator.translate(template, lang, (html) => {
       $('body').append(html);
 
