@@ -63,6 +63,6 @@
     "validator": "^7.0.0"
   },
   "nbbpm": {
-    "compatibility": "^1.5.1"
+    "compatibility": "^1.7.0"
   }
 }
