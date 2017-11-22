@@ -34,10 +34,14 @@ const begin = (momentLang) => {
       e.preventDefault();
       e.stopPropagation();
       displayEvent(original);
-      if (original.repeats) {
-        ajaxify.updateHistory(`calendar/event/${pid}/${original.day}`);
+      if (original.external) {
+        // TODO
       } else {
-        ajaxify.updateHistory(`calendar/event/${pid}`);
+        if (original.repeats) {
+          ajaxify.updateHistory(`calendar/event/${pid}/${original.day}`);
+        } else {
+          ajaxify.updateHistory(`calendar/event/${pid}`);
+        }
       }
     },
     timezone: 'local',

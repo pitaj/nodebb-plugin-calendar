@@ -4,6 +4,7 @@ import { canViewPost } from './privileges';
 import { eventTemplate } from './templates';
 import { getUserResponse } from './responses';
 import { getSettings, setSettings } from './settings';
+import { addICal, deleteICal } from './icals';
 
 const privileges = require.main.require('./src/privileges');
 const categories = require.main.require('./src/categories');
@@ -34,9 +35,21 @@ export default (router, middleware) => {
   router.get('/api/admin/plugins/calendar/save', (req, res, next) => {
     Promise.resolve()
       .then(() => setSettings(JSON.parse(req.query.settings)))
-      .then(() => {
-        res.sendStatus(200);
-      })
+      .then(() => res.sendStatus(200))
+      .catch(next);
+  });
+
+  router.post('/api/admin/plugins/calendar/add', (req, res, next) => {
+    Promise.resolve()
+      .then(() => addICal(req.body))
+      .then(() => res.sendStatus(201))
+      .catch(next);
+  });
+
+  router.post('/api/admin/plugins/calendar/del', (req, res, next) => {
+    Promise.resolve()
+      .then(() => deleteICal(req.query.id))
+      .then(() => res.sendStatus(200))
       .catch(next);
   });
 

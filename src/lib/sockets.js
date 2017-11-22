@@ -1,6 +1,7 @@
 import Promise from 'bluebird';
+import ICAL from 'ical.js';
 import { getAll as getAllResponses, submitResponse, getUserResponse } from './responses';
-import { getEventsByDate, escapeEvent } from './event';
+import { getEventsByDate, getExternalEventsByDate, escapeEvent } from './event';
 import { filterByPid, privilegeNames } from './privileges';
 import { getOccurencesOfRepetition } from './repetition';
 import { getSetting } from './settings';
@@ -80,6 +81,8 @@ pluginSockets.calendar.getEventsByDate = (sock, data, cb) => {
       })
     );
 
-    return withResponses;
+    const externalEvents = await getExternalEventsByDate(startDate, endDate);
+
+    return [...withResponses, ...externalEvents];
   })(sock, data).asCallback(cb);
 };
