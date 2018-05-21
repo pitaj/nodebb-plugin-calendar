@@ -7,18 +7,6 @@ const fullCalendarLang = text =>
     .replace(replaceInFCLang, replaceWithFCLang)
     .replace(/defineLocale/, 'updateLocale');
 
-const replaceInFC = /\(function\(factory\) \{[\w\W]+\}\)\(function\(\$, moment\) \{/;
-
-const replaceWithFC =
-`import moment from "moment";
-(function(factory) {
-  factory(jQuery, moment);
-})(function($, moment) {`;
-
-const fullCalendar = text =>
-  text
-    .replace(replaceInFC, replaceWithFC);
-
 const replaceInDTP = /\(function \(factory\) \{[\w\W]+\}\(function \(\$, moment\) \{/;
 
 const replaceWithDTP =
@@ -35,10 +23,6 @@ const dtp = text =>
 module.exports = function loader(content) {
   if (this.resourcePath.match(/fullcalendar[/\\]+dist[/\\]+locale/)) {
     const output = fullCalendarLang(content);
-    return output;
-  }
-  if (this.resourcePath.includes('fullcalendar')) {
-    const output = fullCalendar(content);
     return output;
   }
   if (this.resourcePath.includes('eonasdan-bootstrap-datetimepicker')) {

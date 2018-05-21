@@ -7,7 +7,7 @@
     "test": "npm run lint && babel-node ./src/lib/tests",
     "babel": "babel src --out-dir build --source-maps",
     "build": "set NODE_ENV=development&& npm run babel && webpack --progress && node ../nodebb/nodebb build",
-    "build-production": "npm run babel && set NODE_ENV=production && webpack --progress",
+    "build-production": "npm run babel && NODE_ENV=production webpack --progress",
     "release": "npm run test && npm run build-production && npm version prerelease && npm publish",
     "lint": "eslint ./src/"
   },
@@ -50,7 +50,8 @@
     "eslint-plugin-import": "^2.3.0",
     "uglify-js": "^2.8.26",
     "uglifyjs-webpack-plugin": "^0.4.3",
-    "webpack": "^2.6.1"
+    "webpack": "^2.6.1",
+    "del": "^3.0.0"
   },
   "dependencies": {
     "babel-runtime": "^6.23.0",
