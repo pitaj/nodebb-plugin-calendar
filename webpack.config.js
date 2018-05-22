@@ -1,16 +1,16 @@
 const webpack = require('webpack');
 const path = require('path');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+const del = require('del');
 
 const nodeEnv = process.env.NODE_ENV || 'development';
 const isProd = nodeEnv === 'production';
 
-const del = require('del');
 const dtsDir = path.resolve(path.dirname(require.resolve('eonasdan-bootstrap-datetimepicker')));
 del.sync(`${dtsDir}/../../node_modules/**`);
 
 module.exports = {
-  devtool: isProd ? 'hidden-source-map' : 'inline-source-map',
+  devtool: isProd ? 'source-map' : 'inline-source-map',
   context: __dirname,
   entry: {
     client: ['core-js/shim', './src/client/index.js'],
@@ -19,6 +19,9 @@ module.exports = {
   output: {
     path: path.join(__dirname, './build/bundles'),
     filename: '[name].js',
+  },
+  externals: {
+    jquery: 'jQuery',
   },
   module: {
     loaders: [
@@ -61,6 +64,6 @@ module.exports = {
       minChunks: 2,
     }),
     new webpack.IgnorePlugin(/^\.\/(locale|lang)$/, /(moment|fullcalendar)$/),
-    ...(isProd ? [new UglifyJSPlugin()] : []),
+    ...(isProd ? [new UglifyJSPlugin({ sourceMap: true })] : []),
   ],
 };
