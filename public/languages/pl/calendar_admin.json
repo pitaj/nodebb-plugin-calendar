@@ -1,0 +1,21 @@
+{
+  "title": "Konfiguracja uprawnień w kalendarzu",
+  "intro": "Na tej stronie administrator może określić, które grupy mają uprawnienia twórców, edytorów i administratorów wydarzeń.",
+  "explanation_header": "Wyjaśnienie",
+  "explanation_creation_rights": "Użytkownicy w grupie uprawnionej do tworzenia mogą tworzyć i edytować własne wydarzenia. Nie mogą jednak edytować wydarzeń innych użytkowników.",
+  "explanation_edit_rights": "Edytorzy kalendarza mogą tworzyć własne wydarzenia i edytować wydarzenia innych użytkowników, ale nie mogą usuwać wydarzeń innych użytkowników.",
+  "explanation_admin_rights": "Administratorzy kalendarza mogą tworzyć własne wydarzenia oraz edytować i usuwać wydarzenia innych użytkowników. Uprawnienia te otrzymują też administratorzy strony, więc nie trzeba ich tutaj dodawać.",
+  "explanation_hierarchy": "Na wyższych poziomach zapewniono wszystkie uprawnienia z niższych poziomów (administratorzy > edytorzy > twórcy).",
+  "explanation_one_group": "Wpisz jedną grupę w każdym z poniższych pól",
+  "explanation_global_note": "Przy wypełnianiu poniższych pól należy pamiętać, że chodzi o ogólne uprawnienia dla wszystkich jednostkowych wydarzeń. Nie można tutaj ograniczyć uprawnień dla poszczególnych wydarzeń.",
+  "explanation_individual_rights": "Jeśli chcesz skonfigurować uprawnienia do edytowania i przeglądania poszczególnych wydarzeń, zrób to poprzez interfejs kalendarza.",
+  "creation_rights": "Twórcy",
+  "creation_placeholder": "Grupa, która może tworzyć wydarzenia",
+  "edit_rights": "Edytorzy",
+  "edit_placeholder": "Grupa, która może edytować wydarzenia",
+  "admin_rights": "Administratorzy",
+  "admin_placeholder": "Grupa, która pełni rolę administratorów",
+  "category_label": "Kategoria, w której publikowane będą posty o wydarzeniach oraz komentarze do wydarzeń",
+  "category_placeholder": "Podaj numer kategorii",
+  "use_whoisin_label": "Czy chcesz skorzystać ze wtyczki whoisin zamiast ze standardowego systemu odpowiedzi?"
+}
