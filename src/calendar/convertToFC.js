@@ -1,6 +1,8 @@
+const decode = window.utils.decodeHTMLEntities;
+
 const mapper = event => ({
   id: event.pid,
-  title: event.name,
+  title: decode(decode(event.name)),
   allDay: event.allday,
   start: event.startDate,
   end: event.endDate + 1,

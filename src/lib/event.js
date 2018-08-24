@@ -1,11 +1,10 @@
-import Promise from 'bluebird';
+import { promisify as p } from 'util';
+import validator from 'validator';
 import { removeAll as removeAllResponses } from './responses';
 
 const db = require.main.require('./src/database');
 const plugins = require.main.require('./src/plugins');
 const posts = require.main.require('./src/posts');
-
-const p = Promise.promisify;
 
 const sortedSetAdd = p(db.sortedSetAdd);
 const sortedSetRemove = p(db.sortedSetRemove);
@@ -27,6 +26,7 @@ const listByEndKey = `${listKey}:byEnd`;
 const saveEvent = (event) => {
   const objectKey = `${listKey}:pid:${event.pid}`;
   const endDate = event.repeats ? event.repeats.endDate || 9999999999999 : event.endDate;
+
   return Promise.all([
     sortedSetAdd(listKey, event.startDate, objectKey),
     sortedSetAdd(listByEndKey, endDate, objectKey),
@@ -115,6 +115,7 @@ const escapeEvent = async (event) => {
 
   return {
     ...event,
+    name: validator.escape(event.name),
     location,
     description,
   };

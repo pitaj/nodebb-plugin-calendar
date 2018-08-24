@@ -1,23 +1,5 @@
 import moment from 'moment';
 
-const userTemplate = user => (`
-  <li class="icon pull-left">
-    <a href="${config.relative_path}/user/${user.userslug}">
-      ${user.picture ? `
-      <img title="${user.username}" class="img-rounded user-img not-responsive"
-        src="${user.picture}">
-      ` : `
-      <div class="user-icon user-img" style="background-color: ${user['icon:bgColor']};"
-        title="${user.username}">${user['icon:text']}</div>
-      `}
-    </a>
-  </li>
-`);
-
-let noYesResponses;
-let noMaybeResponses;
-let noNoResponses;
-
 const addResponsesToPost = (pid, cb) => {
   const $responses = $(`[data-pid=${pid}] .plugin-calendar-event-responses-lists`);
   const day = $(`[data-pid=${pid}] [data-day]`).attr('data-day');
@@ -44,15 +26,21 @@ const addResponsesToPost = (pid, cb) => {
     const maybes = $responses.find('.plugin-calendar-event-responses-list-maybe');
     const nos = $responses.find('.plugin-calendar-event-responses-list-no');
 
-    const yes = responses.yes.map(userTemplate);
-    const maybe = responses.maybe.map(userTemplate);
-    const no = responses.no.map(userTemplate);
+    window.requirejs(['benchpress', 'translator'], (Benchpress, translator) => {
+      Promise.all(
+        [
+          { responseType: 'yes', users: responses.yes },
+          { responseType: 'maybe', users: responses.maybe },
+          { responseType: 'no', users: responses.no },
+        ].map(data => Benchpress.render('partials/calendar/event/response-list', data).then(html => translator.translate(html)))
+      ).then(([yes, maybe, no]) => {
+        yess.empty().append(yes);
+        maybes.empty().append(maybe);
+        nos.empty().append(no);
 
-    yess.empty().append(yes.length ? yes : noYesResponses);
-    maybes.empty().append(maybe.length ? maybe : noMaybeResponses);
-    nos.empty().append(no.length ? no : noNoResponses);
-
-    cb();
+        cb();
+      });
+    });
   });
 };
 
@@ -80,8 +68,8 @@ const setupDTP = (responses, day) => {
     format: 'L',
     useCurrent: true,
   })
-  .data('DateTimePicker')
-  .date(m);
+    .data('DateTimePicker')
+    .date(m);
 };
 
 const noop = () => {};
@@ -204,20 +192,6 @@ const initResponses = () => {
     'action:posts.edited',
   ].join(' '), checkPosts);
   checkPosts(null, ajaxify.data);
-
-  window.requirejs(['translator'], (translator) => {
-    translator.translate(
-      '[[calendar:no_x_responses, [[calendar:response_yes]]]],' +
-      '[[calendar:no_x_responses, [[calendar:response_maybe]]]],' +
-      '[[calendar:no_x_responses, [[calendar:response_no]]]]',
-      (translated) => {
-        const text = translated.split(',');
-        noYesResponses = text[0];
-        noMaybeResponses = text[1];
-        noNoResponses = text[2];
-      }
-    );
-  });
 };
 
 export default initResponses;

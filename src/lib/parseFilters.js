@@ -1,5 +1,7 @@
 import validator from 'validator';
-import { eventTemplate } from './templates';
+import { callbackify } from 'util';
+
+import eventTemplate from './templates';
 import parse, { tagTemplate } from './parse';
 
 const eventRX = new RegExp(tagTemplate('event', '[\\s\\S]*'));
@@ -16,19 +18,19 @@ const parseRaw = async (content) => {
   }
   event.name = validator.escape(event.name);
 
-  const eventText = eventTemplate({ event });
+  const eventText = await eventTemplate({ event });
   const text = input.replace(eventRX, eventText);
   return text;
 };
 
 const parsePost = async (data) => {
-  const postData = data.postData;
+  const { postData } = data;
   postData.content = await parseRaw(postData.content);
 
   return data;
 };
 
-const parsePostCallback = (postData, cb) => parsePost(postData).asCallback(cb);
-const parseRawCallback = (content, cb) => parseRaw(content).asCallback(cb);
+const parsePostCallback = callbackify(parsePost);
+const parseRawCallback = callbackify(parseRaw);
 
 export { parsePostCallback, parsePost, parseRawCallback, parseRaw };

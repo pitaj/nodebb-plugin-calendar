@@ -1,69 +1,58 @@
 const webpack = require('webpack');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const path = require('path');
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 const del = require('del');
 
-const nodeEnv = process.env.NODE_ENV || 'development';
-const isProd = nodeEnv === 'production';
+const dtpDir = path.resolve(path.dirname(require.resolve('eonasdan-bootstrap-datetimepicker')));
 
-const dtsDir = path.resolve(path.dirname(require.resolve('eonasdan-bootstrap-datetimepicker')));
-del.sync(`${dtsDir}/../../node_modules/**`);
+module.exports = (env, argv) => {
+  const prod = argv.mode !== 'development';
 
-module.exports = {
-  devtool: isProd ? 'source-map' : 'inline-source-map',
-  context: __dirname,
-  entry: {
-    client: ['core-js/shim', './src/client/index.js'],
-    calendar: ['core-js/shim', './src/calendar/index.js'],
-  },
-  output: {
-    path: path.join(__dirname, './build/bundles'),
-    filename: '[name].js',
-  },
-  externals: {
-    jquery: 'jQuery',
-  },
-  module: {
-    loaders: [
-      {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        loaders: [
-          {
+  del.sync(`${dtpDir}/../../node_modules/**`);
+
+  return {
+    context: __dirname,
+    devtool: prod ? 'source-map' : 'inline-source-map',
+    entry: {
+      client: './src/client/index.js',
+      calendar: './src/calendar/index.js',
+    },
+    output: {
+      path: path.join(__dirname, './build/bundles'),
+      filename: '[name].js',
+    },
+    externals: {
+      jquery: 'jQuery',
+    },
+    module: {
+      rules: [
+        {
+          test: /\.js$/,
+          exclude: /node_modules/,
+          use: {
             loader: 'babel-loader',
-            query: {
-              presets: [
-                ['es2015', { modules: false }],
-              ],
+            options: {
               plugins: [
-                ['transform-runtime', {
-                  polyfill: false,
-                  regenerator: false,
-                }],
+                'transform-object-rest-spread',
+                'syntax-dynamic-import',
               ],
             },
           },
-        ],
-      },
-      {
-        test: /\.js$/,
-        include: /node_modules/,
-        loader: './removeAMD',
-      },
+        },
+        {
+          test: /\.js$/,
+          include: /node_modules/,
+          use: './loaders/removeAMD',
+        },
+      ],
+    },
+    optimization: {
+      minimizer: [
+        new UglifyJsPlugin({ sourceMap: true }),
+      ],
+    },
+    plugins: [
+      new webpack.IgnorePlugin(/(locale|lang)$/, /(moment|fullcalendar)$/),
     ],
-  },
-  resolve: {
-    extensions: ['.js'],
-    modules: [
-      'node_modules',
-    ],
-  },
-  plugins: [
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'commons',
-      minChunks: 2,
-    }),
-    new webpack.IgnorePlugin(/^\.\/(locale|lang)$/, /(moment|fullcalendar)$/),
-    ...(isProd ? [new UglifyJSPlugin({ sourceMap: true })] : []),
-  ],
+  };
 };

@@ -1,5 +1,6 @@
 import validator from 'validator';
-import Promise from 'bluebird';
+import { promisify as p, callbackify } from 'util';
+
 import parse, { inPost } from './parse';
 import { canPostEvent } from './privileges';
 import { deleteEvent, saveEvent, eventExists, getEvent } from './event';
@@ -10,8 +11,6 @@ import { getSetting } from './settings';
 const plugins = require.main.require('./src/plugins');
 const topics = require.main.require('./src/topics');
 const winston = require.main.require('winston');
-
-const p = Promise.promisify;
 
 const fireHook = p(plugins.fireHook);
 const getTopicField = p(topics.getTopicField);
@@ -85,6 +84,6 @@ const postSave = async (data) => {
   return data;
 };
 
-const postSaveCallback = (data, cb) => postSave(data).asCallback(cb);
+const postSaveCallback = callbackify(postSave);
 
 export { postSave, postSaveCallback };

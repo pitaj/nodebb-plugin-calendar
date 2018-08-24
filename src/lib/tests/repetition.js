@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { getOccurencesOfRepetition } from '../repetition';
+import getOccurencesOfRepetition from '../repetition';
 
 (() => {
   const event = {

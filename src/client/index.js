@@ -19,13 +19,11 @@ const begin = (momentLang) => {
     'composer/formatting',
     'translator',
     'benchpress',
-  ], (composer, formatting, translator, benchpress) =>
-  $(document).ready(() => {
+  ], (composer, formatting, translator, benchpress) => $(document).ready(() => {
     initTranslatorModule(translator.Translator);
     initTranslation(translator.Translator);
 
-    benchpress.parse('partials/calendar/event-creation-modal', {}, template =>
-    translator.translate(template, lang, (html) => {
+    benchpress.render('partials/calendar/event-creation-modal', {}).then(template => translator.translate(template, lang)).then((html) => {
       $('body').append(html);
 
       setupComposerButton(composer, translator);
@@ -76,31 +74,28 @@ const begin = (momentLang) => {
       $(window).on('action:composer.enhanced', prepareFormattingTools);
 
       initResponses();
-    }));
+    });
   }));
 };
 
-__webpack_public_path__ = `${RELATIVE_PATH}/plugins/nodebb-plugin-calendar/bundles/`; // eslint-disable-line
+// eslint-disable-next-line camelcase, no-undef
+__webpack_public_path__ = `${RELATIVE_PATH}/plugins/nodebb-plugin-calendar/bundles/`;
 
-const momentLang = lang.toLowerCase().replace(/_/g, '-');
-
-try {
-  if (momentLang === 'en-us') {
+let momentLang = lang.toLowerCase().replace(/_/g, '-');
+if (momentLang === 'en-us') {
+  begin('en-us');
+} else {
+  import(`moment/locale/${momentLang}`).catch((err) => {
+    // eslint-disable-next-line no-console
+    console.info(`could not load locale data (${momentLang}) for moment`, err);
+    [momentLang] = momentLang.split('-');
+    return import(`moment/locale/${momentLang}`);
+  }).then(() => {
+    moment.locale(momentLang);
+    begin(momentLang);
+  }).catch((err) => {
     begin('en-us');
-  } else {
-    require(`bundle-loader!moment/locale/${momentLang}`)(() => { // eslint-disable-line
-      moment.locale(momentLang);
-      begin(momentLang);
-    });
-  }
-} catch (e) {
-  try {
-    require(`bundle-loader!moment/locale/${momentLang.split('-')[0]}`)(() => { // eslint-disable-line
-      moment.locale(momentLang);
-      begin(momentLang);
-    });
-  } catch (er) {
-    begin('en-us');
-    throw Error(`could not load locale data (${momentLang}) for moment`);
-  }
+    // eslint-disable-next-line no-console
+    console.info(`could not load locale data (${momentLang}) for moment`, err);
+  });
 }

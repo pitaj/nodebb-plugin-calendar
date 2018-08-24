@@ -14,13 +14,13 @@
           </div>
           <div class="form-group">
             <label for="mainPostOnly">
-              <input type="checkbox" name="mainPostOnly" id="mainPostOnly" <!-- IF settings.mainPostOnly --> checked <!-- ENDIF settings.mainPostOnly --> />
+              <input type="checkbox" name="mainPostOnly" id="mainPostOnly" {{{ if settings.mainPostOnly }}} checked {{{ end }}} />
               Only allow events in the main post of a topic
             </label>
           </div>
           <div class="form-group">
             <label for="respondIfCanReply">
-              <input type="checkbox" name="respondIfCanReply" id="respondIfCanReply" <!-- IF settings.respondIfCanReply --> checked <!-- ENDIF settings.respondIfCanReply --> />
+              <input type="checkbox" name="respondIfCanReply" id="respondIfCanReply" {{{ if settings.respondIfCanReply }}} checked {{{ end }}} />
               Link the permission to respond to an event to the reply permission, as opposed to (by default) the view permission
             </label>
           </div>

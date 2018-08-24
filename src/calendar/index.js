@@ -6,7 +6,7 @@ import { setupDTP } from '../client/responses';
 
 const queryRegExp = /calendar\/?(?:\/*event\/+([0-9]+))?/;
 
-const begin = (momentLang) => {
+const begin = momentLang => window.requirejs(['benchpress'], () => {
   const calendarOptions = {
     editable: false,
     header: {
@@ -78,7 +78,7 @@ const begin = (momentLang) => {
       });
     }
 
-    const matches = location.pathname.match(queryRegExp);
+    const matches = window.location.pathname.match(queryRegExp);
     const pid = matches && parseInt(matches[1], 10);
     if (pid) {
       const el = $calendar
@@ -91,7 +91,7 @@ const begin = (momentLang) => {
         if (event) {
           displayEvent(event);
         } else {
-          history.replaceState({}, '', `${RELATIVE_PATH}/calendar`);
+          window.history.replaceState({}, '', `${RELATIVE_PATH}/calendar`);
         }
       } else {
         setupDTP($display.find('[data-day]'), window.calendarEventData.day);
@@ -106,28 +106,25 @@ const begin = (momentLang) => {
 
   $(document).ready(init);
   $(window).on('action:ajaxify.end', init);
-};
+});
 
 __webpack_public_path__ = `${RELATIVE_PATH}/plugins/nodebb-plugin-calendar/bundles/`; // eslint-disable-line
 
 const lang = config.userLang || config.defaultLang;
-const momentLang = lang.toLowerCase().replace(/_/g, '-');
-
-try {
-  if (momentLang === 'en-us') {
+let momentLang = lang.toLowerCase().replace(/_/g, '-');
+if (momentLang === 'en-us') {
+  begin('en-us');
+} else {
+  import(`fullcalendar/dist/locale/${momentLang}`).catch((err) => {
+    // eslint-disable-next-line no-console
+    console.info(`could not load locale data (${momentLang}) for moment`, err);
+    [momentLang] = momentLang.split('-');
+    return import(`fullcalendar/dist/locale/${momentLang}`);
+  }).then(() => {
+    begin(momentLang);
+  }).catch((err) => {
     begin('en-us');
-  } else {
-    require(`bundle-loader!fullcalendar/dist/locale/${momentLang}`)(() => { // eslint-disable-line
-      begin(momentLang);
-    });
-  }
-} catch (e) {
-  try {
-    require(`bundle-loader!fullcalendar/dist/locale/${momentLang.split('-')[0]}`)(() => { // eslint-disable-line
-      begin(momentLang);
-    });
-  } catch (er) {
-    begin('en-us');
-    throw Error(`Could not load locale data (${momentLang}) for fullcalendar`);
-  }
+    // eslint-disable-next-line no-console
+    console.info(`could not load locale data (${momentLang}) for moment`, err);
+  });
 }

@@ -1,11 +1,9 @@
-import Promise from 'bluebird';
+import { promisify as p } from 'util';
 import { canRespond, canViewPost } from './privileges';
 import { listKey } from './event';
 
 const db = require.main.require('./src/database');
 const user = require.main.require('./src/user');
-
-const p = Promise.promisify;
 
 const setAdd = p(db.setAdd);
 const setsRemove = p(db.setsRemove);

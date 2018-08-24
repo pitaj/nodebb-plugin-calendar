@@ -8,7 +8,8 @@ const makeListElement = (n) => {
       <a class="remove" href="#">
         <i class="fa fa-times"></i>
       </a>
-    </li>`);
+    </li>`
+  );
   li.data('value', n);
   return li;
 };

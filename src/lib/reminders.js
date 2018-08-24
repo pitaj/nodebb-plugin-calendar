@@ -1,10 +1,9 @@
-// import { fork } from 'child_process';
-import Promise from 'bluebird';
+import { promisify as p, callbackify } from 'util';
 import { getAll as getResponses, getUserResponse } from './responses';
 import { getEventsEndingAfter, escapeEvent } from './event';
 import { filterUidsByPid } from './privileges';
-import { getOccurencesOfRepetition } from './repetition';
-import { eventTemplate } from './templates';
+import getOccurencesOfRepetition from './repetition';
+import eventTemplate from './templates';
 import { getSetting } from './settings';
 
 const notifications = require.main.require('./src/notifications');
@@ -14,8 +13,6 @@ const user = require.main.require('./src/user');
 const emailer = require.main.require('./src/emailer');
 const nconf = require.main.require('nconf');
 const winston = require.main.require('winston');
-
-const p = Promise.promisify;
 
 const createNotif = p(notifications.create);
 const pushNotif = p(notifications.push);
@@ -42,7 +39,7 @@ const emailNotification = async ({ uid, event, message }) => {
       [uid]: response,
     };
 
-    const content = eventTemplate({ event: parsed, uid, isEmail: true });
+    const content = await eventTemplate({ event: parsed, uid, isEmail: true });
 
     await sendEmail('notif_plugin_calendar_event_reminder', uid, {
       pid: event.pid,
@@ -100,9 +97,9 @@ const notify = async ({ event, reminder, message }) => {
   });
   await pushNotif(notif, uids);
 
-  await Promise.all(uids.map(uid =>
-    emailNotification({ uid, event, message, postData })
-  ));
+  await Promise.all(
+    uids.map(uid => emailNotification({ uid, event, message, postData }))
+  );
 };
 
 const initNotifierDaemon = async () => {
@@ -115,7 +112,7 @@ const initNotifierDaemon = async () => {
 
   let lastEnd = Date.now() + checkingInterval;
 
-  const checkReminders = async () => {
+  const checkReminders = callbackify(async () => {
     checkingInterval = await getSetting('checkingInterval');
     // timespan we check is a checkingInterval in the future
     // so as to avoid sending notifications too late
@@ -148,10 +145,10 @@ const initNotifierDaemon = async () => {
       .filter(Boolean);
 
     await Promise.all(filtered.map(notify));
-  };
+  });
 
   const daemon = () => {
-    checkReminders().asCallback((err) => {
+    checkReminders((err) => {
       if (err) {
         winston.error(err);
       }

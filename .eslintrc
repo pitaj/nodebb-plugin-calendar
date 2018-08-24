@@ -1,12 +1,9 @@
 {
   "parser": "babel-eslint",
   "parserOptions": {
-    "ecmaVersion": 6,
+    "ecmaVersion": 2018,
     "sourceType": "module"
   },
-  "plugins": [
-    "babel"
-  ],
   "extends": "airbnb-base",
   "settings": {
     // "import/resolver": "webpack"
@@ -20,6 +17,13 @@
       "exports": "always-multiline",
       "functions": "never"
     }],
-    "import/prefer-default-export": "warn"
+    "import/prefer-default-export": "warn",
+    "no-return-await": "off",
+    "operator-linebreak": ["error", "after"],
+    "object-curly-newline": ["error", {
+      "multiline": true,
+      "minProperties": 5,
+      "consistent": true
+    }]
   }
 }

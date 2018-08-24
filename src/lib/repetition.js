@@ -33,10 +33,9 @@ import moment from 'moment';
 const dayMS = 24 * 60 * 60 * 1000;
 
 // get occurences of `event` over the interval from `start` to `end`
-const getOccurencesOfRepetition = (event, start, end) => {
+export default function getOccurencesOfRepetition(event, start, end) {
   const startDate = new Date(event.startDate);
-  const endDate = event.repeats.endDate;
-  const every = event.repeats.every;
+  const { endDate, every } = event.repeats;
   if (every.day) {
     every.numOfDays = [1];
   } else if (every.week) {
@@ -151,6 +150,4 @@ const getOccurencesOfRepetition = (event, start, end) => {
     day: moment.utc(date).format('YYYY-MM-DD'),
   }));
   return occurences;
-};
-
-export { getOccurencesOfRepetition };
+}

@@ -1,7 +1,5 @@
-import Promise from 'bluebird';
+import { promisify as p } from 'util';
 import { getSetting } from './settings';
-
-const p = Promise.promisify;
 
 const privileges = require.main.require('./src/privileges');
 const posts = require.main.require('./src/posts');
@@ -18,29 +16,23 @@ const canViewPost = (pid, uid) => privilegesPostCan('read', pid, uid);
 const canPostEvent = (tid, uid) => privilegesTopicCan(privilegeNames.canPost, tid, uid);
 const getCidByPid = p(posts.getCidByPid);
 
-const canRespond = (pid, uid) =>
-  getSetting('respondIfCanReply')
-    .then((respondIfCanReply) => {
-      if (respondIfCanReply) {
-        return privilegesPostCan('reply', pid, uid);
-      }
-      return canViewPost(pid, uid);
-    });
+const canRespond = (pid, uid) => getSetting('respondIfCanReply')
+  .then((respondIfCanReply) => {
+    if (respondIfCanReply) {
+      return privilegesPostCan('reply', pid, uid);
+    }
+    return canViewPost(pid, uid);
+  });
 
-const filterUidsByPid = (uids, pid) =>
-  getCidByPid(pid)
+const filterUidsByPid = (uids, pid) => getCidByPid(pid)
   .then(cid => filterUidsByCid('read', cid, uids));
 
-const filterByPid = (events, uid) =>
-  filterPids('read', events.map(e => e.pid), uid)
+const filterByPid = (events, uid) => filterPids('read', events.map(e => e.pid), uid)
   .then(filtered => events.filter(e => filtered.includes(e.pid)));
 
-const privilegesList = (list, callback) =>
-  callback(null, [...list, privilegeNames.canPost]);
-const privilegesGroupsList = (list, callback) =>
-  callback(null, [...list, `groups:${privilegeNames.canPost}`]);
-const privilegesListHuman = (list, callback) =>
-  callback(null, [...list, { name: 'Post events' }]);
+const privilegesList = (list, callback) => callback(null, [...list, privilegeNames.canPost]);
+const privilegesGroupsList = (list, callback) => callback(null, [...list, `groups:${privilegeNames.canPost}`]);
+const privilegesListHuman = (list, callback) => callback(null, [...list, { name: 'Post events' }]);
 
 export {
   canViewPost,

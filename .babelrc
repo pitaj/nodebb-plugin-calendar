@@ -1,18 +1,7 @@
 {
   "plugins": [
     "transform-es2015-modules-commonjs",
-    "transform-es2015-function-name",
-    ["transform-async-to-module-method", {
-      "module": "bluebird",
-      "method": "coroutine"
-    }],
-    "transform-object-rest-spread",
-    "transform-es2015-destructuring",
-    ["transform-runtime", {
-      "polyfill": false,
-      "regenerator": false
-    }]
+    "transform-object-rest-spread"
   ],
-  "presets": ["es2015-node4"],
   "sourceMaps": true
 }

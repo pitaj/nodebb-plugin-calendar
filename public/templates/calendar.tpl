@@ -3,7 +3,7 @@
 
 <style type="text/css" class="plugin-calendar-cal-styles">{{calendarEventsStyle}}</style>
 
-<div class="modal fade <!-- IF eventData -->in<!-- ENDIF eventData -->" id="plugin-calendar-cal-event-display" tabindex="-1"
+<div class="modal fade {{{ if eventData }}}in{{{ end }}}" id="plugin-calendar-cal-event-display" tabindex="-1"
 role="dialog" aria-labelledby="plugin-calendar-cal-event-display-title">
   <div class="modal-dialog" role="document">
     <div class="modal-content">

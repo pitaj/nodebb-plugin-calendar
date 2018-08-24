@@ -1,5 +1,4 @@
-const tagTemplate = (name, content) =>
-  `\\s*\\[${name}\\](${content})\\[\\/${name}\\]\\s*`;
+const tagTemplate = (name, content) => `\\s*\\[${name}\\](${content})\\[\\/${name}\\]\\s*`;
 
 const regExps = [
   { key: 'name', pattern: '.*' },

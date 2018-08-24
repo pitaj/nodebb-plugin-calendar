@@ -1,8 +1,7 @@
-import Promise from 'bluebird';
+import { promisify as p } from 'util';
 
 const db = require.main.require('./src/database');
 
-const p = Promise.promisify;
 const getObject = p(db.getObject);
 const getObjectField = p(db.getObjectField);
 const setObject = p(db.setObject);

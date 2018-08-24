@@ -1,7 +1,6 @@
-// Polyfills
-import 'core-js/shim';
-
 import 'source-map-support/register';
+
+import { callbackify } from 'util';
 
 import init from './init';
 import { parsePostCallback, parseRawCallback } from './parseFilters';
@@ -11,7 +10,7 @@ import { deleteEvent } from './event';
 import './sockets';
 import initTranslatorModule from './translatorModule';
 
-const Translator = require.main.require('./public/src/modules/translator').Translator;
+const { Translator } = require.main.require('./public/src/modules/translator');
 initTranslatorModule(Translator);
 
 const addNavigation = (navs, callback) => {
@@ -42,7 +41,7 @@ const composerFormatting = (data, callback) => {
   callback(null, data);
 };
 
-const postDelete = (pid, cb) => deleteEvent(pid).asCallback(cb);
+const postDelete = callbackify(deleteEvent);
 
 export {
   init,
