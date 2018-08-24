@@ -11,5 +11,13 @@
     },
     "env": {
         "browser": true
+    },
+    "rules": {
+        "import/no-unresolved": ["error", {
+            "ignore": [
+                "translator",
+                "benchpress"
+            ]
+        }]
     }
 }

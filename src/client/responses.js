@@ -1,3 +1,5 @@
+import { translate } from 'translator';
+import Benchpress from 'benchpress';
 import moment from 'moment';
 
 const addResponsesToPost = (pid, cb) => {
@@ -26,20 +28,18 @@ const addResponsesToPost = (pid, cb) => {
     const maybes = $responses.find('.plugin-calendar-event-responses-list-maybe');
     const nos = $responses.find('.plugin-calendar-event-responses-list-no');
 
-    window.requirejs(['benchpress', 'translator'], (Benchpress, translator) => {
-      Promise.all(
-        [
-          { responseType: 'yes', users: responses.yes },
-          { responseType: 'maybe', users: responses.maybe },
-          { responseType: 'no', users: responses.no },
-        ].map(data => Benchpress.render('partials/calendar/event/response-list', data).then(html => translator.translate(html)))
-      ).then(([yes, maybe, no]) => {
-        yess.empty().append(yes);
-        maybes.empty().append(maybe);
-        nos.empty().append(no);
+    Promise.all(
+      [
+        { responseType: 'yes', users: responses.yes },
+        { responseType: 'maybe', users: responses.maybe },
+        { responseType: 'no', users: responses.no },
+      ].map(data => Benchpress.render('partials/calendar/event/response-list', data).then(html => translate(html)))
+    ).then(([yes, maybe, no]) => {
+      yess.empty().append(yes);
+      maybes.empty().append(maybe);
+      nos.empty().append(no);
 
-        cb();
-      });
+      cb();
     });
   });
 };
@@ -110,7 +110,12 @@ const setupPost = ({ pid, e }, cb = noop) => {
   });
 };
 
-const initResponses = () => {
+let initialized = false;
+const initialize = () => {
+  if (initialized) {
+    return;
+  }
+
   $(document.body).on('click', '.plugin-calendar-event-responses-user .btn', (e) => {
     const button = $(e.target);
     const value = button.data('value');
@@ -133,8 +138,8 @@ const initResponses = () => {
   $(document.body).on('change dp.change', '.plugin-calendar-event-responses-day input', (e) => {
     const input = $(e.target);
     const day = input
-      .data('DateTimePicker').date()
-      .utc()
+      .data('DateTimePicker')
+      .date().utc()
       .format('YYYY-MM-DD');
     const pid = input.closest('[data-pid]').attr('data-pid');
     const responses = input.closest('[data-day]');
@@ -183,6 +188,8 @@ const initResponses = () => {
       } else {
         toggle();
       }
+
+      e.preventDefault();
     }
   );
 
@@ -192,7 +199,8 @@ const initResponses = () => {
     'action:posts.edited',
   ].join(' '), checkPosts);
   checkPosts(null, ajaxify.data);
+
+  initialized = true;
 };
 
-export default initResponses;
-export { setupPost, setupDTP };
+export { setupPost, setupDTP, initialize };

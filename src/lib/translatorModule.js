@@ -34,7 +34,7 @@ const formatDates = (s, e, allday, lang, utc) => {
   return `${start.format(dateAndTime)} - ${end.format(dateAndTime)}`;
 };
 
-const init = (Translator) => {
+const initialize = (Translator) => {
   Translator.registerModule('moment', (lang) => {
     const momentLang = lang.replace(/[_@]/g, '-');
     const zero = moment(0).locale(momentLang);
@@ -112,5 +112,4 @@ const init = (Translator) => {
   });
 };
 
-export { formatDates };
-export default init;
+export { formatDates, initialize };

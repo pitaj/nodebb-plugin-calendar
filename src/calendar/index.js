@@ -1,12 +1,16 @@
+import { getLanguage } from 'translator';
 import 'fullcalendar';
+
 import convertToFC from './convertToFC';
 import displayEvent from './displayEvent';
 import locationHistory from '../client/locationHistory';
-import { setupDTP } from '../client/responses';
+
+// eslint-disable-next-line camelcase, no-undef
+__webpack_public_path__ = `${config.relative_path}/plugins/nodebb-plugin-calendar/bundles/`;
 
 const queryRegExp = /calendar\/?(?:\/*event\/+([0-9]+))?/;
 
-const begin = momentLang => window.requirejs(['benchpress'], () => {
+const begin = (momentLang) => {
   const calendarOptions = {
     editable: false,
     header: {
@@ -71,7 +75,7 @@ const begin = momentLang => window.requirejs(['benchpress'], () => {
     }
 
     const $display = $('#plugin-calendar-cal-event-display');
-    if ($display) {
+    if ($display && !shouldHandle) {
       $display.on('click', '.dismiss', () => {
         $display.modal('hide');
         ajaxify.updateHistory('calendar');
@@ -83,7 +87,7 @@ const begin = momentLang => window.requirejs(['benchpress'], () => {
     if (pid) {
       const el = $calendar
         .data('fullCalendar')
-        .getEventCache()
+        .clientEvents()
         .find(x => x.id === pid);
 
       if (shouldHandle) {
@@ -94,8 +98,14 @@ const begin = momentLang => window.requirejs(['benchpress'], () => {
           window.history.replaceState({}, '', `${RELATIVE_PATH}/calendar`);
         }
       } else {
-        setupDTP($display.find('[data-day]'), window.calendarEventData.day);
+        import('../client/responses')
+          .then(({ setupDTP }) => setupDTP($display.find('[data-day]'), window.calendarEventData.day));
+        $display.modal({
+          backdrop: false,
+          show: window.calendarEventData && !!window.calendarEventData.pid,
+        });
       }
+
       $calendar.fullCalendar('gotoDate', el ? el.start : (
         window.calendarEventData.day || window.calendarEventData.startDate
       ));
@@ -106,12 +116,9 @@ const begin = momentLang => window.requirejs(['benchpress'], () => {
 
   $(document).ready(init);
   $(window).on('action:ajaxify.end', init);
-});
+};
 
-__webpack_public_path__ = `${RELATIVE_PATH}/plugins/nodebb-plugin-calendar/bundles/`; // eslint-disable-line
-
-const lang = config.userLang || config.defaultLang;
-let momentLang = lang.toLowerCase().replace(/_/g, '-');
+let momentLang = getLanguage().toLowerCase().replace(/_/g, '-');
 if (momentLang === 'en-us') {
   begin('en-us');
 } else {
@@ -120,11 +127,9 @@ if (momentLang === 'en-us') {
     console.info(`could not load locale data (${momentLang}) for moment`, err);
     [momentLang] = momentLang.split('-');
     return import(`fullcalendar/dist/locale/${momentLang}`);
-  }).then(() => {
-    begin(momentLang);
   }).catch((err) => {
-    begin('en-us');
     // eslint-disable-next-line no-console
     console.info(`could not load locale data (${momentLang}) for moment`, err);
-  });
+    momentLang = 'en-us';
+  }).then(() => begin(momentLang));
 }

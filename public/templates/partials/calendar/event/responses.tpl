@@ -9,7 +9,7 @@
       </span>
     </div>
     {{{ end }}}
-    {{{ if uid }}}
+    
     <div class="plugin-calendar-event-responses-user btn-group">
       <button data-value="no" type="button" class="btn btn-sm btn-danger {active.no}">
         [[calendar:response_no]]
@@ -21,11 +21,11 @@
         [[calendar:response_yes]]
       </button>
     </div>
-    {{{ end }}}
+
     <div class="panel-group plugin-calendar-event-responses-lists" data-loaded="false">
       <div class="panel panel-default closed">
         <div class="panel-heading">
-          <a role="button" data-toggle="collapse" href="#"
+          <a role="button" href="#"
           class="btn btn-sm btn-info" aria-expanded="true">
             <i class="fa fa-chevron-down pull-right"></i>
             [[calendar:response_yes]]
@@ -41,7 +41,7 @@
       </div>
       <div class="panel panel-default closed">
         <div class="panel-heading">
-          <a role="button" data-toggle="collapse" href="#"
+          <a role="button" href="#"
           class="btn btn-sm btn-link" aria-expanded="true">
             <i class="fa fa-chevron-down pull-right"></i>
             [[calendar:response_maybe]]
@@ -57,7 +57,7 @@
       </div>
       <div class="panel panel-default closed">
         <div class="panel-heading">
-          <a role="button" data-toggle="collapse" href="#"
+          <a role="button" href="#"
           class="btn btn-sm btn-warning" aria-expanded="true">
             <i class="fa fa-chevron-down pull-right"></i>
             [[calendar:response_no]]

@@ -1,4 +1,5 @@
-const decode = window.utils.decodeHTMLEntities;
+// eslint-disable-next-line import/no-unresolved
+import { decodeHTMLEntities as decode } from 'utils';
 
 const mapper = event => ({
   id: event.pid,

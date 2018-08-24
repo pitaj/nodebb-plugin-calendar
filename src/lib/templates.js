@@ -1,5 +1,4 @@
-/* globals window */
-const render = require.main.require ? require('util').promisify((name, data, cb) => require.main.require('./src/routes/authentication').app.render(name, data, cb)) : window.requirejs('benchpress').render;
+import render from './render';
 
 export default function eventTemplate({ event, isEmail, uid }) {
   const response = (uid && event.responses && event.responses[uid]) ? event.responses[uid] : 'no';

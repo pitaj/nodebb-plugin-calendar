@@ -35,17 +35,4 @@ role="dialog" aria-labelledby="plugin-calendar-cal-event-display-title">
 
 <script>
   window.calendarEventData = {{eventJSON}};
-
-  function onload() {
-    require(['{relative_path}/plugins/nodebb-plugin-calendar/bundles/calendar.js']);
-    $('#plugin-calendar-cal-event-display').modal({
-      backdrop: false,
-      show: window.calendarEventData && !!window.calendarEventData.pid,
-    });
-  }
-  if (window.jQuery) {
-    onload();
-  } else {
-    window.addEventListener('load',  onload);
-  }
 </script>

@@ -1,6 +1,9 @@
+import composer from 'composer';
+import { translate } from 'translator';
+
 import { inPost } from '../lib/parse';
 
-export default (composer, translator) => {
+export default () => {
   const onChange = () => {
     const data = composer.posts[composer.active];
     socket.emit('plugins.calendar.canPostEvent', data, (e, canPost) => {
@@ -29,7 +32,7 @@ export default (composer, translator) => {
       button.off('click').on('click', function onClick(e) {
         const text = write.val();
         if (!inPost.test(text)) {
-          translator.translate('[[calendar:confirm_delete_event]]', (question) => {
+          translate('[[calendar:confirm_delete_event]]', (question) => {
             bootbox.confirm(question, (okay) => {
               if (okay) {
                 trigger(this, e);

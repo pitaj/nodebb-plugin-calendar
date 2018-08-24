@@ -8,7 +8,7 @@ import { postSaveCallback } from './postSave';
 import { privilegesList, privilegesGroupsList, privilegesListHuman } from './privileges';
 import { deleteEvent } from './event';
 import './sockets';
-import initTranslatorModule from './translatorModule';
+import { initialize as initTranslatorModule } from './translatorModule';
 
 const { Translator } = require.main.require('./public/src/modules/translator');
 initTranslatorModule(Translator);

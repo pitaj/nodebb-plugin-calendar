@@ -2,6 +2,7 @@ import moment from 'moment';
 import remindersFactory from './reminders';
 import repetitionFactory from './repetition';
 import validateEvent from '../lib/validateEvent';
+import 'eonasdan-bootstrap-datetimepicker';
 
 const defaultEvent = {
   name: '',
