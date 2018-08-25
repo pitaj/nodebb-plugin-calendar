@@ -43,6 +43,12 @@
     },
     {
       "hook": "action:post.delete", "method": "postDelete"
+    },
+    {
+      "hook": "filter:post.getPostSummaryByPids", "method": "postSummary"
+    },
+    {
+      "hook": "filter:teasers.get", "method": "topicTeaser"
     }
   ],
   "templates": "public/templates",

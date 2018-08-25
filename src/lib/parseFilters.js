@@ -30,7 +30,47 @@ const parsePost = async (data) => {
   return data;
 };
 
+const reescape = str => validator.escape(validator.unescape(str));
+
+const postSummary = (data, callback) => {
+  data.posts.forEach((post) => {
+    if (post && post.content) {
+      // eslint-disable-next-line no-param-reassign
+      post.content = post.content.replace(
+        /\[event\]\s*\[name\](.*)\[\/name\][\s\S]*\[\/event\]/,
+        (full, name) => `[[calendar:event_title]]: ${reescape(name)}`
+      ).replace(
+        /<!-- plugin-calendar-event-wrapper:start \|\|\|(.*?)\|\|\| -->[\s\S]*<!-- plugin-calendar-event-wrapper:end -->/,
+        (full, name) => `[[calendar:event_title]]: ${reescape(name)}`
+      );
+    }
+  });
+
+  callback(null, data);
+};
+
+const topicTeaser = (data, callback) => {
+  data.teasers.forEach((post) => {
+    if (post && post.content) {
+      // eslint-disable-next-line no-param-reassign
+      post.content = post.content.replace(
+        /<!-- plugin-calendar-event-wrapper:start \|\|\|(.*?)\|\|\| -->[\s\S]*<!-- plugin-calendar-event-wrapper:end -->/,
+        (full, name) => `[[calendar:event_title]]: ${reescape(name)}`
+      );
+    }
+  });
+
+  callback(null, data);
+};
+
 const parsePostCallback = callbackify(parsePost);
 const parseRawCallback = callbackify(parseRaw);
 
-export { parsePostCallback, parsePost, parseRawCallback, parseRaw };
+export {
+  parsePost,
+  parseRaw,
+  postSummary,
+  topicTeaser,
+  parsePostCallback,
+  parseRawCallback,
+};

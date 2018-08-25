@@ -3,7 +3,7 @@ import 'source-map-support/register';
 import { callbackify } from 'util';
 
 import init from './init';
-import { parsePostCallback, parseRawCallback } from './parseFilters';
+import { parsePostCallback, parseRawCallback, postSummary, topicTeaser } from './parseFilters';
 import { postSaveCallback } from './postSave';
 import { privilegesList, privilegesGroupsList, privilegesListHuman } from './privileges';
 import { deleteEvent } from './event';
@@ -49,6 +49,8 @@ export {
   adminMenu,
   parsePostCallback as parsePost,
   parseRawCallback as parseRaw,
+  postSummary,
+  topicTeaser,
   postSaveCallback as postSave,
   postSaveCallback as postEdit,
   privilegesList,
