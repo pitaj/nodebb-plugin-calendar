@@ -100,10 +100,6 @@ const begin = (momentLang) => {
       } else {
         import('../client/responses')
           .then(({ setupDTP }) => setupDTP($display.find('[data-day]'), window.calendarEventData.day));
-        $display.modal({
-          backdrop: false,
-          show: window.calendarEventData && !!window.calendarEventData.pid,
-        });
       }
 
       $calendar.fullCalendar('gotoDate', el ? el.start : (

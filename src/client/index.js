@@ -5,6 +5,17 @@ __webpack_public_path__ = `${config.relative_path}/plugins/nodebb-plugin-calenda
 
 jQuery.fn.size = jQuery.fn.size || function size() { return this.length; };
 
+const calendarLoad = () => {
+  if (ajaxify.data.template.calendar) {
+    window.require(['plugins/nodebb-plugin-calendar/bundles/calendar']);
+
+    $('#plugin-calendar-cal-event-display').modal({
+      backdrop: false,
+      show: window.calendarEventData && !!window.calendarEventData.pid,
+    });
+  }
+};
+
 $(document).ready(() => {
   // ensure dependencies are loaded
   window.requirejs(['translator', 'benchpress'], () => {
@@ -22,13 +33,7 @@ $(document).ready(() => {
       });
     });
 
-    if (ajaxify.data.template.calendar) {
-      window.require(['plugins/nodebb-plugin-calendar/bundles/calendar']);
-
-      $('#plugin-calendar-cal-event-display').modal({
-        backdrop: false,
-        show: window.calendarEventData && !!window.calendarEventData.pid,
-      });
-    }
+    calendarLoad();
+    $(window).on('action:ajaxify.end', calendarLoad);
   });
 });
