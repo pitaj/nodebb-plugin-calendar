@@ -1,15 +1,23 @@
 import { promisify as p, callbackify } from 'util';
-import { getEvent, escapeEvent } from './event';
-import { canViewPost } from './privileges';
+import { getEvent, escapeEvent, getEventsByDate } from './event';
+import { canViewPost, filterByPid } from './privileges';
 import eventTemplate from './templates';
 import { getUserResponse } from './responses';
 import { getSettings, setSettings } from './settings';
+import getOccurencesOfRepetition from './repetition';
 
 const privileges = require.main.require('./src/privileges');
 const categories = require.main.require('./src/categories');
+const user = require.main.require('./src/user');
+const posts = require.main.require('./src/posts');
+const topics = require.main.require('./src/topics');
 
 const getAllCategoryFields = p(categories.getAllCategoryFields);
+const getCategoriesFields = p(categories.getCategoriesFields);
 const filterCids = p(privileges.categories.filterCids);
+const getUsersData = p(user.getUsersData);
+const tidFromPid = p((pid, cb) => posts.getPostField(pid, 'tid', cb));
+const topicIsDeleted = p((tid, cb) => topics.getTopicField(tid, 'deleted', cb));
 
 /* eslint-disable */
 function shadeColor2(color, percent) {
@@ -38,14 +46,14 @@ export default (router, middleware) => {
       .catch(next);
   });
 
-  const renderPageCb = callbackify(async ({ uid, params }) => {
+  const renderCalendarCb = callbackify(async ({ uid, params }) => {
     const cats = await getAllCategoryFields(['cid', 'bgColor']);
-    const filtered = await filterCids('read', cats.map(c => c.cid), uid);
+    const filtered = new Set(await filterCids('read', cats.map(c => c.cid), uid));
 
-    const colors = cats.filter(c => filtered.includes(c.cid));
+    const colors = cats.filter(c => filtered.has(c.cid));
 
     const style = colors.map(({ cid, bgColor }) => `
-      .plugin-calendar-cal-event-category-${cid} {
+    .plugin-calendar-cal-event-category-${cid} {
       background-color: ${bgColor};
       border-color: ${shadeColor2(bgColor, -0.2)};
     }`);
@@ -93,7 +101,7 @@ export default (router, middleware) => {
     };
   });
 
-  const renderPage = (req, res, next) => {
+  const renderCalendar = (req, res, next) => {
     const cb = (err, data) => {
       if (err) {
         next(err);
@@ -102,13 +110,86 @@ export default (router, middleware) => {
       res.render('calendar', data);
     };
 
-    renderPageCb(req, res, cb);
+    renderCalendarCb(req, cb);
   };
 
-  router.get('/calendar/event/:eventPid/:eventDay', middleware.buildHeader, renderPage);
-  router.get('/api/calendar/event/:eventPid/:eventDay', renderPage);
-  router.get('/calendar/event/:eventPid', middleware.buildHeader, renderPage);
-  router.get('/api/calendar/event/:eventPid', renderPage);
-  router.get('/calendar', middleware.buildHeader, renderPage);
-  router.get('/api/calendar', renderPage);
+  router.get('/calendar/event/:eventPid/:eventDay', middleware.buildHeader, renderCalendar);
+  router.get('/api/calendar/event/:eventPid/:eventDay', renderCalendar);
+  router.get('/calendar/event/:eventPid', middleware.buildHeader, renderCalendar);
+  router.get('/api/calendar/event/:eventPid', renderCalendar);
+  router.get('/calendar', middleware.buildHeader, renderCalendar);
+  router.get('/api/calendar', renderCalendar);
+
+  const renderUpcomingCb = callbackify(async ({ uid }) => {
+    const end = new Date();
+    end.setMonth(end.getMonth() + 3);
+
+    const endDate = end.valueOf();
+    const startDate = Date.now();
+
+    const events = await getEventsByDate(startDate, endDate);
+    const filtered = await filterByPid(events, uid);
+
+    const cids = new Set();
+    const uids = new Set();
+    const pids = new Set();
+
+    const occurences = filtered.reduce((prev, event) => {
+      cids.add(event.cid);
+      uids.add(event.uid);
+      pids.add(event.pid);
+
+      if (event.repeats && event.repeats.every) {
+        return [...prev, ...getOccurencesOfRepetition(event, startDate, endDate)];
+      }
+      return [...prev, event];
+    }, []);
+
+    const [cats, users, deletedTopics, escaped] = await Promise.all([
+      getCategoriesFields([...cids], []),
+      getUsersData([...uids]),
+      Promise.all([...pids].map(async (pid) => {
+        const tid = await tidFromPid(pid);
+        return parseInt(await topicIsDeleted(tid), 10) && pid;
+      })),
+      Promise.all(occurences.map(event => escapeEvent(event))),
+    ]);
+
+    const pidInDeletedTopic = new Set(deletedTopics.filter(Boolean));
+    const userMap = new Map(users.map(u => [u.uid, u]));
+    const catMap = new Map(cats.map(c => [c.cid, c]));
+
+    escaped.forEach((event) => {
+      if (pidInDeletedTopic.has(event.pid)) {
+        return;
+      }
+
+      const c = catMap.get(event.cid);
+      c.events = c.events || [];
+
+      c.events.push({
+        ...event,
+        user: userMap.get(event.uid),
+      });
+    });
+
+    return {
+      categories: [...catMap.values()],
+    };
+  });
+
+  const renderUpcoming = (req, res, next) => {
+    const cb = (err, data) => {
+      if (err) {
+        next(err);
+        return;
+      }
+      res.render('events/upcoming', data);
+    };
+
+    renderUpcomingCb(req, cb);
+  };
+
+  router.get('/events/upcoming', middleware.buildHeader, renderUpcoming);
+  router.get('/api/events/upcoming', renderUpcoming);
 };

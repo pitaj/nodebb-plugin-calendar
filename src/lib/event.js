@@ -63,8 +63,10 @@ const getEventsByDate = async (startDate, endDate) => {
     // events that end after start date
     getSortedSetRangeByScore(listByEndKey, 0, -1, startDate, +Infinity),
   ]);
+
+  const byEndSet = new Set(byEnd);
   // filter to events that only start before the endDate and end after the startDate
-  const keys = byStart.filter(x => byEnd.includes(x));
+  const keys = byStart.filter(x => byEndSet.has(x));
 
   const events = await getObjects(keys);
 
