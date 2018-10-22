@@ -2,7 +2,7 @@ const state = {
   current: window.location.pathname,
   prev: '',
   handlers: [],
-  listen(handler) {
+  listen: function(handler) {
     this.handlers.push(handler);
   },
 };
