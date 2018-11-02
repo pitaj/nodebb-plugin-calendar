@@ -39,6 +39,23 @@ const deleteEvent = (data) => {
   return Promise.all([
     sortedSetRemove(listKey, objectKey),
     sortedSetRemove(listByEndKey, objectKey),
+  ]);
+};
+
+const restoreEvent = async (data) => {
+  const objectKey = `${listKey}:pid:${data.post.pid}`;
+  const event = await getObject(objectKey);
+  const endDate = event.repeats ? event.repeats.endDate || 9999999999999 : event.endDate;
+
+  return Promise.all([
+    sortedSetAdd(listKey, event.startDate, objectKey),
+    sortedSetAdd(listByEndKey, endDate, objectKey),
+  ]);
+};
+
+const purgeEvent = (data) => {
+  const objectKey = `${listKey}:pid:${data.post.pid}`;
+  return Promise.all([
     deleteKey(objectKey),
     removeAllResponses(data.post.pid),
   ]);
@@ -123,6 +140,8 @@ const escapeEvent = async (event) => {
 
 export {
   deleteEvent,
+  restoreEvent,
+  purgeEvent,
   saveEvent,
   eventExists,
   getEvent,

@@ -1,12 +1,10 @@
 import 'source-map-support/register';
 
-import { callbackify } from 'util';
-
 import init from './init';
 import { parsePostCallback, parseRawCallback, postSummary, topicTeaser } from './parseFilters';
 import { postSaveCallback } from './postSave';
 import { privilegesList, privilegesGroupsList, privilegesListHuman } from './privileges';
-import { deleteEvent } from './event';
+import { deleteEvent, restoreEvent, purgeEvent } from './event';
 import './sockets';
 import { initialize as initTranslatorModule } from './translatorModule';
 
@@ -41,7 +39,9 @@ const composerFormatting = (data, callback) => {
   callback(null, data);
 };
 
-const postDelete = callbackify(deleteEvent);
+const postDelete = (data) => { deleteEvent(data); };
+const postRestore = (data) => { restoreEvent(data); };
+const postPurge = (data) => { purgeEvent(data); };
 
 export {
   init,
@@ -58,4 +58,6 @@ export {
   privilegesListHuman,
   composerFormatting,
   postDelete,
+  postRestore,
+  postPurge,
 };
