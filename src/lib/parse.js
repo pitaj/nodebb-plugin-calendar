@@ -47,7 +47,7 @@ const parse = (text) => {
       allday: results.allday === 'true',
       startDate: parseInt(results.startDate, 10),
       endDate: parseInt(results.endDate, 10),
-      reminders: JSON.parse(results.reminders).sort((a, b) => b - a),
+      reminders: JSON.parse(results.reminders),
       location: results.location,
       description: results.description,
       mandatory: results.mandatory === 'true',

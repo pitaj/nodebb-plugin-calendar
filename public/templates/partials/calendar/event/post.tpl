@@ -28,7 +28,7 @@
       <i class="fa fa-bell" aria-hidden="true"></i>
       <ul>
         {{{ each reminders }}}
-        <li data-value="{../}">[[moment:time-duration, {./}]]</li>
+        <li data-value="{@value}">[[moment:time-duration, {@value}]]</li>
         {{{ end }}}
       </ul>
     </div>

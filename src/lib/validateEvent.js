@@ -2,7 +2,7 @@ const isArrayOf = (arr, type) => {
   if (!Array.isArray(arr)) {
     return false;
   }
-  return arr.every(x => typeof x !== type); // eslint-disable-line valid-typeof
+  return arr.every(x => typeof x === type); // eslint-disable-line valid-typeof
 };
 
 const checkDate = val => Number.isFinite(val) && new Date(val).getTime() === val;
