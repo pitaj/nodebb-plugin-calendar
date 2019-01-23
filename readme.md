@@ -2,8 +2,9 @@
 
 This plugin adds a site-wide calendar to NodeBB. It also lets you create and customize events.
 
-![Event](https://i.imgur.com/Rafqlcm.png)
-![Calendar](https://i.imgur.com/g44COuv.png)
+![Event](https://i.imgur.com/klcV8kh.png)
+
+![Calendar](https://i.imgur.com/HCAvVqT.png)
 
 ## Installation
  1. Install and activate this plugin on the ACP "Plugins" page
@@ -30,7 +31,7 @@ Before do anything with the Calendar, make sure you have the correct settings se
  - Add **Reminders** determine when subscribers get notifications about the event.
  - **Mandatory** events disable responses and send all reminders to any user that can view the event.
 
-## In The Works
+#### In The Works
  * iCal export
  * Simplistic, graceful calendar UI (infinite scroll) with mobile support
 
