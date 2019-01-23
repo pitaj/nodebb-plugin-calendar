@@ -74,6 +74,8 @@ const postSave = async (data) => {
   event.description = event.description.trim();
   event.pid = post.pid;
   event.uid = post.uid;
+  event.reminders = JSON.stringify(event.reminders);
+  event.repeats = JSON.stringify(event.repeats);
   event = await fireHook('filter:plugin-calendar.event.post', event);
 
   if (event) {

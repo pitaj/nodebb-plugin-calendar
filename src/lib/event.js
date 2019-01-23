@@ -61,6 +61,31 @@ const purgeEvent = (data) => {
   ]);
 };
 
+const fixEvent = (event) => {
+  let repeats;
+  try {
+    repeats = JSON.parse(event.repeats);
+  } catch (e) {
+    repeats = null;
+  }
+  let reminders;
+  try {
+    reminders = JSON.parse(event.reminders);
+  } catch (e) {
+    reminders = [];
+  }
+
+  return {
+    ...event,
+    repeats,
+    reminders,
+    startDate: parseInt(event.startDate, 10),
+    endDate: parseInt(event.endDate, 10),
+    mandatory: event.mandatory === true || event.mandatory === 'true',
+    allday: event.allday === true || event.allday === 'true',
+  };
+};
+
 const getEventsByDate = async (startDate, endDate) => {
   // may be possible eventually
   // except I need to do the intersection, not the union, of the sets
@@ -83,26 +108,20 @@ const getEventsByDate = async (startDate, endDate) => {
   // filter to events that only start before the endDate and end after the startDate
   const keys = byStart.filter(x => byEnd.includes(x));
 
-  const events = await getObjects(keys);
-
+  const events = (await getObjects(keys)).filter(Boolean);
   const cids = await getCidsByPids(events.map(event => event.pid));
 
-  return events.map((event, i) => ({
+  return events.map(fixEvent).map((event, i) => ({
     ...event,
     cid: cids[i],
-    startDate: parseInt(event.startDate, 10),
-    endDate: parseInt(event.endDate, 10),
-    repeats: (typeof event.repeats === 'string') ? JSON.parse(event.repeats) : event.repeats,
-    mandatory: event.mandatory === true || event.mandatory === 'true',
-    allday: event.allday === true || event.allday === 'true',
   }));
 };
 
 const getAllEvents = async () => {
   const keys = await getSortedSetRange(listKey, 0, -1);
-  const events = await getObjects(keys);
+  const events = (await getObjects(keys)).filter(Boolean);
 
-  return events;
+  return events.map(fixEvent);
 };
 
 const getEvent = async (pid) => {
@@ -110,16 +129,16 @@ const getEvent = async (pid) => {
   const cid = await getCidByPid(event.pid);
 
   return {
-    ...event,
+    ...fixEvent(event),
     cid,
   };
 };
 
 const getEventsEndingAfter = async (endDate) => {
   const keys = await getSortedSetRangeByScore(listByEndKey, 0, -1, endDate, +Infinity);
-  const events = await getObjects(keys);
+  const events = (await getObjects(keys)).filter(Boolean);
 
-  return events;
+  return events.map(fixEvent);
 };
 
 const eventExists = pid => exists(`${listKey}:pid:${pid}`);
