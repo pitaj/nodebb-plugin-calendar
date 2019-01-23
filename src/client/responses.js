@@ -1,6 +1,7 @@
 import { translate } from 'translator';
 import Benchpress from 'benchpress';
 import moment from 'moment';
+import 'eonasdan-bootstrap-datetimepicker';
 
 const addResponsesToPost = (pid, cb) => {
   const $responses = $(`[data-pid=${pid}] .plugin-calendar-event-responses-lists`);

@@ -1,4 +1,5 @@
 import moment from 'moment';
+import 'eonasdan-bootstrap-datetimepicker';
 
 const factory = ($ul) => {
   const list = $ul
