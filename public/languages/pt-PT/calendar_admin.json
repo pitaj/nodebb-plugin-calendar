@@ -1,0 +1,21 @@
+{
+  "title": "Configuração de permissões do plugin Calendar",
+  "intro": "Esta página permite ao administrador configurar quais grupos podem editar, criar e administrar eventos.",
+  "explanation_header": "Explicação",
+  "explanation_creation_rights": "Os utilizadores com direitos de criação podem criar e editar os seus próprios eventos. No entanto, não podem editar os eventos de outros.",
+  "explanation_edit_rights": "Os editores podem criar os seus próprios eventos e editar eventos de outros, mas não podem excluir eventos de outras pessoas.",
+  "explanation_admin_rights": "Os administradores podem criar os seus próprios eventos, editar eventos de outros e excluir eventos de outras pessoas. Os administradores do site também recebem esses direitos, portanto, não é necessário adicioná-los aqui.",
+  "explanation_hierarchy": "Níveis mais altos recebem todas as permissões dos níveis mais baixos (Administradores > Editores > Utilizadores com direitos de criação)",
+  "explanation_one_group": "Introduz um grupo em cada uma das seguintes caixas de entrada",
+  "explanation_global_note": "Ao preencheres os formulários seguintes, tem em mente que essas permissões são globais para todos os eventos. Elas não podem ser restringidas por negações específicas de eventos.",
+  "explanation_individual_rights": "Se quiseres configurar os direitos de edição e visualização para eventos individuais, faz isso na própria interface do Calendar.",
+  "creation_rights": "Utilizadores com direitos de criação",
+  "creation_placeholder": "Grupo dos utilizadores que podem criar eventos",
+  "edit_rights": "Editores",
+  "edit_placeholder": "Grupo dos utilizadores que podem editar eventos",
+  "admin_rights": "Administradores",
+  "admin_placeholder": "Grupo dos utilizadores que são administradores",
+  "category_label": "Categoria onde as publicações do evento serão criadas e onde serão os comentários desses eventos",
+  "category_placeholder": "Introduz o número da categoria",
+  "use_whoisin_label": "Usa o plugin Whoisin em vez do sistema interno de resposta?"
+}
