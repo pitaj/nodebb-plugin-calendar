@@ -19,7 +19,7 @@ const getCidByPid = p(posts.getCidByPid);
 const canRespond = (pid, uid) => getSetting('respondIfCanReply')
   .then((respondIfCanReply) => {
     if (respondIfCanReply) {
-      return privilegesPostCan('reply', pid, uid);
+      return privilegesPostCan('topics:reply', pid, uid);
     }
     return canViewPost(pid, uid);
   });

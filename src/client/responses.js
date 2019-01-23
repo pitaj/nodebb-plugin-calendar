@@ -95,6 +95,11 @@ const setupPost = ({ pid, e }, cb = noop) => {
   }
 
   socket.emit('plugins.calendar.getUserResponse', { pid, day }, (err, value) => {
+    if (err && err.message === '[[error:no-privileges]]') {
+      cb();
+      return;
+    }
+
     if (err) {
       app.alertError(err);
       throw err;
