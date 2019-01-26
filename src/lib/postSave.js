@@ -28,9 +28,10 @@ const postSave = async (data) => {
   if (!post.content.match(inPost)) {
     const existed = await eventExists(post.pid);
     if (existed) {
+      const existingEvent = await getEvent(post.pid);
       await notify({
-        event: await getEvent(post.pid),
-        message: '[[calendar:event_deleted]]',
+        event: existingEvent,
+        message: `[[calendar:event_deleted, ${existingEvent.name}]]`,
       });
 
       await deleteEvent(post.pid);

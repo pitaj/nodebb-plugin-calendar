@@ -52,6 +52,7 @@
   "you_responded": "You responded with <b>%1</b>",
 
   "confirm_delete_event": "Are you sure you want to delete the event in this post? This action cannot be undone.",
+  "event_deleted": "The event %1 has been deleted",
 
   "name_too_short": "Event name must be more than five characters long",
   "invalid_date": "Selected dates are invalid",
