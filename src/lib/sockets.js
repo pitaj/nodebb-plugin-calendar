@@ -20,20 +20,45 @@ const topicIsDeleted = p((tid, cb) => topics.getTopicField(tid, 'deleted', cb));
 
 pluginSockets.calendar = {};
 pluginSockets.calendar.canPostEvent = callbackify(async ({ uid }, { pid, tid, cid, isMain }) => {
+  const neither = {
+    canPost: false,
+    canPostMandatory: false,
+  };
+
   if (!isMain && await getSetting('mainPostOnly')) {
-    return false;
+    return neither;
   }
 
+  if (!(pid || tid || cid)) {
+    return neither;
+  }
+
+  let promises;
+
   if (pid) {
-    return can.posts(privilegeNames.canPost, pid, uid);
+    promises = [
+      can.posts(privilegeNames.canPost, pid, uid),
+      can.posts(privilegeNames.canMandatoryPost, pid, uid),
+    ];
   }
   if (tid) {
-    return can.topics(privilegeNames.canPost, tid, uid);
+    promises = [
+      can.topics(privilegeNames.canPost, tid, uid),
+      can.topics(privilegeNames.canMandatoryPost, tid, uid),
+    ];
   }
   if (cid) {
-    return can.categories(privilegeNames.canPost, cid, uid);
+    promises = [
+      can.categories(privilegeNames.canPost, cid, uid),
+      can.categories(privilegeNames.canMandatoryPost, cid, uid),
+    ];
   }
-  return false;
+
+  const [canPost, canPostMandatory] = await Promise.all(promises);
+  return {
+    canPost,
+    canPostMandatory,
+  };
 });
 
 const getAllResponsesCb = callbackify(getAllResponses);

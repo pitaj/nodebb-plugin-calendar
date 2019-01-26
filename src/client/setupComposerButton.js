@@ -6,11 +6,17 @@ import { inPost } from '../lib/parse';
 export default () => {
   const onChange = () => {
     const data = composer.posts[composer.active];
-    socket.emit('plugins.calendar.canPostEvent', data, (e, canPost) => {
-      $(`#cmp-uuid-${composer.active}`)
-        .find('.plugin-calendar-composer-edit-event')
-        .parent()
-        .toggle(canPost);
+    socket.emit('plugins.calendar.canPostEvent', data, (e, { canPost, canPostMandatory }) => {
+      if (canPost) {
+        $(`.composer[data-uuid=${composer.active}]`)
+          .find('.plugin-calendar-composer-edit-event')
+          .parent()
+          .css('display', 'inline-block');
+      }
+
+      $('#plugin-calendar-event-editor-mandatory')
+        .closest('.form-group')
+        .toggle(canPostMandatory);
     });
   };
 
@@ -55,4 +61,7 @@ export default () => {
     }, 400);
   });
   $(document.body).on('change', '.composer .category-list', onChange);
+
+  onChange();
+  alterSubmit();
 };

@@ -10,10 +10,16 @@ const filterPids = p(privileges.posts.filter);
 
 const privilegeNames = {
   canPost: 'plugin_calendar:event:post',
+  canMandatoryPost: 'plugin_calendar:event:mandatory',
 };
 
 const canViewPost = (pid, uid) => privilegesPostCan('read', pid, uid);
 const canPostEvent = (tid, uid) => privilegesTopicCan(privilegeNames.canPost, tid, uid);
+const canPostMandatoryEvent = (tid, uid) => privilegesTopicCan(
+  privilegeNames.canMandatoryPost,
+  tid,
+  uid
+);
 const getCidByPid = p(posts.getCidByPid);
 
 const canRespond = (pid, uid) => getSetting('respondIfCanReply')
@@ -30,13 +36,24 @@ const filterUidsByPid = (uids, pid) => getCidByPid(pid)
 const filterByPid = (events, uid) => filterPids('read', events.map(e => e.pid), uid)
   .then(filtered => events.filter(e => filtered.includes(e.pid)));
 
-const privilegesList = (list, callback) => callback(null, [...list, privilegeNames.canPost]);
-const privilegesGroupsList = (list, callback) => callback(null, [...list, `groups:${privilegeNames.canPost}`]);
-const privilegesListHuman = (list, callback) => callback(null, [...list, { name: 'Post events' }]);
+const privilegesList = (list, callback) => callback(null, [
+  ...list,
+  ...Object.values(privilegeNames),
+]);
+const privilegesGroupsList = (list, callback) => callback(null, [
+  ...list,
+  ...Object.values(privilegeNames).map(name => `groups:${name}`),
+]);
+const privilegesListHuman = (list, callback) => callback(null, [
+  ...list,
+  { name: 'Post events' },
+  { name: 'Post mandatory events' },
+]);
 
 export {
   canViewPost,
   canPostEvent,
+  canPostMandatoryEvent,
   filterUidsByPid,
   privilegesList,
   privilegesGroupsList,

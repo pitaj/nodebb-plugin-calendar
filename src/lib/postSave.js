@@ -2,7 +2,7 @@ import validator from 'validator';
 import { promisify as p, callbackify } from 'util';
 
 import parse, { inPost } from './parse';
-import { canPostEvent } from './privileges';
+import { canPostEvent, canPostMandatoryEvent } from './privileges';
 import { deleteEvent, saveEvent, eventExists, getEvent } from './event';
 import validateEvent from './validateEvent';
 import { notify } from './reminders';
@@ -65,8 +65,11 @@ const postSave = async (data) => {
     return invalid();
   }
 
-  const can = await canPostEvent(post.tid, post.uid);
-  if (!can) {
+  if (!await canPostEvent(post.tid, post.uid)) {
+    return invalid();
+  }
+
+  if (event.mandatory && !await canPostMandatoryEvent(post.tid, post.uid)) {
     return invalid();
   }
 
