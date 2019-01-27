@@ -3,7 +3,7 @@ import { getEvent, escapeEvent } from './event';
 import { canViewPost } from './privileges';
 import eventTemplate from './templates';
 import { getUserResponse } from './responses';
-import { getSettings, setSettings } from './settings';
+import { getSetting, getSettings, setSettings } from './settings';
 
 const privileges = require.main.require('./src/privileges');
 const categories = require.main.require('./src/categories');
@@ -39,10 +39,13 @@ export default (router, middleware) => {
   });
 
   const renderPageCb = callbackify(async ({ uid, params }) => {
-    const cats = await getAllCategoryFields(['cid', 'bgColor']);
-    const filtered = await filterCids('read', cats.map(c => c.cid), uid);
+    const [cats, calendarViews] = await Promise.all([
+      getAllCategoryFields(['cid', 'bgColor']),
+      getSetting('calendarViews'),
+    ]);
+    const filtered = new Set(await filterCids('read', cats.map(c => c.cid), uid));
 
-    const colors = cats.filter(c => filtered.includes(c.cid));
+    const colors = cats.filter(c => filtered.has(c.cid));
 
     const style = colors.map(({ cid, bgColor }) => `
       .plugin-calendar-cal-event-category-${cid} {
@@ -57,6 +60,7 @@ export default (router, middleware) => {
         calendarEventsStyle: style.join('\n'),
         title: '[[calendar:calendar]]',
         eventJSON: 'null',
+        calendarViews,
       };
     }
 
@@ -90,6 +94,7 @@ export default (router, middleware) => {
       eventData: event,
       eventJSON: JSON.stringify(event),
       eventHTML: await eventTemplate({ event, uid }),
+      calendarViews,
     };
   });
 

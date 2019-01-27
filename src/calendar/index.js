@@ -12,11 +12,20 @@ const queryRegExp = /calendar\/?(?:\/*event\/+([0-9]+))?/;
 
 const begin = (momentLang) => {
   const calendarOptions = {
+    defaultView: ajaxify.data.calendarViews.split(',', 1)[0],
+
+    views: {
+      listDay: { buttonText: 'day' },
+      listWeek: { buttonText: 'week' },
+      listMonth: { buttonText: 'month' },
+      listYear: { buttonText: 'year' },
+    },
+
     editable: false,
     header: {
       left: 'prev,next today',
       center: 'title',
-      right: 'month,agendaWeek,agendaDay',
+      right: ajaxify.data.calendarViews,
     },
     lang: momentLang,
     events: (start, end, timezone, callback) => {

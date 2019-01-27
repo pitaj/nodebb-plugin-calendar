@@ -24,6 +24,18 @@
               Link the permission to respond to an event to the reply permission, as opposed to (by default) the view permission
             </label>
           </div>
+          <div class="form-group row">
+            <label for="calendarViews" class="col-xs-12 col-sm-8">
+              Available views on the calendar page. Options are 
+              <code>month</code>, <code>agendaDay</code>, <code>agendaWeek</code>, <code>listDay</code>, 
+              <code>listWeek</code>, <code>listMonth</code>, and <code>listYear</code>.
+              <br>
+              Examples of these can be found at <a href="https://fullcalendar.io/docs" target="_blank">the FullCalendar Documentation</a>.
+            </label>
+            <div class="col-xs-12 col-sm-4">
+              <input type="text" class="form-control" name="calendarViews" id="calendarViews" value="{settings.calendarViews}" />
+            </div>
+          </div>
         </div>
       </div>
     </form>
