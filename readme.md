@@ -1,6 +1,6 @@
 # nodebb-plugin-calendar
 
-This plugin adds a site-wide calendar to NodeBB. It also lets you create and customize events.
+This plugin adds a site-wide calendar to NodeBB, letting you create and customize events.
 
 ![Event](https://i.imgur.com/klcV8kh.png)
 
@@ -9,6 +9,14 @@ This plugin adds a site-wide calendar to NodeBB. It also lets you create and cus
 ## Installation
  1. Install and activate this plugin on the ACP "Plugins" page
  2. Restart and rebuild your NodeBB
+
+#### Manual Installation
+Current alpha/beta version can be installed by doing the following:
+
+ 1. Open a terminal in the NodeBB root directory
+ 2. Install the latest *nodebb-plugin-calendar*:
+    `npm install nodebb-plugin-calendar@latest`
+ 3. Restart nodebb and activate the plugin
 
 ## Configuration
 Before do anything with the Calendar, make sure you have the correct settings set up in the ACP plugin settings page. Also, configure permissions for who can post events in the category management section of the ACP.
