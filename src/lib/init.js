@@ -4,6 +4,10 @@ import controllers from './controllers';
 import { initNotifierDaemon } from './reminders';
 import { getSettings, setSettings } from './settings';
 
+const nconf = require.main.require('nconf');
+
+const primary = nconf.get('isPrimary') === 'true' || nconf.get('isPrimary') === true;
+
 const shallowEqual = (a, b) => Object.keys(a).every(key => a[key] === b[key]);
 
 const initCb = callbackify(async () => {
@@ -21,7 +25,9 @@ const initCb = callbackify(async () => {
     await setSettings(settings);
   }
 
-  await initNotifierDaemon();
+  if (primary) {
+    await initNotifierDaemon();
+  }
 });
 
 export default ({ router, middleware }, callback) => {

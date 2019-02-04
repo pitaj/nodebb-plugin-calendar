@@ -107,7 +107,7 @@ const initNotifierDaemon = async () => {
   // pulled from settings
   let checkingInterval = await getSetting('checkingInterval');
 
-  winston.verbose(`Notifier Daemon initialized with
+  winston.verbose(`[plugins/calendar] Notifier Daemon initialized with
     interval of ${Math.floor(checkingInterval / 1000)} seconds`);
 
   let lastEnd = Date.now() + checkingInterval;
