@@ -1,6 +1,6 @@
 {
   "name": "nodebb-plugin-calendar",
-  "version": "1.0.0-alpha.46",
+  "version": "1.0.0-alpha.47",
   "description": "Calendar and events for NodeBB",
   "main": "library.js",
   "scripts": {
