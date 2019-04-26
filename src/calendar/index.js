@@ -11,7 +11,8 @@ __webpack_public_path__ = `${config.relative_path}/plugins/nodebb-plugin-calenda
 const queryRegExp = /calendar\/?(?:\/*event\/+([0-9]+))?/;
 
 const begin = (momentLang) => {
-  const { buttonText } = $.fullCalendar.locales[momentLang];
+  const locale = $.fullCalendar.locales[momentLang];
+  const buttonText = (locale && locale.buttonText) || {};
 
   const calendarOptions = {
     defaultView: ajaxify.data.calendarViews.split(',', 1)[0],
