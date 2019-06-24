@@ -1,5 +1,5 @@
 const webpack = require('webpack');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 const path = require('path');
 const del = require('del');
 
@@ -62,8 +62,8 @@ module.exports = (env, argv) => {
             loader: 'babel-loader',
             options: {
               plugins: [
-                'transform-object-rest-spread',
-                'syntax-dynamic-import',
+                '@babel/plugin-proposal-object-rest-spread',
+                '@babel/plugin-syntax-dynamic-import',
               ],
             },
           },
@@ -77,7 +77,10 @@ module.exports = (env, argv) => {
     },
     optimization: {
       minimizer: [
-        new UglifyJsPlugin({ sourceMap: true }),
+        new TerserPlugin({
+          sourceMap: true,
+          parallel: true,
+        }),
       ],
     },
     plugins: [

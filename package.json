@@ -29,29 +29,29 @@
   },
   "homepage": "https://github.com/pitaj/nodebb-plugin-calendar#readme",
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.3",
-    "babel-eslint": "^8.2.6",
-    "babel-loader": "^7.1.5",
-    "babel-plugin-syntax-dynamic-import": "^6.18.0",
-    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.5",
+    "@babel/plugin-proposal-object-rest-spread": "^7.4.4",
+    "@babel/plugin-syntax-dynamic-import": "^7.2.0",
+    "@babel/plugin-transform-modules-commonjs": "^7.4.4",
+    "babel-eslint": "^10.0.2",
+    "babel-loader": "^8.0.6",
     "chalk": "^2.4.1",
-    "del": "^3.0.0",
-    "eslint": "^5.4.0",
+    "del": "^4.1.1",
+    "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-babel": "^5.1.0",
-    "eslint-plugin-import": "^2.14.0",
-    "uglifyjs-webpack-plugin": "^1.3.0",
-    "webpack": "^4.17.0",
-    "webpack-cli": "^3.1.0"
+    "eslint-plugin-import": "^2.17.3",
+    "terser-webpack-plugin": "^1.3.0",
+    "webpack": "^4.35.0",
+    "webpack-cli": "^3.3.5"
   },
   "dependencies": {
     "eonasdan-bootstrap-datetimepicker": "^4.17.47",
     "fullcalendar": "^3.9.0",
     "moment": "^2.22.2",
-    "source-map-support": "^0.5.9",
-    "validator": "^10.6.0"
+    "source-map-support": "^0.5.12",
+    "validator": "^11.0.0"
   },
   "nbbpm": {
     "compatibility": "^1.10.0"
