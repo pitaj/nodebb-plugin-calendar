@@ -33,6 +33,7 @@ module.exports = (env, argv) => {
     output: {
       path: path.join(__dirname, './build/bundles'),
       filename: '[name].js',
+      chunkFilename: '[name].[contenthash].js',
     },
     externals: [
       {
