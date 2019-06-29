@@ -19,7 +19,8 @@ const parseRaw = async (content) => {
   event.name = validator.escape(event.name);
 
   const eventText = await eventTemplate({ event });
-  const text = input.replace(eventRX, eventText);
+  // must use function to avoid `$` being treated specially
+  const text = input.replace(eventRX, () => eventText);
   return text;
 };
 
