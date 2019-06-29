@@ -33,17 +33,17 @@ const parsePost = async (data) => {
 
 const reescape = str => validator.escape(validator.unescape(str));
 
+const rawPattern = /\[event\]\s*\[name\](.*)\[\/name\][\s\S]*\[\/event\]/;
+const wrapperPattern = /<!-- plugin-calendar-event-wrapper:start \|\|\|(.*?)\|\|\| -->[\s\S]*<!-- plugin-calendar-event-wrapper:end -->/;
+const shortEvent = (full, name) => `<p>| [[calendar:event_title]]: ${reescape(name)} |</p>`;
+
 const postSummary = (data, callback) => {
   data.posts.forEach((post) => {
     if (post && post.content) {
       // eslint-disable-next-line no-param-reassign
-      post.content = post.content.replace(
-        /\[event\]\s*\[name\](.*)\[\/name\][\s\S]*\[\/event\]/,
-        (full, name) => `[[calendar:event_title]]: ${reescape(name)}`
-      ).replace(
-        /<!-- plugin-calendar-event-wrapper:start \|\|\|(.*?)\|\|\| -->[\s\S]*<!-- plugin-calendar-event-wrapper:end -->/,
-        (full, name) => `[[calendar:event_title]]: ${reescape(name)}`
-      );
+      post.content = post.content
+        .replace(rawPattern, shortEvent)
+        .replace(wrapperPattern, shortEvent);
     }
   });
 
@@ -54,10 +54,7 @@ const topicTeaser = (data, callback) => {
   data.teasers.forEach((post) => {
     if (post && post.content) {
       // eslint-disable-next-line no-param-reassign
-      post.content = post.content.replace(
-        /<!-- plugin-calendar-event-wrapper:start \|\|\|(.*?)\|\|\| -->[\s\S]*<!-- plugin-calendar-event-wrapper:end -->/,
-        (full, name) => `[[calendar:event_title]]: ${reescape(name)}`
-      );
+      post.content = post.content.replace(wrapperPattern, shortEvent);
     }
   });
 
