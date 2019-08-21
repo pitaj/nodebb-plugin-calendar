@@ -1,4 +1,4 @@
-import { promisify as p, callbackify } from 'util';
+import { callbackify } from 'util';
 import { getEvent, escapeEvent } from './event';
 import { canViewPost } from './privileges';
 import eventTemplate from './templates';
@@ -8,8 +8,8 @@ import { getSetting, getSettings, setSettings } from './settings';
 const privileges = require.main.require('./src/privileges');
 const categories = require.main.require('./src/categories');
 
-const getAllCategoryFields = p(categories.getAllCategoryFields);
-const filterCids = p(privileges.categories.filterCids);
+const { getAllCategoryFields } = categories;
+const { filterCids } = privileges.categories;
 
 /* eslint-disable */
 function shadeColor2(color, percent) {

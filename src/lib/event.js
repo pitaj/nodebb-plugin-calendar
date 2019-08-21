@@ -1,4 +1,3 @@
-import { promisify as p } from 'util';
 import validator from 'validator';
 import { removeAll as removeAllResponses } from './responses';
 
@@ -6,19 +5,19 @@ const db = require.main.require('./src/database');
 const plugins = require.main.require('./src/plugins');
 const posts = require.main.require('./src/posts');
 
-const sortedSetAdd = p(db.sortedSetAdd);
-const sortedSetRemove = p(db.sortedSetRemove);
-const getSortedSetRangeByScore = p(db.getSortedSetRangeByScore);
-const getSortedSetRange = p(db.getSortedSetRange);
-// const getObjectsFields = p(db.getObjectsFields);
-const setObject = p(db.setObject);
-const getObject = p(db.getObject);
-const getObjects = p(db.getObjects);
-const deleteKey = p(db.delete);
-const exists = p(db.exists);
-const fireHook = p(plugins.fireHook);
-const getCidsByPids = p(posts.getCidsByPids);
-const getCidByPid = p(posts.getCidByPid);
+const { sortedSetAdd } = db;
+const { sortedSetRemove } = db;
+const { getSortedSetRangeByScore } = db;
+const { getSortedSetRange } = db;
+// const getObjectsFields = db.getObjectsFields;
+const { setObject } = db;
+const { getObject } = db;
+const { getObjects } = db;
+const deleteKey = db.delete;
+const { exists } = db;
+const { fireHook } = plugins;
+const { getCidsByPids } = posts;
+const { getCidByPid } = posts;
 
 const listKey = 'plugins:calendar:events';
 const listByEndKey = `${listKey}:byEnd`;

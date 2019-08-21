@@ -1,10 +1,8 @@
-import { promisify as p } from 'util';
-
 const db = require.main.require('./src/database');
 
-const getObject = p(db.getObject);
-const getObjectField = p(db.getObjectField);
-const setObject = p(db.setObject);
+const { getObject } = db;
+const { getObjectField } = db;
+const { setObject } = db;
 
 const convert = {
   checkingInterval: x => parseInt(x, 10) || 1000 * 60 * 5,

@@ -1,5 +1,5 @@
 import validator from 'validator';
-import { promisify as p, callbackify } from 'util';
+import { callbackify } from 'util';
 
 import parse, { inPost } from './parse';
 import { canPostEvent, canPostMandatoryEvent } from './privileges';
@@ -12,8 +12,8 @@ const plugins = require.main.require('./src/plugins');
 const topics = require.main.require('./src/topics');
 const winston = require.main.require('winston');
 
-const fireHook = p(plugins.fireHook);
-const getTopicField = p(topics.getTopicField);
+const { fireHook } = plugins;
+const { getTopicField } = topics;
 
 const isMainPost = async ({ pid, tid }) => {
   const mainPid = await getTopicField(tid, 'mainPid');

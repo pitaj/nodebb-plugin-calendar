@@ -1,16 +1,15 @@
-import { promisify as p } from 'util';
 import { canRespond, canViewPost } from './privileges';
 import { listKey } from './event';
 
 const db = require.main.require('./src/database');
 const user = require.main.require('./src/user');
 
-const setAdd = p(db.setAdd);
-const setsRemove = p(db.setsRemove);
-const deleteAll = p(db.deleteAll);
-const getSetsMembers = p(db.getSetsMembers);
-const isSetMember = p(db.isSetMember);
-const getUsersFields = p(user.getUsersFields);
+const { setAdd } = db;
+const { setsRemove } = db;
+const { deleteAll } = db;
+const { getSetsMembers } = db;
+const { isSetMember } = db;
+const { getUsersFields } = user;
 
 const values = ['yes', 'maybe', 'no'];
 

@@ -1,12 +1,11 @@
-import { promisify as p } from 'util';
 import { getSetting } from './settings';
 
 const privileges = require.main.require('./src/privileges');
 const posts = require.main.require('./src/posts');
-const privilegesPostCan = p(privileges.posts.can);
-const privilegesTopicCan = p(privileges.topics.can);
-const filterUidsByCid = p(privileges.categories.filterUids);
-const filterPids = p(privileges.posts.filter);
+const privilegesPostCan = privileges.posts.can;
+const privilegesTopicCan = privileges.topics.can;
+const filterUidsByCid = privileges.categories.filterUids;
+const filterPids = privileges.posts.filter;
 
 const privilegeNames = {
   canPost: 'plugin_calendar:event:post',
@@ -20,7 +19,7 @@ const canPostMandatoryEvent = (tid, uid) => privilegesTopicCan(
   tid,
   uid
 );
-const getCidByPid = p(posts.getCidByPid);
+const {getCidByPid} = posts;
 
 const canRespond = (pid, uid) => getSetting('respondIfCanReply')
   .then((respondIfCanReply) => {
