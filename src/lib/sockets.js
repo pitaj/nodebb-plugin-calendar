@@ -19,7 +19,7 @@ const tidFromPid = (pid, cb) => posts.getPostField(pid, 'tid', cb);
 const topicIsDeleted = (tid, cb) => topics.getTopicField(tid, 'deleted', cb);
 
 pluginSockets.calendar = {};
-pluginSockets.calendar.canPostEvent = callbackify(async ({ uid }, { pid, tid, cid, isMain }) => {
+pluginSockets.calendar.canPostEvent = async ({ uid }, { pid, tid, cid, isMain }) => {
   const neither = {
     canPost: false,
     canPostMandatory: false,
@@ -59,7 +59,7 @@ pluginSockets.calendar.canPostEvent = callbackify(async ({ uid }, { pid, tid, ci
     canPost,
     canPostMandatory,
   };
-});
+};
 
 const getAllResponsesCb = callbackify(getAllResponses);
 const submitResponseCb = callbackify(submitResponse);
