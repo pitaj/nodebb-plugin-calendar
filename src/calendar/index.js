@@ -100,7 +100,7 @@ const begin = (momentLang) => {
       const el = $calendar
         .data('fullCalendar')
         .clientEvents()
-        .find(x => x.id === pid);
+        .find((x) => x.id === pid);
 
       if (shouldHandle) {
         const event = el && el.original;

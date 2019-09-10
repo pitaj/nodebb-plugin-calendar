@@ -94,7 +94,7 @@ const createEventFactory = () => {
   };
 
   const createEvent = (data, callback) => {
-    const event = Object.assign({}, defaultEvent, data);
+    const event = { ...defaultEvent, ...data };
     setInputs(event);
     modal.find('.form-group').removeClass('has-error');
     modal.modal('show');
@@ -108,7 +108,7 @@ const createEventFactory = () => {
 
       const [failed, failures] = validateEvent(newEvent);
       if (failed) {
-        failures.map(failure => inputs[failure]).forEach(alertFailure);
+        failures.map((failure) => inputs[failure]).forEach(alertFailure);
         return;
       }
 
@@ -131,7 +131,7 @@ const createEventFactory = () => {
 
       const [failed, failures] = validateEvent(newEvent);
       if (failed) {
-        failures.map(failure => inputs[failure]).forEach(alertFailure);
+        failures.map((failure) => inputs[failure]).forEach(alertFailure);
       }
     };
     modal.on('change dp.change', onChange);

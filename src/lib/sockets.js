@@ -1,4 +1,3 @@
-import { promisify as p, callbackify } from 'util';
 import { getAll as getAllResponses, submitResponse, getUserResponse } from './responses';
 import { getEventsByDate, escapeEvent } from './event';
 import { filterByPid, privilegeNames } from './privileges';
@@ -11,15 +10,15 @@ const posts = require.main.require('./src/posts');
 const topics = require.main.require('./src/topics');
 
 const can = {
-  posts: p(privileges.posts.can),
-  topics: p(privileges.topics.can),
-  categories: p(privileges.categories.can),
+  posts: privileges.posts.can,
+  topics: privileges.topics.can,
+  categories: privileges.categories.can,
 };
-const tidFromPid = p((pid, cb) => posts.getPostField(pid, 'tid', cb));
-const topicIsDeleted = p((tid, cb) => topics.getTopicField(tid, 'deleted', cb));
+const tidFromPid = (pid, cb) => posts.getPostField(pid, 'tid', cb);
+const topicIsDeleted = (tid, cb) => topics.getTopicField(tid, 'deleted', cb);
 
 pluginSockets.calendar = {};
-pluginSockets.calendar.canPostEvent = callbackify(async ({ uid }, { pid, tid, cid, isMain }) => {
+pluginSockets.calendar.canPostEvent = async ({ uid }, { pid, tid, cid, isMain }) => {
   const neither = {
     canPost: false,
     canPostMandatory: false,
@@ -59,25 +58,18 @@ pluginSockets.calendar.canPostEvent = callbackify(async ({ uid }, { pid, tid, ci
     canPost,
     canPostMandatory,
   };
-});
-
-const getAllResponsesCb = callbackify(getAllResponses);
-const submitResponseCb = callbackify(submitResponse);
-const getUserResponseCb = callbackify(getUserResponse);
-
-pluginSockets.calendar.getResponses = ({ uid }, { pid, day }, cb) => {
-  getAllResponsesCb({ uid, pid, day }, cb);
 };
 
-pluginSockets.calendar.submitResponse = ({ uid }, { pid, value, day } = {}, cb) => {
-  submitResponseCb({ uid, pid, value, day }, cb);
-};
+pluginSockets.calendar.getResponses =
+  async ({ uid }, { pid, day }) => await getAllResponses({ uid, pid, day });
 
-pluginSockets.calendar.getUserResponse = ({ uid }, { pid, day }, cb) => {
-  getUserResponseCb({ uid, pid, day }, cb);
-};
+pluginSockets.calendar.submitResponse =
+  async ({ uid }, { pid, value, day } = {}) => await submitResponse({ uid, pid, value, day });
 
-pluginSockets.calendar.getEventsByDate = callbackify(async ({ uid }, { startDate, endDate }) => {
+pluginSockets.calendar.getUserResponse =
+  async ({ uid }, { pid, day }) => await getUserResponse({ uid, pid, day });
+
+pluginSockets.calendar.getEventsByDate = async ({ uid }, { startDate, endDate }) => {
   const events = await getEventsByDate(startDate, endDate);
   const filtered = await filterByPid(events, uid);
   const occurences = filtered.reduce((prev, event) => {
@@ -105,4 +97,4 @@ pluginSockets.calendar.getEventsByDate = callbackify(async ({ uid }, { startDate
   );
 
   return withResponses;
-});
+};

@@ -1,4 +1,4 @@
-import { promisify as p, callbackify } from 'util';
+import { callbackify } from 'util';
 import { getAll as getResponses, getUserResponse } from './responses';
 import { getEventsEndingAfter, escapeEvent } from './event';
 import { filterUidsByPid } from './privileges';
@@ -6,21 +6,20 @@ import getOccurencesOfRepetition from './repetition';
 import eventTemplate from './templates';
 import { getSetting } from './settings';
 
-const notifications = require.main.require('./src/notifications');
-const posts = require.main.require('./src/posts');
+const {
+  create: createNotif,
+  push: pushNotif,
+} = require.main.require('./src/notifications');
+const { getPostFields } = require.main.require('./src/posts');
 const meta = require.main.require('./src/meta');
-const user = require.main.require('./src/user');
-const emailer = require.main.require('./src/emailer');
+const {
+  getUidsFromSet,
+  getUserFields,
+  getSettings: getUserSettings,
+} = require.main.require('./src/user');
+const { send: sendEmail } = require.main.require('./src/emailer');
 const nconf = require.main.require('nconf');
 const winston = require.main.require('winston');
-
-const createNotif = p(notifications.create);
-const pushNotif = p(notifications.push);
-const getPostFields = p(posts.getPostFields);
-const getUidsFromSet = p(user.getUidsFromSet);
-const sendEmail = p(emailer.send);
-const getUserSettings = p(user.getSettings);
-const getUserFields = p(user.getUserFields);
 
 const emailNotification = async ({ uid, event, message }) => {
   if (parseInt(meta.config.disableEmailSubscriptions, 10) === 1) {
@@ -81,7 +80,7 @@ const notify = async ({ event, reminder, message }) => {
       });
       users = responses.yes;
     }
-    uids = users.map(u => u.uid);
+    uids = users.map((u) => u.uid);
   }
 
   const postData = await getPostFields(event.pid, ['tid', 'content', 'title']);
@@ -98,7 +97,7 @@ const notify = async ({ event, reminder, message }) => {
   await pushNotif(notif, uids);
 
   await Promise.all(
-    uids.map(uid => emailNotification({ uid, event, message, postData }))
+    uids.map((uid) => emailNotification({ uid, event, message, postData }))
   );
 };
 

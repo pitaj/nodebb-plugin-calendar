@@ -1,8 +1,8 @@
 import 'source-map-support/register';
 
 import init from './init';
-import { parsePostCallback, parseRawCallback, postSummary, topicTeaser } from './parseFilters';
-import { postSaveCallback } from './postSave';
+import { parsePost, parseRaw, postSummary, topicTeaser } from './parseFilters';
+import { postSave } from './postSave';
 import { privilegesList, privilegesGroupsList, privilegesListHuman } from './privileges';
 import { deleteEvent, restoreEvent, purgeEvent } from './event';
 import './sockets';
@@ -39,6 +39,13 @@ const composerFormatting = (data, callback) => {
   callback(null, data);
 };
 
+const sanitizeConfig = (config, callback) => {
+  config.allowedTags.push('input');
+  config.allowedAttributes.input = ['class', 'title', 'type'];
+
+  callback(null, config);
+};
+
 const postDelete = (data) => { deleteEvent(data); };
 const postRestore = (data) => { restoreEvent(data); };
 const postPurge = (data) => { purgeEvent(data); };
@@ -47,16 +54,17 @@ export {
   init,
   addNavigation,
   adminMenu,
-  parsePostCallback as parsePost,
-  parseRawCallback as parseRaw,
+  parsePost,
+  parseRaw,
   postSummary,
   topicTeaser,
-  postSaveCallback as postSave,
-  postSaveCallback as postEdit,
+  postSave as postCreate,
+  postSave as postEdit,
   privilegesList,
   privilegesGroupsList,
   privilegesListHuman,
   composerFormatting,
+  sanitizeConfig,
   postDelete,
   postRestore,
   postPurge,

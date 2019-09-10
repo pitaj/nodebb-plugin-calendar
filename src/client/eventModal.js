@@ -18,7 +18,7 @@ const initialize = () => {
   }
 
   return Benchpress.render('partials/calendar/event-creation-modal', {})
-    .then(template => translate(template)).then((html) => {
+    .then((template) => translate(template)).then((html) => {
       $('body').append(html);
 
       setupComposerButton();

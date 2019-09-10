@@ -10,7 +10,7 @@
     { "hook": "filter:admin.header.build", "method": "adminMenu" },
     { "hook": "filter:parse.post", "method": "parsePost", "priority": 6 },
     { "hook": "filter:parse.raw", "method": "parseRaw", "priority": 6 },
-    { "hook": "filter:post.create", "method": "postSave" },
+    { "hook": "filter:post.create", "method": "postCreate" },
     { "hook": "filter:post.edit", "method": "postEdit" },
     { "hook": "filter:privileges.list", "method": "privilegesList" },
     { "hook": "filter:privileges.groups.list", "method": "privilegesGroupsList" },
@@ -21,7 +21,8 @@
     { "hook": "action:post.restore", "method": "postRestore" },
     { "hook": "action:post.purge", "method": "postPurge" },
     { "hook": "filter:post.getPostSummaryByPids", "method": "postSummary" },
-    { "hook": "filter:teasers.get", "method": "topicTeaser" }
+    { "hook": "filter:teasers.get", "method": "topicTeaser" },
+    { "hook": "filter:sanitize.config", "method": "sanitizeConfig" }
   ],
   "templates": "public/templates",
   "languages": "public/languages",

@@ -1,24 +1,19 @@
-import { promisify as p } from 'util';
 import validator from 'validator';
 import { removeAll as removeAllResponses } from './responses';
 
-const db = require.main.require('./src/database');
-const plugins = require.main.require('./src/plugins');
-const posts = require.main.require('./src/posts');
-
-const sortedSetAdd = p(db.sortedSetAdd);
-const sortedSetRemove = p(db.sortedSetRemove);
-const getSortedSetRangeByScore = p(db.getSortedSetRangeByScore);
-const getSortedSetRange = p(db.getSortedSetRange);
-// const getObjectsFields = p(db.getObjectsFields);
-const setObject = p(db.setObject);
-const getObject = p(db.getObject);
-const getObjects = p(db.getObjects);
-const deleteKey = p(db.delete);
-const exists = p(db.exists);
-const fireHook = p(plugins.fireHook);
-const getCidsByPids = p(posts.getCidsByPids);
-const getCidByPid = p(posts.getCidByPid);
+const {
+  sortedSetAdd,
+  sortedSetRemove,
+  getSortedSetRange,
+  getSortedSetRangeByScore,
+  setObject,
+  getObject,
+  getObjects,
+  exists,
+  delete: deleteKey,
+} = require.main.require('./src/database');
+const { fireHook } = require.main.require('./src/plugins');
+const { getCidsByPids, getCidByPid } = require.main.require('./src/posts');
 
 const listKey = 'plugins:calendar:events';
 const listByEndKey = `${listKey}:byEnd`;
@@ -106,10 +101,10 @@ const getEventsByDate = async (startDate, endDate) => {
     getSortedSetRangeByScore(listByEndKey, 0, -1, startDate, +Infinity),
   ]);
   // filter to events that only start before the endDate and end after the startDate
-  const keys = byStart.filter(x => byEnd.includes(x));
+  const keys = byStart.filter((x) => byEnd.includes(x));
 
   const events = (await getObjects(keys)).filter(Boolean);
-  const cids = await getCidsByPids(events.map(event => event.pid));
+  const cids = await getCidsByPids(events.map((event) => event.pid));
 
   return events.map(fixEvent).map((event, i) => ({
     ...event,
@@ -141,7 +136,7 @@ const getEventsEndingAfter = async (endDate) => {
   return events.map(fixEvent);
 };
 
-const eventExists = pid => exists(`${listKey}:pid:${pid}`);
+const eventExists = (pid) => exists(`${listKey}:pid:${pid}`);
 
 const escapeEvent = async (event) => {
   const [location, description] = await Promise.all([

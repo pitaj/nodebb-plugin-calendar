@@ -34,7 +34,7 @@ const addResponsesToPost = (pid, cb) => {
         { responseType: 'yes', users: responses.yes },
         { responseType: 'maybe', users: responses.maybe },
         { responseType: 'no', users: responses.no },
-      ].map(data => Benchpress.render('partials/calendar/event/response-list', data).then(html => translate(html)))
+      ].map((data) => Benchpress.render('partials/calendar/event/response-list', data).then((html) => translate(html)))
     ).then(([yes, maybe, no]) => {
       yess.empty().append(yes);
       maybes.empty().append(maybe);
@@ -68,9 +68,7 @@ const setupDTP = (responses, day) => {
     locale: (config.userLang || config.defaultLang).toLowerCase().replace(/_/g, '-'),
     format: 'L',
     useCurrent: true,
-  })
-    .data('DateTimePicker')
-    .date(m);
+  }).data('DateTimePicker').date(m);
 };
 
 const noop = () => {};
@@ -143,10 +141,9 @@ const initialize = () => {
 
   $(document.body).on('change dp.change', '.plugin-calendar-event-responses-day input', (e) => {
     const input = $(e.target);
-    const day = input
-      .data('DateTimePicker')
-      .date().utc()
-      .format('YYYY-MM-DD');
+    const data = input.data('DateTimePicker');
+    const day = data && data.date().utc().format('YYYY-MM-DD');
+
     const pid = input.closest('[data-pid]').attr('data-pid');
     const responses = input.closest('[data-day]');
     responses.attr('data-day', day);
@@ -165,7 +162,7 @@ const initialize = () => {
 
     if (posts && posts.length > 0) {
       setTimeout(() => {
-        posts.forEach(post => setupPost({ pid: post.pid }));
+        posts.forEach((post) => setupPost({ pid: post.pid }));
       }, 200);
     }
   };

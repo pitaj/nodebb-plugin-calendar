@@ -1,15 +1,12 @@
-import { promisify as p, callbackify } from 'util';
+import { callbackify } from 'util';
 import { getEvent, escapeEvent } from './event';
 import { canViewPost } from './privileges';
 import eventTemplate from './templates';
 import { getUserResponse } from './responses';
 import { getSetting, getSettings, setSettings } from './settings';
 
-const privileges = require.main.require('./src/privileges');
-const categories = require.main.require('./src/categories');
-
-const getAllCategoryFields = p(categories.getAllCategoryFields);
-const filterCids = p(privileges.categories.filterCids);
+const { filterCids } = require.main.require('./src/privileges').categories;
+const { getAllCategoryFields } = require.main.require('./src/categories');
 
 /* eslint-disable */
 function shadeColor2(color, percent) {
@@ -43,9 +40,9 @@ export default (router, middleware) => {
       getAllCategoryFields(['cid', 'bgColor']),
       getSetting('calendarViews'),
     ]);
-    const filtered = new Set(await filterCids('read', cats.map(c => c.cid), uid));
+    const filtered = new Set(await filterCids('read', cats.map((c) => c.cid), uid));
 
-    const colors = cats.filter(c => filtered.has(c.cid));
+    const colors = cats.filter((c) => filtered.has(c.cid));
 
     const style = colors.map(({ cid, bgColor }) => `
       .plugin-calendar-cal-event-category-${cid} {

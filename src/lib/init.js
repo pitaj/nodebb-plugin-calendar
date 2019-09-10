@@ -1,5 +1,3 @@
-import { callbackify } from 'util';
-
 import controllers from './controllers';
 import { initNotifierDaemon } from './reminders';
 import { getSettings, setSettings } from './settings';
@@ -8,9 +6,9 @@ const nconf = require.main.require('nconf');
 
 const primary = nconf.get('isPrimary') === 'true' || nconf.get('isPrimary') === true;
 
-const shallowEqual = (a, b) => Object.keys(a).every(key => a[key] === b[key]);
+const shallowEqual = (a, b) => Object.keys(a).every((key) => a[key] === b[key]);
 
-const initCb = callbackify(async () => {
+const init = async () => {
   const defaults = {
     checkingInterval: 1000 * 60 * 5,
     mainPostOnly: false,
@@ -28,10 +26,10 @@ const initCb = callbackify(async () => {
   if (primary) {
     await initNotifierDaemon();
   }
-});
+};
 
-export default ({ router, middleware }, callback) => {
+export default async ({ router, middleware }) => {
   controllers(router, middleware);
 
-  initCb(callback);
+  await init();
 };

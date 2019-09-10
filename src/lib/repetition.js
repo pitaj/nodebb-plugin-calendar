@@ -143,7 +143,7 @@ export default function getOccurencesOfRepetition(event, start, end) {
     dates = out;
   }
 
-  const occurences = dates.map(date => ({
+  const occurences = dates.map((date) => ({
     ...event,
     startDate: date,
     endDate: date + duration,

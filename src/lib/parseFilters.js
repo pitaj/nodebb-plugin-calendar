@@ -1,5 +1,4 @@
 import validator from 'validator';
-import { callbackify } from 'util';
 
 import eventTemplate from './templates';
 import parse, { tagTemplate } from './parse';
@@ -31,7 +30,7 @@ const parsePost = async (data) => {
   return data;
 };
 
-const reescape = str => validator.escape(validator.unescape(str));
+const reescape = (str) => validator.escape(validator.unescape(str));
 
 const rawPattern = /\[event\]\s*\[name\](.*)\[\/name\][\s\S]*\[\/event\]/;
 const wrapperPattern = /<!-- plugin-calendar-event-wrapper:start \|\|\|(.*?)\|\|\| -->[\s\S]*<!-- plugin-calendar-event-wrapper:end -->/;
@@ -61,14 +60,9 @@ const topicTeaser = (data, callback) => {
   callback(null, data);
 };
 
-const parsePostCallback = callbackify(parsePost);
-const parseRawCallback = callbackify(parseRaw);
-
 export {
   parsePost,
   parseRaw,
   postSummary,
   topicTeaser,
-  parsePostCallback,
-  parseRawCallback,
 };

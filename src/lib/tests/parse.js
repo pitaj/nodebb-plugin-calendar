@@ -121,4 +121,4 @@ import rawTemplate from '../../client/templates';
     const result = parse(rawTemplate(data));
     assert.strictEqual(null, result, 'Expected null, got something else');
   },
-].forEach(x => x());
+].forEach((x) => x());

@@ -1,7 +1,7 @@
 // eslint-disable-next-line import/no-unresolved
 import { decodeHTMLEntities as decode } from 'utils';
 
-const mapper = event => ({
+const mapper = (event) => ({
   id: event.pid,
   title: decode(decode(event.name)),
   allDay: event.allday,
@@ -15,6 +15,6 @@ const mapper = event => ({
   original: event,
 });
 
-const convertToFC = events => events.map(mapper);
+const convertToFC = (events) => events.map(mapper);
 
 export default convertToFC;

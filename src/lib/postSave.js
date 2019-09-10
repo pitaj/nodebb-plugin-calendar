@@ -1,5 +1,4 @@
 import validator from 'validator';
-import { promisify as p, callbackify } from 'util';
 
 import parse, { inPost } from './parse';
 import { canPostEvent, canPostMandatoryEvent } from './privileges';
@@ -8,12 +7,9 @@ import validateEvent from './validateEvent';
 import { notify } from './reminders';
 import { getSetting } from './settings';
 
-const plugins = require.main.require('./src/plugins');
-const topics = require.main.require('./src/topics');
+const { fireHook } = require.main.require('./src/plugins');
+const { getTopicField } = require.main.require('./src/topics');
 const winston = require.main.require('winston');
-
-const fireHook = p(plugins.fireHook);
-const getTopicField = p(topics.getTopicField);
 
 const isMainPost = async ({ pid, tid }) => {
   const mainPid = await getTopicField(tid, 'mainPid');
@@ -90,6 +86,4 @@ const postSave = async (data) => {
   return data;
 };
 
-const postSaveCallback = callbackify(postSave);
-
-export { postSave, postSaveCallback };
+export { postSave };

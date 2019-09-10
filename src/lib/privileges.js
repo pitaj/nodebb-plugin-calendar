@@ -1,12 +1,12 @@
-import { promisify as p } from 'util';
 import { getSetting } from './settings';
 
 const privileges = require.main.require('./src/privileges');
-const posts = require.main.require('./src/posts');
-const privilegesPostCan = p(privileges.posts.can);
-const privilegesTopicCan = p(privileges.topics.can);
-const filterUidsByCid = p(privileges.categories.filterUids);
-const filterPids = p(privileges.posts.filter);
+const { getCidByPid } = require.main.require('./src/posts');
+
+const privilegesPostCan = privileges.posts.can;
+const privilegesTopicCan = privileges.topics.can;
+const filterUidsByCid = privileges.categories.filterUids;
+const filterPids = privileges.posts.filter;
 
 const privilegeNames = {
   canPost: 'plugin_calendar:event:post',
@@ -20,7 +20,6 @@ const canPostMandatoryEvent = (tid, uid) => privilegesTopicCan(
   tid,
   uid
 );
-const getCidByPid = p(posts.getCidByPid);
 
 const canRespond = (pid, uid) => getSetting('respondIfCanReply')
   .then((respondIfCanReply) => {
@@ -31,10 +30,10 @@ const canRespond = (pid, uid) => getSetting('respondIfCanReply')
   });
 
 const filterUidsByPid = (uids, pid) => getCidByPid(pid)
-  .then(cid => filterUidsByCid('read', cid, uids));
+  .then((cid) => filterUidsByCid('read', cid, uids));
 
-const filterByPid = (events, uid) => filterPids('read', events.map(e => e.pid), uid)
-  .then(filtered => events.filter(e => filtered.includes(e.pid)));
+const filterByPid = (events, uid) => filterPids('read', events.map((e) => e.pid), uid)
+  .then((filtered) => events.filter((e) => filtered.includes(e.pid)));
 
 const privilegesList = (list, callback) => callback(null, [
   ...list,
@@ -42,7 +41,7 @@ const privilegesList = (list, callback) => callback(null, [
 ]);
 const privilegesGroupsList = (list, callback) => callback(null, [
   ...list,
-  ...Object.values(privilegeNames).map(name => `groups:${name}`),
+  ...Object.values(privilegeNames).map((name) => `groups:${name}`),
 ]);
 const privilegesListHuman = (list, callback) => callback(null, [
   ...list,

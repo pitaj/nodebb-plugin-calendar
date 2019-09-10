@@ -8,7 +8,7 @@ export default function eventTemplate({ event, isEmail, uid }) {
     yes: '',
     [response]: 'active',
   };
-  const repeatsEveryUnit = event.repeats && ['day', 'week', 'month', 'year'].find(x => event.repeats.every[x]);
+  const repeatsEveryUnit = event.repeats && ['day', 'week', 'month', 'year'].find((x) => event.repeats.every[x]);
   const repeatsEndDateFinite = Number.isFinite(event.repeats && event.repeats.endDate);
   const reminders = event.reminders.sort((a, b) => a - b);
 
