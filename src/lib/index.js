@@ -43,6 +43,10 @@ const sanitizeConfig = (config, callback) => {
   config.allowedTags.push('input');
   config.allowedAttributes.input = ['class', 'title', 'type'];
 
+  // in case we're on an older NodeBB version
+  config.allowedClasses = config.allowedClasses || {};
+  config.allowedClasses.input = ['form-control'];
+
   callback(null, config);
 };
 

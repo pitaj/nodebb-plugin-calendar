@@ -83,14 +83,14 @@ const setupPost = ({ pid, e }, cb = noop) => {
     return;
   }
 
+  if (!e) {
+    setupDTP(responses, day);
+  }
+
   if (!app.user.uid) {
     buttonCont.remove();
     cb();
     return;
-  }
-
-  if (!e) {
-    setupDTP(responses, day);
   }
 
   socket.emit('plugins.calendar.getUserResponse', { pid, day }, (err, value) => {
