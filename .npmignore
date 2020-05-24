@@ -1,8 +1,7 @@
-src
 .babelrc
-.eslintrc
-.eslintignore
+.editorconfig
+.eslintrc.json
+.gitignore
+.npmignore
 webpack.config.js
-tsconfig.json
-ts
 .vscode
