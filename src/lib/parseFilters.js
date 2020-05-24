@@ -33,7 +33,7 @@ const parsePost = async (data) => {
 const reescape = (str) => validator.escape(validator.unescape(str));
 
 const rawPattern = /\[event\]\s*\[name\](.*)\[\/name\][\s\S]*\[\/event\]/;
-const wrapperPattern = /<!-- plugin-calendar-event-wrapper:start \|\|\|(.*?)\|\|\| -->[\s\S]*<!-- plugin-calendar-event-wrapper:end -->/;
+const wrapperPattern = /(?:<span class="hidden">)?plugin-calendar-event-wrapper:start \|\|\|(.*?)\|\|\|(<\/span>)?[\s\S]*(?:<span class="hidden">)?plugin-calendar-event-wrapper:end(<\/span>)?/;
 const shortEvent = (full, name) => `<p>| [[calendar:event_title]]: ${reescape(name)} |</p>`;
 
 const postSummary = (data, callback) => {

@@ -1,4 +1,4 @@
-<!-- plugin-calendar-event-wrapper:start |||{event.name}||| -->
+<span class="hidden">plugin-calendar-event-wrapper:start |||{event.name}|||</span>
 <div class="plugin-calendar-event panel panel-success" data-translated="false">
   <div class="plugin-calendar-event-name panel-heading">
     {event.name}
@@ -65,4 +65,4 @@
     {{{ end }}}
   </div>
 </div>
-<!-- plugin-calendar-event-wrapper:end -->
+<span class="hidden">plugin-calendar-event-wrapper:end</span>
