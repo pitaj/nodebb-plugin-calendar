@@ -1,4 +1,3 @@
-import { callbackify } from 'util';
 import { getEvent, escapeEvent } from './event';
 import { canViewPost } from './privileges';
 import eventTemplate from './templates';
@@ -35,18 +34,19 @@ export default (router, middleware) => {
       .catch(next);
   });
 
-  const renderPageCb = callbackify(async ({ uid, params }) => {
+  const renderPage = async ({ uid, params }) => {
     const [cats, calendarViews] = await Promise.all([
-      getAllCategoryFields(['cid', 'bgColor']),
+      getAllCategoryFields(['cid', 'bgColor', 'color']),
       getSetting('calendarViews'),
     ]);
     const filtered = new Set(await filterCids('read', cats.map((c) => c.cid), uid));
 
     const colors = cats.filter((c) => filtered.has(c.cid));
 
-    const style = colors.map(({ cid, bgColor }) => `
+    const style = colors.map(({ cid, bgColor, color }) => `
       .plugin-calendar-cal-event-category-${cid} {
       background-color: ${bgColor};
+      color: ${color};
       border-color: ${shadeColor2(bgColor, -0.2)};
     }`);
 
@@ -93,24 +93,19 @@ export default (router, middleware) => {
       eventHTML: await eventTemplate({ event, uid }),
       calendarViews,
     };
-  });
-
-  const renderPage = (req, res, next) => {
-    const cb = (err, data) => {
-      if (err) {
-        next(err);
-        return;
-      }
-      res.render('calendar', data);
-    };
-
-    renderPageCb(req, res, cb);
   };
 
-  router.get('/calendar/event/:eventPid/:eventDay', middleware.buildHeader, renderPage);
-  router.get('/api/calendar/event/:eventPid/:eventDay', renderPage);
-  router.get('/calendar/event/:eventPid', middleware.buildHeader, renderPage);
-  router.get('/api/calendar/event/:eventPid', renderPage);
-  router.get('/calendar', middleware.buildHeader, renderPage);
-  router.get('/api/calendar', renderPage);
+  const renderPageHandler = (req, res, next) => {
+    renderPage(req).then(
+      (data) => res.render('calendar', data),
+      (err) => setImmediate(next, err)
+    );
+  };
+
+  router.get('/calendar/event/:eventPid/:eventDay', middleware.buildHeader, renderPageHandler);
+  router.get('/api/calendar/event/:eventPid/:eventDay', renderPageHandler);
+  router.get('/calendar/event/:eventPid', middleware.buildHeader, renderPageHandler);
+  router.get('/api/calendar/event/:eventPid', renderPageHandler);
+  router.get('/calendar', middleware.buildHeader, renderPageHandler);
+  router.get('/api/calendar', renderPageHandler);
 };
