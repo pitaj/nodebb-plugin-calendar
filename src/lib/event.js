@@ -40,7 +40,12 @@ const deleteEvent = (data) => {
 const restoreEvent = async (data) => {
   const objectKey = `${listKey}:pid:${data.post.pid}`;
   const event = await getObject(objectKey);
-  const endDate = event.repeats ? event.repeats.endDate || 9999999999999 : event.endDate;
+
+  if (!event) {
+    return null;
+  }
+
+  const endDate = event.repeats ? (event.repeats.endDate || 9999999999999) : event.endDate;
 
   return Promise.all([
     sortedSetAdd(listKey, event.startDate, objectKey),
