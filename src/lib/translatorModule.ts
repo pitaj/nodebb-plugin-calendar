@@ -47,7 +47,7 @@ interface NodebbTranslator {
   ): void;
 }
 
-const initialize = (Translator: NodebbTranslator) => {
+const initialize = (Translator: NodebbTranslator): void => {
   Translator.registerModule('moment', (lang) => {
     const momentLang = lang.replace(/[_@]/g, '-');
     const zero = moment(0).locale(momentLang);

@@ -1,29 +1,30 @@
 import { EventInfo, Keys } from './event';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-const isArrayOf = (arr: any, type: string) => {
+const isArrayOf = (arr: unknown, type: string) => {
   if (!Array.isArray(arr)) {
     return false;
   }
   return arr.every(x => typeof x === type); // eslint-disable-line valid-typeof
 };
 
-const checkDate = (val: any) => Number.isFinite(val) && new Date(val).getTime() === val;
+const isFiniteNumber = (val: unknown): val is number => Number.isFinite(val);
+const checkDate = (val: unknown) => isFiniteNumber(val) && new Date(val).getTime() === val;
+
+const isRecord = (val: unknown): val is Record<string, unknown> => !!val;
 
 const fields: {
-  [K in Keys]: (val: any) => boolean
+  [K in Keys]: (val: unknown) => boolean
 } = {
-  name: (val: any) => typeof val === 'string' && (val.length > 5),
-  allday: (val: any) => typeof val === 'boolean',
+  name: val => typeof val === 'string' && (val.length > 5),
+  allday: val => typeof val === 'boolean',
   startDate: checkDate,
   endDate: checkDate,
-  reminders: (val: any) => isArrayOf(val, 'number'),
-  mandatory: (val: any) => typeof val === 'boolean',
-  location: (val: any) => typeof val === 'string' && !val.includes('\n'),
-  description: (val: any) => typeof val === 'string',
-  repeats: (val: any) => val == null || (val && !!Object.keys(val.every).length),
+  reminders: val => isArrayOf(val, 'number'),
+  mandatory: val => typeof val === 'boolean',
+  location: val => typeof val === 'string' && !val.includes('\n'),
+  description: val => typeof val === 'string',
+  repeats: val => val == null || (isRecord(val) && !!Object.keys(val.every).length),
 };
-/* eslint-enable @typescript-eslint/no-explicit-any */
 
 const validateEvent = (event: EventInfo): [boolean, (Keys | 'repeatEndDate')[]] => {
   let failures: (Keys | 'repeatEndDate')[] = [];
