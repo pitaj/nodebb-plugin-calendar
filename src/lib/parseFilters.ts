@@ -6,7 +6,7 @@ import parse, { tagTemplate } from './parse';
 const eventRX = new RegExp(tagTemplate('event', '[\\s\\S]*'));
 const invalidRX = new RegExp(`(${tagTemplate('event-invalid', '[\\s\\S]*')})`);
 
-const parseRaw = async (content) => {
+const parseRaw: filter__parse_raw = async (content) => {
   const input = content.replace(
     /\[description\]([\s\S]*)\[\/description\]/,
     '[description]<p>$1</p>[/description]'
@@ -23,20 +23,20 @@ const parseRaw = async (content) => {
   return text;
 };
 
-const parsePost = async (data) => {
+const parsePost: filter__parse_post = async (data) => {
   const { postData } = data;
   postData.content = await parseRaw(postData.content);
 
   return data;
 };
 
-const reescape = (str) => validator.escape(validator.unescape(str));
+const reescape = (str: string) => validator.escape(validator.unescape(str));
 
 const rawPattern = /\[event\]\s*\[name\](.*)\[\/name\][\s\S]*\[\/event\]/;
 const wrapperPattern = /(?:<span class="hidden">)?plugin-calendar-event-wrapper:start \|\|\|(.*?)\|\|\|(<\/span>)?[\s\S]*(?:<span class="hidden">)?plugin-calendar-event-wrapper:end(<\/span>)?/;
-const shortEvent = (full, name) => `<p>| [[calendar:event_title]]: ${reescape(name)} |</p>`;
+const shortEvent = (full: string, name: string) => `<p>| [[calendar:event_title]]: ${reescape(name)} |</p>`;
 
-const postSummary = (data, callback) => {
+const postSummary: filter__post_getPostSummaryByPids = async (data) => {
   data.posts.forEach((post) => {
     if (post && post.content) {
       // eslint-disable-next-line no-param-reassign
@@ -46,10 +46,10 @@ const postSummary = (data, callback) => {
     }
   });
 
-  callback(null, data);
+  return data;
 };
 
-const topicTeaser = (data, callback) => {
+const topicTeaser: filter__teasers_get = async (data) => {
   data.teasers.forEach((post) => {
     if (post && post.content) {
       // eslint-disable-next-line no-param-reassign
@@ -57,7 +57,7 @@ const topicTeaser = (data, callback) => {
     }
   });
 
-  callback(null, data);
+  return data;
 };
 
 export {

@@ -1,4 +1,4 @@
-import { getAll as getAllResponses, submitResponse, getUserResponse } from './responses';
+import { getAll as getAllResponses, submitResponse, getUserResponse, Response } from './responses';
 import { getEventsByDate, escapeEvent } from './event';
 import { filterByPid, privilegeNames } from './privileges';
 import getOccurencesOfRepetition from './repetition';
@@ -14,11 +14,14 @@ const can = {
   topics: privileges.topics.can,
   categories: privileges.categories.can,
 };
-const tidFromPid = (pid, cb) => posts.getPostField(pid, 'tid', cb);
-const topicIsDeleted = (tid, cb) => topics.getTopicField(tid, 'deleted', cb);
+const tidFromPid = (pid: number) => posts.getPostField(pid, 'tid');
+const topicIsDeleted = (tid: number) => topics.getTopicField(tid, 'deleted');
 
 pluginSockets.calendar = {};
-pluginSockets.calendar.canPostEvent = async ({ uid }, { pid, tid, cid, isMain }) => {
+pluginSockets.calendar.canPostEvent = async (
+  { uid }: { uid: number },
+  { pid, tid, cid, isMain }: { pid: number, tid: number, cid: number, isMain: boolean }
+) => {
   const neither = {
     canPost: false,
     canPostMandatory: false,
@@ -60,24 +63,35 @@ pluginSockets.calendar.canPostEvent = async ({ uid }, { pid, tid, cid, isMain })
   };
 };
 
-pluginSockets.calendar.getResponses =
-  async ({ uid }, { pid, day }) => await getAllResponses({ uid, pid, day });
+pluginSockets.calendar.getResponses = async (
+  { uid }: { uid: number },
+  { pid, day }: { pid: number, day: string }
+) => await getAllResponses({ uid, pid, day });
 
-pluginSockets.calendar.submitResponse =
-  async ({ uid }, { pid, value, day } = {}) => await submitResponse({ uid, pid, value, day });
+pluginSockets.calendar.submitResponse = async (
+  { uid }: { uid: number },
+  { pid, value, day }: { pid?: number, value?: Response, day?: string } = {}
+) => await submitResponse({ uid, pid, value, day });
 
-pluginSockets.calendar.getUserResponse =
-  async ({ uid }, { pid, day }) => await getUserResponse({ uid, pid, day });
+pluginSockets.calendar.getUserResponse = async (
+  { uid }: { uid: number },
+  { pid, day }: { pid: number, day: string }
+) => await getUserResponse({ uid, pid, day });
 
-pluginSockets.calendar.getEventsByDate = async ({ uid }, { startDate, endDate }) => {
+pluginSockets.calendar.getEventsByDate = async (
+  { uid }: { uid: number },
+  { startDate, endDate }: { startDate: number, endDate: number }
+) => {
   const events = await getEventsByDate(startDate, endDate);
   const filtered = await filterByPid(events, uid);
+
   const occurences = filtered.reduce((prev, event) => {
     if (event.repeats && event.repeats.every) {
       return [...prev, ...getOccurencesOfRepetition(event, startDate, endDate)];
     }
     return [...prev, event];
   }, []);
+
   const withResponses = await Promise.all(
     occurences.map(async (event) => {
       const { pid, day } = event;

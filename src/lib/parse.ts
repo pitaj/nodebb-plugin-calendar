@@ -1,6 +1,11 @@
-const tagTemplate = (name, content) => `\\s*\\[${name}\\](${content})\\[\\/${name}\\]\\s*`;
+import { EventInfo, Keys } from './event';
 
-const regExps = [
+const tagTemplate = (name: string, content: string): string => `\\s*\\[${name}\\](${content})\\[\\/${name}\\]\\s*`;
+
+const regExps: {
+  key: Keys,
+  pattern: string,
+}[] = [
   { key: 'name', pattern: '.*' },
   { key: 'allday', pattern: 'true|false' },
   { key: 'startDate', pattern: '[0-9]+' },
@@ -9,7 +14,7 @@ const regExps = [
   { key: 'location', pattern: '.*' },
   { key: 'description', pattern: '[\\s\\S]*' },
   { key: 'mandatory', pattern: 'true|false' },
-].map(({ key, pattern }) => ({
+].map(({ key, pattern }: { key: Keys, pattern: string }) => ({
   key,
   pattern: tagTemplate(key, pattern),
 }));
@@ -23,23 +28,23 @@ const inPost = new RegExp(
   '(\\[event(?:\\-invalid)?\\][\\s\\S]+\\[\\/event(?:\\-invalid)?\\])'
 );
 
-const full = regExps.map((r) => r.pattern).join('');
+const full = regExps.map(r => r.pattern).join('');
 const eventRegExp = tagTemplate('event', full);
 
-const parse = (text) => {
+const parse = (text: string): EventInfo => {
   const matches = text.match(eventRegExp);
   if (!matches || !matches.length) {
     return null;
   }
   const match = matches[1];
-  const results = {};
+  const results: { [K in Keys]?: string } = {};
   regExps.forEach(({ key, pattern }) => {
     const m = match.match(pattern);
     results[key] = m && m[1] && m[1].trim();
   });
 
-  results.repeats = match.match(/\[repeats\](.*)\[\/repeats\]/);
-  results.repeats = results.repeats && results.repeats[1];
+  const repeats = match.match(/\[repeats\](.*)\[\/repeats\]/);
+  results.repeats = repeats ? repeats[1] : null;
 
   try {
     return {

@@ -1,6 +1,6 @@
 import { callbackify } from 'util';
 import { getAll as getResponses, getUserResponse } from './responses';
-import { getEventsEndingAfter, escapeEvent } from './event';
+import { getEventsEndingAfter, escapeEvent, Event } from './event';
 import { filterUidsByPid } from './privileges';
 import getOccurencesOfRepetition from './repetition';
 import eventTemplate from './templates';
@@ -21,7 +21,10 @@ const { send: sendEmail } = require.main.require('./src/emailer');
 const nconf = require.main.require('nconf');
 const winston = require.main.require('winston');
 
-const emailNotification = async ({ uid, event, message }) => {
+const emailNotification = async (
+  { uid, event, message }:
+  { uid: number, event: Event, message: string }
+) => {
   if (parseInt(meta.config.disableEmailSubscriptions, 10) === 1) {
     return;
   }
@@ -40,6 +43,7 @@ const emailNotification = async ({ uid, event, message }) => {
 
     const content = await eventTemplate({ event: parsed, uid, isEmail: true });
 
+    /* eslint-disable camelcase */
     await sendEmail('notif_plugin_calendar_event_reminder', uid, {
       pid: event.pid,
       subject: `[${meta.config.title || 'NodeBB'}] ` +
@@ -51,10 +55,14 @@ const emailNotification = async ({ uid, event, message }) => {
       url: `${nconf.get('url')}/post/${event.pid}`,
       base_url: nconf.get('url'),
     });
+    /* eslint-enable camelcase */
   }
 };
 
-const notify = async ({ event, reminder, message }) => {
+const notify = async (
+  { event, reminder, message }:
+  { event: Event, reminder?: number, message: string }
+): Promise<void> => {
   let uids;
 
   // if event is mandatory, notify all the users who can view it
@@ -80,7 +88,7 @@ const notify = async ({ event, reminder, message }) => {
       });
       users = responses.yes;
     }
-    uids = users.map((u) => u.uid);
+    uids = users.map(u => u.uid);
   }
 
   const postData = await getPostFields(event.pid, ['tid', 'content', 'title']);
@@ -97,11 +105,11 @@ const notify = async ({ event, reminder, message }) => {
   await pushNotif(notif, uids);
 
   await Promise.all(
-    uids.map((uid) => emailNotification({ uid, event, message, postData }))
+    uids.map(uid => emailNotification({ uid, event, message }))
   );
 };
 
-const initNotifierDaemon = async () => {
+const initNotifierDaemon = async (): Promise<void> => {
   // ms between checking for reminders
   // pulled from settings
   let checkingInterval = await getSetting('checkingInterval');

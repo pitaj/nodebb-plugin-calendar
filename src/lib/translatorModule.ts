@@ -1,10 +1,16 @@
-import moment from 'moment';
+import moment, { Locale } from 'moment';
 
 const justDate = 'dddd, LL';
 const justTime = 'LT';
 const dateAndTime = 'LLLL';
 
-const formatDates = (s, e, allday, lang, utc) => {
+const formatDates = (
+  s: number,
+  e: number,
+  allday: boolean,
+  lang: string,
+  utc: boolean
+): string => {
   const mom = utc ? moment.utc : moment;
 
   const start = mom(s).locale(lang);
@@ -34,12 +40,19 @@ const formatDates = (s, e, allday, lang, utc) => {
   return `${start.format(dateAndTime)} - ${end.format(dateAndTime)}`;
 };
 
-const initialize = (Translator) => {
+interface NodebbTranslator {
+  registerModule(
+    name: string,
+    moduleHandler: (language: string) => ((key: string, args: string[]) => void)
+  ): void;
+}
+
+const initialize = (Translator: NodebbTranslator) => {
   Translator.registerModule('moment', (lang) => {
     const momentLang = lang.replace(/[_@]/g, '-');
     const zero = moment(0).locale(momentLang);
 
-    const timeago = (key, [duration]) => {
+    const timeago = (key: string, [duration]: string[]) => {
       const ms = parseInt(duration, 10);
       switch (key) {
         case 'time-ago':
@@ -53,7 +66,10 @@ const initialize = (Translator) => {
       }
     };
 
-    const timeDateView = (key, [timezone, start, end, allday]) => {
+    const timeDateView = (
+      key: string,
+      [timezone, start, end, allday]: string[]
+    ) => {
       const s = parseInt(start, 10);
       const e = parseInt(end, 10);
       const isAllday = allday === 'true';
@@ -68,14 +84,15 @@ const initialize = (Translator) => {
     };
 
     const data = zero.localeData();
-    const localeData = (key, [n, ...a]) => {
-      let name = n;
+    const localeData = (key: string, [n, ...a]: string[]) => {
+      let name = n as keyof Locale;
       if (!data[name]) {
-        name = `_${n}`;
+        name = `_${n}` as keyof Locale;
         if (!data[name]) {
           return '';
         }
       }
+
       const args = a.map((x) => {
         if (x === 'true') {
           return true;
@@ -88,11 +105,12 @@ const initialize = (Translator) => {
         }
         return x;
       });
+
       if (typeof data[name] === 'function') {
-        return data[name](...args);
+        return (data[name] as any)(...args);
       }
       const [index] = args;
-      return data[name][index];
+      return (data[name] as any)[index as any];
     };
 
     return (key, args) => {

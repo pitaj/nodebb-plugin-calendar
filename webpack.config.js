@@ -50,12 +50,18 @@ module.exports = (env, argv) => {
       },
     ],
     resolve: {
+      extensions: ['.js', '.ts'],
       alias: {
         './render$': path.resolve(__dirname, './src/calendar/render.js'),
       },
     },
     module: {
       rules: [
+        {
+          test: /\.ts$/,
+          use: 'ts-loader',
+          exclude: /node_modules/,
+        },
         {
           test: /\.js$/,
           exclude: /node_modules/,

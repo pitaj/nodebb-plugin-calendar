@@ -1,6 +1,9 @@
+import { EventInfo } from './event';
 import render from './render';
 
-export default function eventTemplate({ event, isEmail, uid }) {
+export default async function eventTemplate(
+  { event, isEmail, uid }: { event: EventInfo, isEmail?: boolean, uid?: number }
+): Promise<string> {
   const response = (uid && event.responses && event.responses[uid]) ? event.responses[uid] : 'no';
   const active = {
     no: '',
@@ -8,11 +11,11 @@ export default function eventTemplate({ event, isEmail, uid }) {
     yes: '',
     [response]: 'active',
   };
-  const repeatsEveryUnit = event.repeats && ['day', 'week', 'month', 'year'].find((x) => event.repeats.every[x]);
+  const repeatsEveryUnit = event.repeats && ['day', 'week', 'month', 'year'].find((x: 'day' | 'week' | 'month' | 'year') => event.repeats.every[x]);
   const repeatsEndDateFinite = Number.isFinite(event.repeats && event.repeats.endDate);
   const reminders = event.reminders.sort((a, b) => a - b);
 
-  return render('partials/calendar/event/post', {
+  return await render('partials/calendar/event/post', {
     event,
     isEmail,
     uid,

@@ -1,0 +1,22 @@
+{
+  "include": [
+    "*.ts"
+  ],
+  "compilerOptions": {
+    "outDir": "../../build/lib",
+    "lib": ["es2017"],
+    "target": "es2017",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "noImplicitAny": true,
+    "alwaysStrict": true,
+    "sourceMap": true,
+    "types": [
+      "socket.io"
+    ]
+  },
+  "typeAcquisition": {
+    "enable": false
+  }
+}

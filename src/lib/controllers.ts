@@ -1,3 +1,5 @@
+import { Router, RequestHandler, Request } from 'express';
+
 import { getEvent, escapeEvent } from './event';
 import { canViewPost } from './privileges';
 import eventTemplate from './templates';
@@ -8,14 +10,14 @@ const { filterCids } = require.main.require('./src/privileges').categories;
 const { getAllCategoryFields } = require.main.require('./src/categories');
 
 /* eslint-disable */
-function shadeColor2(color, percent) {
+function shadeColor2(color: string, percent: number) {
   var f=parseInt(color.slice(1),16),t=percent<0?0:255,p=percent<0?percent*-1:percent,R=f>>16,G=f>>8&0x00FF,B=f&0x0000FF;
   return "#"+(0x1000000+(Math.round((t-R)*p)+R)*0x10000+(Math.round((t-G)*p)+G)*0x100+(Math.round((t-B)*p)+B)).toString(16).slice(1);
 }
 /* eslint-enable */
 
-export default (router, middleware) => {
-  const renderAdmin = (req, res, next) => {
+const controllers = (router: Router, middleware: static__app_load_Params['middleware']): void => {
+  const renderAdmin: RequestHandler = (req, res, next) => {
     getSettings().then((settings) => {
       res.render('admin/plugins/calendar', {
         settings,
@@ -27,21 +29,21 @@ export default (router, middleware) => {
 
   router.get('/api/admin/plugins/calendar/save', (req, res, next) => {
     Promise.resolve()
-      .then(() => setSettings(JSON.parse(req.query.settings)))
+      .then(() => setSettings(JSON.parse(req.query.settings as string)))
       .then(() => {
         res.sendStatus(200);
       })
       .catch(next);
   });
 
-  const renderPage = async ({ uid, params }) => {
+  const renderPage = async ({ uid, params }: Request) => {
     const [cats, calendarViews] = await Promise.all([
-      getAllCategoryFields(['cid', 'bgColor', 'color']),
+      getAllCategoryFields(['cid', 'bgColor', 'color']) as { cid: number, bgColor: string, color: string}[],
       getSetting('calendarViews'),
     ]);
-    const filtered = new Set(await filterCids('read', cats.map((c) => c.cid), uid));
+    const filtered = new Set(await filterCids('read', cats.map(c => c.cid), uid));
 
-    const colors = cats.filter((c) => filtered.has(c.cid));
+    const colors = cats.filter(c => filtered.has(c.cid));
 
     const style = colors.map(({ cid, bgColor, color }) => `
       .plugin-calendar-cal-event-category-${cid} {
@@ -50,7 +52,8 @@ export default (router, middleware) => {
       border-color: ${shadeColor2(bgColor, -0.2)};
     }`);
 
-    const { eventPid: pid, eventDay: day } = params;
+    const pid = parseInt(params.eventPid, 10);
+    const day: string = params.eventDay;
 
     if (!pid || !(await canViewPost(pid, uid))) {
       return {
@@ -95,10 +98,10 @@ export default (router, middleware) => {
     };
   };
 
-  const renderPageHandler = (req, res, next) => {
+  const renderPageHandler: RequestHandler = (req, res, next) => {
     renderPage(req).then(
-      (data) => res.render('calendar', data),
-      (err) => setImmediate(next, err)
+      data => res.render('calendar', data),
+      err => setImmediate(next, err)
     );
   };
 
@@ -109,3 +112,5 @@ export default (router, middleware) => {
   router.get('/calendar', middleware.buildHeader, renderPageHandler);
   router.get('/api/calendar', renderPageHandler);
 };
+
+export default controllers;

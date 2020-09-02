@@ -11,7 +11,7 @@ import { initialize as initTranslatorModule } from './translatorModule';
 const { Translator } = require.main.require('./public/src/modules/translator');
 initTranslatorModule(Translator);
 
-const addNavigation = (navs, callback) => {
+const addNavigation: filter__navigation_available = async (navs) => {
   navs.push({
     route: '/calendar',
     title: '\\[\\[calendar:calendar\\]\\]',
@@ -19,27 +19,28 @@ const addNavigation = (navs, callback) => {
     textClass: 'visible-xs-inline',
     text: '\\[\\[calendar:calendar\\]\\]',
   });
-  callback(null, navs);
+  return navs;
 };
-const adminMenu = (header, callback) => {
+const adminMenu: filter__admin_header_build = async (header) => {
   header.plugins.push({
     route: '/plugins/calendar',
     icon: 'fa-calendar',
     name: 'Calendar',
   });
-  callback(null, header);
+  return header;
 };
 
-const composerFormatting = (data, callback) => {
+const composerFormatting: filter__composer_formatting = async (data) => {
   data.options.push({
     name: 'plugin-calendar-event',
     className: 'fa fa-calendar-o plugin-calendar-composer-edit-event',
     title: '[[calendar:edit_event]]',
   });
-  callback(null, data);
+  return data;
 };
 
-const sanitizeConfig = (config, callback) => {
+/* eslint-disable no-param-reassign */
+const sanitizeConfig: filter__sanitize_config = async (config) => {
   config.allowedTags.push('input');
   config.allowedAttributes.input = ['class', 'title', 'type'];
 
@@ -47,12 +48,13 @@ const sanitizeConfig = (config, callback) => {
   config.allowedClasses = config.allowedClasses || {};
   config.allowedClasses.input = ['form-control'];
 
-  callback(null, config);
+  return config;
 };
+/* eslint-enable no-param-reassign */
 
-const postDelete = (data) => { deleteEvent(data); };
-const postRestore = (data) => { restoreEvent(data); };
-const postPurge = (data) => { purgeEvent(data); };
+const postDelete: action__post_delete = (data) => { deleteEvent(data); };
+const postRestore: action__post_restore = (data) => { restoreEvent(data); };
+const postPurge: action__post_purge = (data) => { purgeEvent(data); };
 
 export {
   init,
