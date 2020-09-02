@@ -43,7 +43,7 @@ const formatDates = (
 interface NodebbTranslator {
   registerModule(
     name: string,
-    moduleHandler: (language: string) => ((key: string, args: string[]) => void)
+    moduleHandler: (language: string) => ((key: string, args: string[]) => string)
   ): void;
 }
 
@@ -83,34 +83,44 @@ const initialize = (Translator: NodebbTranslator): void => {
       return '';
     };
 
+    function hasOwnProperty<T>(obj: T, key: string | number | symbol): key is keyof T {
+      return Object.prototype.hasOwnProperty.call(obj, key);
+    }
+
     const data = zero.localeData();
     const localeData = (key: string, [n, ...a]: string[]) => {
-      let name = n as keyof Locale;
-      if (!data[name]) {
-        name = `_${n}` as keyof Locale;
-        if (!data[name]) {
-          return '';
-        }
+      let member: Locale[keyof Locale];
+      const loN = `_${n}`;
+      if (hasOwnProperty(data, n)) {
+        member = data[n];
+      } else if (hasOwnProperty(data, loN)) {
+        member = data[loN];
+      } else {
+        return '';
       }
 
-      const args = a.map((x) => {
-        if (x === 'true') {
-          return true;
-        }
-        if (x === 'false') {
-          return false;
-        }
-        if (/^[0-9]+$/.test(x)) {
-          return parseInt(x, 10);
-        }
-        return x;
-      });
-
-      if (typeof data[name] === 'function') {
-        return (data[name] as any)(...args);
+      if (typeof member === 'function') {
+        const args = a.map((x) => {
+          if (x === 'true') {
+            return true;
+          }
+          if (x === 'false') {
+            return false;
+          }
+          if (/^[0-9]+$/.test(x)) {
+            return parseInt(x, 10);
+          }
+          return x;
+        });
+        return (member as (...args: (string | number | boolean)[]) => string)(...args);
       }
-      const [index] = args;
-      return (data[name] as any)[index as any];
+
+      const [index] = a;
+      if (member && hasOwnProperty(member, index)) {
+        return member[index];
+      }
+
+      return '';
     };
 
     return (key, args) => {
