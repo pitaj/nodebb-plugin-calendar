@@ -95,4 +95,4 @@ const lang = 'en-us';
     assert(`${start.toLocaleDateString(lang)} - ${end.toLocaleDateString(lang)}`,
       formatDates(s, e, true, lang));
   },
-].forEach((x) => x());
+].forEach(x => x());

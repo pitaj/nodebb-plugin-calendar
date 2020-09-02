@@ -1,5 +1,8 @@
 {
   "rules": {
-    "import/no-cycle": "off"
+    "import/no-cycle": "off",
+    "camelcase": ["error", {
+      "allow": ["^(filter|action|static)__.*"]
+    }]
   }
 }

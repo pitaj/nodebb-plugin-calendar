@@ -50,7 +50,7 @@
           {{{ end }}}
 
           {{{ each event.repeats.every.daysOfWeek }}}
-            [[moment:locale-data, _weekdaysShort, {./}]]{{{ if !@last }}}, {{{ end }}}
+            [[moment:locale-data, weekdaysShort, {@value}]]{{{ if !@last }}}, {{{ end }}}
           {{{ end }}}
         </span>
       </div>

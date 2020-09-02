@@ -6,7 +6,7 @@
         <div class="panel-body">
           <div class="form-group row">
             <label for="checkingInterval" class="col-xs-12 col-sm-8">
-              Interval on which to check for upcoming events (used for reminders)
+              Interval on which to check for upcoming events (used for reminders) [seconds]
             </label>
             <div class="col-xs-12 col-sm-4">
               <input type="tel" class="form-control" name="checkingInterval" id="checkingInterval" value="{settings.checkingInterval}" />

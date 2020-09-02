@@ -1,0 +1,22 @@
+{
+  "include": [
+    "*.ts",
+    "../global.d.ts"
+  ],
+  "compilerOptions": {
+    "outDir": "../../build/lib",
+    "lib": ["es2019"],
+    "target": "es2019",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "strict": true,
+    "sourceMap": true,
+    "types": [
+      "socket.io"
+    ]
+  },
+  "typeAcquisition": {
+    "enable": false
+  }
+}

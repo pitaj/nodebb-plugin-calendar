@@ -7,31 +7,31 @@ style="display:none">
     <div class="form-group" id="plugin-calendar-event-editor-repetition-custom-daysOfWeek">
       <ul>
         <li data-value="0">
-          <a href="#">[[moment:locale-data, _weekdaysShort, 0]]</a>
+          <a href="#">[[moment:locale-data, weekdaysShort, 0]]</a>
         </li>
         
         <li data-value="1">
-          <a href="#">[[moment:locale-data, _weekdaysShort, 1]]</a>
+          <a href="#">[[moment:locale-data, weekdaysShort, 1]]</a>
         </li>
         
         <li data-value="2">
-          <a href="#">[[moment:locale-data, _weekdaysShort, 2]]</a>
+          <a href="#">[[moment:locale-data, weekdaysShort, 2]]</a>
         </li>
         
         <li data-value="3">
-          <a href="#">[[moment:locale-data, _weekdaysShort, 3]]</a>
+          <a href="#">[[moment:locale-data, weekdaysShort, 3]]</a>
         </li>
         
         <li data-value="4">
-          <a href="#">[[moment:locale-data, _weekdaysShort, 4]]</a>
+          <a href="#">[[moment:locale-data, weekdaysShort, 4]]</a>
         </li>
         
         <li data-value="5">
-          <a href="#">[[moment:locale-data, _weekdaysShort, 5]]</a>
+          <a href="#">[[moment:locale-data, weekdaysShort, 5]]</a>
         </li>
         
         <li data-value="6">
-          <a href="#">[[moment:locale-data, _weekdaysShort, 6]]</a>
+          <a href="#">[[moment:locale-data, weekdaysShort, 6]]</a>
         </li>
       </ul>
     </div>

@@ -1,15 +1,9 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+
 const webpack = require('webpack');
 const TerserPlugin = require('terser-webpack-plugin');
 const path = require('path');
 const del = require('del');
-
-const eslintrcCalendar = require('./src/calendar/.eslintrc');
-const eslintrcClient = require('./src/client/.eslintrc');
-
-const getIgnores = eslintrc => eslintrc.rules &&
-  eslintrc.rules['import/no-unresolved'] &&
-  eslintrc.rules['import/no-unresolved'][1] &&
-  eslintrc.rules['import/no-unresolved'][1].ignore;
 
 const dtpDir = path.resolve(path.dirname(require.resolve('eonasdan-bootstrap-datetimepicker')));
 
@@ -19,16 +13,19 @@ module.exports = (env, argv) => {
   del.sync(`${dtpDir}/../../node_modules/**`);
 
   const requirejsModules = new Set([
-    ...getIgnores(eslintrcCalendar),
-    ...getIgnores(eslintrcClient),
+    'composer',
+    'composer/formatting',
+    'translator',
+    'benchpress',
   ]);
 
   return {
     context: __dirname,
+    mode: prod ? 'production' : 'development',
     devtool: prod ? 'source-map' : 'inline-source-map',
     entry: {
-      client: './src/client/index.js',
-      calendar: './src/calendar/index.js',
+      client: './src/client/index',
+      calendar: './src/calendar/index',
     },
     output: {
       path: path.join(__dirname, './build/bundles'),
@@ -50,24 +47,17 @@ module.exports = (env, argv) => {
       },
     ],
     resolve: {
+      extensions: ['.js', '.ts'],
       alias: {
-        './render$': path.resolve(__dirname, './src/calendar/render.js'),
+        './render$': path.resolve(__dirname, './src/calendar/render'),
       },
     },
     module: {
       rules: [
         {
-          test: /\.js$/,
+          test: /\.ts$/,
+          use: 'ts-loader',
           exclude: /node_modules/,
-          use: {
-            loader: 'babel-loader',
-            options: {
-              plugins: [
-                '@babel/plugin-proposal-object-rest-spread',
-                '@babel/plugin-syntax-dynamic-import',
-              ],
-            },
-          },
         },
         {
           test: /\.js$/,
@@ -79,7 +69,9 @@ module.exports = (env, argv) => {
     optimization: {
       minimizer: [
         new TerserPlugin({
-          sourceMap: true,
+          terserOptions: {
+            sourceMap: true,
+          },
           parallel: true,
         }),
       ],

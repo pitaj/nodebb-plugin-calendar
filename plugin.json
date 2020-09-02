@@ -1,6 +1,5 @@
 {
-  "name": "NodeBB Calendar plugin",
-  "library": "library.js",
+  "library": ".",
   "staticDirs": {
     "bundles": "build/bundles/"
   },

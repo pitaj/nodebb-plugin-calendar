@@ -1,0 +1,24 @@
+{
+  "include": [
+    "*.ts",
+    "../public.d.ts",
+    "../global.d.ts"
+  ],
+  "compilerOptions": {
+    "lib": ["es2019", "dom"],
+    "target": "es2019",
+    "strict": true,
+    "types": [
+      "jquery",
+      "bootstrap",
+      "socket.io-client",
+      "eonasdan-bootstrap-datetimepicker"
+    ],
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "module": "es2020"
+  },
+  "typeAcquisition": {
+    "enable": false
+  }
+}
