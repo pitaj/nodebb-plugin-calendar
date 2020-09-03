@@ -35,24 +35,24 @@ export interface Repeats {
   endDate: number,
   every: {
     // [A, B] repeats every A days and every B days from first instance
-    numOfDays: number[],
+    numOfDays?: number[],
     // [A, B] repeats every Ath and Bth day of the week
-    daysOfWeek: number[],
+    daysOfWeek?: number[],
     // [A, B] repeats every Ath and Bth day of the month
     // if dayOfMonth > days in current month, use maximum possible
-    daysOfMonth: number[],
+    daysOfMonth?: number[],
     // repeats every day at startDate.time
     // aliased to { numOfDays = [1] }
-    day: boolean,
+    day?: boolean,
     // repeats every 7 days
     // aliased to { numOfDays = [7] }
     // equal to { daysOfWeek = [startDate.dayOfWeek] }
-    week: boolean,
+    week?: boolean,
     // repeats every month on startDate.dayOfMonth
     // aliased to { daysOfMonth = [startDate.dayOfMonth] }
-    month: boolean,
+    month?: boolean,
     // repeats every year on startDate.dayOfMonth of startDate.month
-    year: boolean,
+    year?: boolean,
   }
 }
 

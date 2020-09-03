@@ -61,7 +61,7 @@ interface User {
   'icon:text': string,
 }
 
-type ResponseCollection = {
+export type ResponseCollection = {
   [R in Response]: User[]
 };
 

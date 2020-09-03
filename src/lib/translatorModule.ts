@@ -1,4 +1,5 @@
 import moment, { Locale } from 'moment';
+import { NodebbTranslator } from 'translator';
 
 const justDate = 'dddd, LL';
 const justTime = 'LT';
@@ -39,13 +40,6 @@ const formatDates = (
   }
   return `${start.format(dateAndTime)} - ${end.format(dateAndTime)}`;
 };
-
-interface NodebbTranslator {
-  registerModule(
-    name: string,
-    moduleHandler: (language: string) => ((key: string, args: string[]) => string)
-  ): void;
-}
 
 const initialize = (Translator: NodebbTranslator): void => {
   Translator.registerModule('moment', (lang) => {

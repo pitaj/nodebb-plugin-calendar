@@ -1,5 +1,11 @@
-import { getAll as getAllResponses, submitResponse, getUserResponse, Response } from './responses';
-import { getEventsByDate, escapeEvent } from './event';
+import {
+  getAll as getAllResponses,
+  submitResponse,
+  getUserResponse,
+  Response,
+  ResponseCollection,
+} from './responses';
+import { getEventsByDate, escapeEvent, Event } from './event';
 import { filterByPid, privilegeNames } from './privileges';
 import getOccurencesOfRepetition from './repetition';
 import { getSetting } from './settings';
@@ -17,10 +23,35 @@ const can = {
 const tidFromPid = (pid: number) => posts.getPostField(pid, 'tid');
 const topicIsDeleted = (tid: number) => topics.getTopicField(tid, 'deleted');
 
-pluginSockets.calendar = {};
-pluginSockets.calendar.canPostEvent = async (
-  { uid }: { uid: number },
-  { pid, tid, cid, isMain }: { pid: number, tid: number, cid: number, isMain: boolean }
+export interface SocketRequests {
+  'plugins.calendar.canPostEvent': { pid?: number, tid?: number, cid?: number, isMain?: boolean },
+  'plugins.calendar.getResponses': { pid: number, day: string },
+  'plugins.calendar.submitResponse': { pid?: number, value?: Response, day?: string },
+  'plugins.calendar.getUserResponse': { pid: number, day: string },
+  'plugins.calendar.getEventsByDate': { startDate: number, endDate: number },
+}
+
+interface EventWithDeleted extends Event {
+  topicDeleted: boolean;
+}
+
+export interface SocketResponses {
+  'plugins.calendar.canPostEvent': { canPost: boolean, canPostMandatory: boolean },
+  'plugins.calendar.getResponses': ResponseCollection,
+  'plugins.calendar.submitResponse': void,
+  'plugins.calendar.getUserResponse': Response,
+  'plugins.calendar.getEventsByDate': EventWithDeleted[],
+}
+
+export type SocketNamespaces = keyof SocketRequests & keyof SocketResponses;
+
+interface SocketHandler<K extends SocketNamespaces> {
+  (socket: { uid: number }, data: SocketRequests[K]): Promise<SocketResponses[K]>
+}
+
+const canPostEventSocket: SocketHandler<'plugins.calendar.canPostEvent'> = async (
+  { uid },
+  { pid, tid, cid, isMain }
 ) => {
   const neither = {
     canPost: false,
@@ -63,24 +94,24 @@ pluginSockets.calendar.canPostEvent = async (
   };
 };
 
-pluginSockets.calendar.getResponses = async (
-  { uid }: { uid: number },
-  { pid, day }: { pid: number, day: string }
+const getResponsesSocket: SocketHandler<'plugins.calendar.getResponses'> = async (
+  { uid },
+  { pid, day }
 ) => await getAllResponses({ uid, pid, day });
 
-pluginSockets.calendar.submitResponse = async (
-  { uid }: { uid: number },
-  { pid, value, day }: { pid?: number, value?: Response, day?: string } = {}
+const submitResponseSocket: SocketHandler<'plugins.calendar.submitResponse'> = async (
+  { uid },
+  { pid, value, day } = {}
 ) => await submitResponse({ uid, pid, value, day });
 
-pluginSockets.calendar.getUserResponse = async (
-  { uid }: { uid: number },
-  { pid, day }: { pid: number, day: string }
+const getUserResponseSocket: SocketHandler<'plugins.calendar.getUserResponse'> = async (
+  { uid },
+  { pid, day }
 ) => await getUserResponse({ uid, pid, day });
 
-pluginSockets.calendar.getEventsByDate = async (
-  { uid }: { uid: number },
-  { startDate, endDate }: { startDate: number, endDate: number }
+const getEventsByDateSocket: SocketHandler<'plugins.calendar.getEventsByDate'> = async (
+  { uid },
+  { startDate, endDate }
 ) => {
   const events = await getEventsByDate(startDate, endDate);
   const filtered = await filterByPid(events, uid);
@@ -111,4 +142,12 @@ pluginSockets.calendar.getEventsByDate = async (
   );
 
   return withResponses;
+};
+
+pluginSockets.calendar = {
+  canPostEvent: canPostEventSocket,
+  getResponses: getResponsesSocket,
+  submitResponse: submitResponseSocket,
+  getUserResponse: getUserResponseSocket,
+  getEventsByDate: getEventsByDateSocket,
 };

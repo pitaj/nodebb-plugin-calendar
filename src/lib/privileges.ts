@@ -1,4 +1,9 @@
 import { Event } from './event';
+import {
+  filter__privileges_groups_list,
+  filter__privileges_list,
+  filter__privileges_list_human,
+} from './hooks';
 import { getSetting } from './settings';
 
 const privileges = require.main.require('./src/privileges');

@@ -2,6 +2,12 @@ import validator from 'validator';
 
 import eventTemplate from './templates';
 import parse, { tagTemplate } from './parse';
+import {
+  filter__parse_post,
+  filter__parse_raw,
+  filter__post_getPostSummaryByPids,
+  filter__teasers_get,
+} from './hooks';
 
 const eventRX = new RegExp(tagTemplate('event', '[\\s\\S]*'));
 const invalidRX = new RegExp(`(${tagTemplate('event-invalid', '[\\s\\S]*')})`);

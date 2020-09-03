@@ -1,6 +1,7 @@
 {
   "include": [
-    "*.ts"
+    "*.ts",
+    "../global.d.ts"
   ],
   "compilerOptions": {
     "outDir": "../../build/lib",

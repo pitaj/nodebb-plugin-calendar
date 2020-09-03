@@ -12,6 +12,7 @@ import {
 import validateEvent from './validateEvent';
 import { notify } from './reminders';
 import { getSetting } from './settings';
+import { filter__post_save } from './hooks';
 
 const { fireHook } = require.main.require('./src/plugins');
 const { getTopicField } = require.main.require('./src/topics');

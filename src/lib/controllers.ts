@@ -16,7 +16,7 @@ function shadeColor2(color: string, percent: number) {
 }
 /* eslint-enable */
 
-const controllers = (router: Router, middleware: static__app_load_Params['middleware']): void => {
+const controllers = (router: Router, middleware: any): void => {
   const renderAdmin: RequestHandler = (req, res, next) => {
     getSettings().then((settings) => {
       res.render('admin/plugins/calendar', {

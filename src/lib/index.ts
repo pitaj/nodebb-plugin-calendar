@@ -7,6 +7,15 @@ import { privilegesList, privilegesGroupsList, privilegesListHuman } from './pri
 import { deleteEvent, restoreEvent, purgeEvent } from './event';
 import './sockets';
 import { initialize as initTranslatorModule } from './translatorModule';
+import {
+  action__post_delete,
+  action__post_purge,
+  action__post_restore,
+  filter__admin_header_build,
+  filter__composer_formatting,
+  filter__navigation_available,
+  filter__sanitize_config,
+} from './hooks';
 
 const { Translator } = require.main.require('./public/src/modules/translator');
 initTranslatorModule(Translator);
