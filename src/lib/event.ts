@@ -141,8 +141,12 @@ const fixEvent = (event: JsonEvent): Event => {
   };
 };
 
-interface EventWithCid extends Event {
+export interface EventWithCid extends Event {
   cid: number,
+}
+
+export interface EventWithDeleted extends EventWithCid {
+  topicDeleted: boolean,
 }
 
 const getEventsByDate = async (startDate: number, endDate: number): Promise<EventWithCid[]> => {
@@ -203,7 +207,7 @@ const getEventsEndingAfter = async (endDate: number): Promise<Event[]> => {
 
 const eventExists = (pid: number): Promise<boolean> => exists(`${listKey}:pid:${pid}`);
 
-const escapeEvent = async (event: Event): Promise<Event> => {
+const escapeEvent = async <T extends Event>(event: T): Promise<T> => {
   const [location, description] = await Promise.all([
     fireHook('filter:parse.raw', event.location || ''),
     fireHook('filter:parse.raw', event.description || ''),

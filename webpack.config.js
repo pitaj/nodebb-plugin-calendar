@@ -48,7 +48,7 @@ module.exports = (env, argv) => {
     resolve: {
       extensions: ['.js', '.ts'],
       alias: {
-        './render$': path.resolve(__dirname, './src/calendar/render.js'),
+        './render$': path.resolve(__dirname, './src/calendar/render'),
       },
     },
     module: {

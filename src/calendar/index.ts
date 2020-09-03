@@ -1,7 +1,8 @@
 import { getLanguage } from 'translator';
 import 'fullcalendar';
+import { OptionsInput } from 'fullcalendar/src/types/input-types';
 
-import convertToFC from './convertToFC';
+import convertToFC, { EventFC } from './convertToFC';
 import displayEvent from './displayEvent';
 import locationHistory from '../client/locationHistory';
 
@@ -10,11 +11,11 @@ __webpack_public_path__ = `${config.relative_path}/plugins/nodebb-plugin-calenda
 
 const queryRegExp = /calendar\/?(?:\/*event\/+([0-9]+))?/;
 
-const begin = (momentLang) => {
+const begin = (momentLang: string) => {
   const locale = $.fullCalendar.locales[momentLang];
   const buttonText = (locale && locale.buttonText) || {};
 
-  const calendarOptions = {
+  const calendarOptions: OptionsInput = {
     defaultView: ajaxify.data.calendarViews.split(',', 1)[0],
 
     views: {
@@ -30,7 +31,7 @@ const begin = (momentLang) => {
       center: 'title',
       right: ajaxify.data.calendarViews,
     },
-    lang: momentLang,
+    // lang: momentLang,
     events: (start, end, timezone, callback) => {
       socket.emit('plugins.calendar.getEventsByDate', {
         startDate: start.valueOf(),
@@ -97,32 +98,32 @@ const begin = (momentLang) => {
     const matches = window.location.pathname.match(queryRegExp);
     const pid = matches && parseInt(matches[1], 10);
     if (pid) {
-      const el = $calendar
+      const el: EventFC = $calendar
         .data('fullCalendar')
         .clientEvents()
-        .find((x) => x.id === pid);
+        .find((x: EventFC) => x.id === pid);
 
       if (shouldHandle) {
         const event = el && el.original;
         if (event) {
           displayEvent(event);
         } else {
-          window.history.replaceState({}, '', `${RELATIVE_PATH}/calendar`);
+          window.history.replaceState({}, '', `${config.relative_path}/calendar`);
         }
       } else {
         import('../client/responses')
-          .then(({ setupDTP }) => setupDTP($display.find('[data-day]'), window.calendarEventData.day));
+          .then(({ setupDTP }) => setupDTP($display.find('[data-day]'), calendarEventData.day));
       }
 
       $calendar.fullCalendar('gotoDate', el ? el.start : (
-        window.calendarEventData.day || window.calendarEventData.startDate
+        calendarEventData.day || calendarEventData.startDate
       ));
     } else if (shouldHandle) {
       $display.modal('hide');
     }
   };
 
-  $(document).ready(init);
+  $(init);
   $(window).on('action:ajaxify.end', init);
 };
 

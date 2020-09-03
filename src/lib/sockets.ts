@@ -5,7 +5,7 @@ import {
   Response,
   ResponseCollection,
 } from './responses';
-import { getEventsByDate, escapeEvent, Event } from './event';
+import { getEventsByDate, escapeEvent, EventWithDeleted } from './event';
 import { filterByPid, privilegeNames } from './privileges';
 import getOccurencesOfRepetition from './repetition';
 import { getSetting } from './settings';
@@ -29,10 +29,6 @@ export interface SocketRequests {
   'plugins.calendar.submitResponse': { pid?: number, value?: Response, day?: string },
   'plugins.calendar.getUserResponse': { pid: number, day: string },
   'plugins.calendar.getEventsByDate': { startDate: number, endDate: number },
-}
-
-interface EventWithDeleted extends Event {
-  topicDeleted: boolean;
 }
 
 export interface SocketResponses {

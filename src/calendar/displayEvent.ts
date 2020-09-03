@@ -1,7 +1,11 @@
 import eventTemplate from '../lib/templates';
 import { setupPost } from '../client/responses';
+import { Event } from '../lib/event';
 
-const displayEvent = (event, cb) => {
+const displayEvent = (
+  event: Event,
+  cb?: (data: { content: string, parsed: Event }) => void
+): void => {
   eventTemplate({ event, uid: app.user.uid }).then((content) => {
     const { pid } = event;
 
@@ -14,7 +18,7 @@ const displayEvent = (event, cb) => {
       .append(div);
     $display
       .find('.modal-footer a.btn-primary')
-      .attr('href', `${RELATIVE_PATH}/post/${pid}`);
+      .attr('href', `${config.relative_path}/post/${pid}`);
     $display
       .find('.modal-body')
       .attr('data-pid', pid);

@@ -1,7 +1,14 @@
-// eslint-disable-next-line import/no-unresolved
+import { EventObjectInput } from 'fullcalendar';
 import { decodeHTMLEntities as decode } from 'utils';
+import { EventWithDeleted } from '../lib/event';
 
-const mapper = (event) => ({
+export interface EventFC extends EventObjectInput {
+  start: number,
+  className: string[],
+  original: EventWithDeleted,
+}
+
+const mapper = (event: EventWithDeleted): EventFC => ({
   id: event.pid,
   title: decode(decode(event.name)),
   allDay: event.allday,
@@ -15,6 +22,6 @@ const mapper = (event) => ({
   original: event,
 });
 
-const convertToFC = (events) => events.map(mapper);
+const convertToFC = (events: EventWithDeleted[]): EventFC[] => events.map(mapper);
 
 export default convertToFC;

@@ -4,6 +4,19 @@ interface JQueryStatic {
   _data(element: HTMLElement, prop: string): {
     click: { handler(event: JQuery.Event): boolean }[]
   }
+
+  fullCalendar: {
+    locales: {
+      [key: string]: {
+        buttonText?: {
+          day?: string,
+          week?: string,
+          month?: string,
+          year?: string,
+        }
+      },
+    }
+  }
 }
 
 interface JQuery {
@@ -16,6 +29,10 @@ declare const bootbox: {
 
 declare const requirejs: (modules: string[], callback?: (...modules: unknown[]) => void) => void;
 
+declare module 'utils' {
+  export const decodeHTMLEntities: (encoded: string) => string;
+}
+
 declare module 'translator' {
   interface NodebbTranslatorInstance {
     translateInPlace(element: HTMLElement): Promise<void>;
@@ -23,10 +40,7 @@ declare module 'translator' {
 }
 
 declare module 'benchpress' {
-  const Benchpress: {
-    render(template: string, data: unknown): Promise<string>
-  };
-  export default Benchpress;
+  export const render: (template: string, data: unknown) => Promise<string>;
 }
 
 declare module 'composer' {
@@ -63,13 +77,13 @@ declare const ajaxify: {
     },
     posts?: {
       pid: number
-    }[]
-  }
+    }[],
+    calendarViews: string,
+  },
+  updateHistory(path: string): void,
 };
 
-declare const calendarEventData: {
-  pid: number,
-} | null;
+declare const calendarEventData: import('./lib/event').Event | null;
 
 declare const app: {
   alertError(err?: Error | string): void,
