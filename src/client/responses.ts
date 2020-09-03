@@ -3,7 +3,7 @@ import Benchpress from 'benchpress';
 import moment from 'moment';
 import 'eonasdan-bootstrap-datetimepicker';
 
-const addResponsesToPost = (pid, cb) => {
+const addResponsesToPost = (pid: number, cb: () => void) => {
   const $responses = $(`[data-pid=${pid}] .plugin-calendar-event-responses-lists`);
   const day = $(`[data-pid=${pid}] [data-day]`).attr('data-day');
 
@@ -34,7 +34,7 @@ const addResponsesToPost = (pid, cb) => {
         { responseType: 'yes', users: responses.yes },
         { responseType: 'maybe', users: responses.maybe },
         { responseType: 'no', users: responses.no },
-      ].map((data) => Benchpress.render('partials/calendar/event/response-list', data).then((html) => translate(html)))
+      ].map(data => Benchpress.render('partials/calendar/event/response-list', data).then(html => translate(html)))
     ).then(([yes, maybe, no]) => {
       yess.empty().append(yes);
       maybes.empty().append(maybe);
@@ -45,7 +45,7 @@ const addResponsesToPost = (pid, cb) => {
   });
 };
 
-const setupDTP = (responses, day) => {
+const setupDTP = (responses: JQuery, day: string): void => {
   const dayInput = responses.find('.plugin-calendar-event-responses-day input');
   if (!dayInput.length) {
     return;
@@ -73,7 +73,7 @@ const setupDTP = (responses, day) => {
 
 const noop = () => {};
 
-const setupPost = ({ pid, e }, cb = noop) => {
+const setupPost = ({ pid, e }: { pid: number, e?: JQuery.Event }, cb = noop): void => {
   let buttonCont = $(`[data-pid=${pid}] .plugin-calendar-event-responses-user`);
   const responses = buttonCont.closest('[data-day]');
   const day = responses.attr('data-day') || null;
@@ -115,7 +115,7 @@ const setupPost = ({ pid, e }, cb = noop) => {
 };
 
 let initialized = false;
-const initialize = () => {
+const initialize = (): void => {
   if (initialized) {
     return;
   }
@@ -123,7 +123,7 @@ const initialize = () => {
   $(document.body).on('click', '.plugin-calendar-event-responses-user .btn', (e) => {
     const button = $(e.target);
     const value = button.data('value');
-    const pid = button.closest('[data-pid]').attr('data-pid');
+    const pid = parseInt(button.closest('[data-pid]').attr('data-pid'), 10);
     const day = button.closest('[data-day]').attr('data-day');
 
     socket.emit('plugins.calendar.submitResponse', { pid, value, day }, (err) => {
@@ -144,7 +144,7 @@ const initialize = () => {
     const data = input.data('DateTimePicker');
     const day = data && data.date().utc().format('YYYY-MM-DD');
 
-    const pid = input.closest('[data-pid]').attr('data-pid');
+    const pid = parseInt(input.closest('[data-pid]').attr('data-pid'), 10);
     const responses = input.closest('[data-day]');
     responses.attr('data-day', day);
 
@@ -157,12 +157,15 @@ const initialize = () => {
     setupPost({ pid, e });
   });
 
-  const checkPosts = (e, data) => {
-    const posts = data.posts || data.post || ajaxify.data.posts;
+  const checkPosts = (e: JQuery.Event, data: {
+    posts?: { pid: number }[],
+    post?: { pid: number },
+  }) => {
+    const posts = data.posts || (data.post && [data.post]) || ajaxify.data.posts;
 
     if (posts && posts.length > 0) {
       setTimeout(() => {
-        posts.forEach((post) => setupPost({ pid: post.pid }));
+        posts.forEach(post => setupPost({ pid: post.pid }));
       }, 200);
     }
   };

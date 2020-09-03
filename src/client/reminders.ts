@@ -1,6 +1,6 @@
 import moment from 'moment';
 
-const makeListElement = (n) => {
+const makeListElement = (n: number) => {
   const zero = moment(0);
   const li = $(
     `<li class="plugin-calendar-event-editor-reminder" data-value="${n}">
@@ -14,18 +14,25 @@ const makeListElement = (n) => {
   return li;
 };
 
-const factory = ($ul) => {
+interface Reminders {
+  setReminders(reminders: number[]): void;
+  getReminders(): number[];
+  addReminder(n: number): void;
+  removeReminder(n: number): void;
+}
+
+const factory = ($ul: JQuery): Reminders => {
   const addButtons = $ul
     .find('#plugin-calendar-event-editor-reminders-add li > a');
 
-  const methods = {
+  const methods: Reminders = {
     setReminders: (reminders) => {
       $ul.find('li.plugin-calendar-event-editor-reminder').remove();
       $ul.data('value', reminders);
       reminders
         .reverse()
         .map(makeListElement)
-        .forEach((el) => $ul.prepend(el));
+        .forEach(el => $ul.prepend(el));
     },
     getReminders: () => $ul.data('value'),
     addReminder: (n) => {
@@ -47,12 +54,12 @@ const factory = ($ul) => {
       }
     },
     removeReminder: (n) => {
-      const nots = $ul.data('value');
+      const nots: number[] = $ul.data('value');
       if (!nots.includes(n)) {
         return;
       }
 
-      const reminders = nots.filter((not) => not !== n);
+      const reminders = nots.filter(not => not !== n);
       $ul.data('value', reminders);
 
       $ul.find(`li.plugin-calendar-event-editor-reminder[data-value=${n}]`).remove();
@@ -71,16 +78,21 @@ const factory = ($ul) => {
       .removeClass('active');
   });
 
-  const promptCustom = (addNotif) => {
+  const promptCustom = (addNotif: (ms: number) => void) => {
     button.on('click', () => {
-      const unit = radios.find(':checked').val();
-      const number = parseInt(input.val(), 10);
+      const unit = radios.find(':checked').val().toString();
+      const number = parseInt(input.val().toString(), 10);
 
-      const ms = ({
+      if (unit !== 'mm' && unit !== 'hh' && unit !== 'dd') {
+        return;
+      }
+
+      const map = {
         mm: 1000 * 60,
         hh: 1000 * 60 * 60,
         dd: 1000 * 60 * 60 * 24,
-      })[unit] * number;
+      };
+      const ms = map[unit] * number;
 
       addNotif(ms);
       popup.slideUp(200);
@@ -101,7 +113,7 @@ const factory = ($ul) => {
     if (n === 'custom') {
       e.preventDefault();
       e.stopPropagation();
-      promptCustom((notif) => methods.addReminder(notif));
+      promptCustom(notif => methods.addReminder(notif));
       return;
     }
     methods.addReminder(n);

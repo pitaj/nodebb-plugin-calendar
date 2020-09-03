@@ -3,7 +3,7 @@ import { translate } from 'translator';
 
 import { inPost } from '../lib/parse';
 
-export default () => {
+export default (): void => {
   const onChange = () => {
     const data = composer.posts[composer.active];
     socket.emit('plugins.calendar.canPostEvent', data, (e, { canPost, canPostMandatory }) => {
@@ -24,19 +24,19 @@ export default () => {
     const uuid = composer.active;
     const comp = $(`#cmp-uuid-${uuid}`);
     const write = comp.find('.write-container textarea.write');
-    const eventExisted = inPost.test(write.val());
+    const eventExisted = inPost.test(write.val().toString());
 
     if (eventExisted) {
       const button = comp.find('.composer-submit:visible');
 
       const orig = $._data(button[0], 'events').click.map(x => x.handler); // eslint-disable-line
-      const trigger = (self, e) => {
+      const trigger = (self: HTMLElement, e: JQuery.Event) => {
         orig.forEach((handler) => {
           handler.call(self, e);
         });
       };
       button.off('click').on('click', function onClick(e) {
-        const text = write.val();
+        const text = write.val().toString();
         if (!inPost.test(text)) {
           translate('[[calendar:confirm_delete_event]]', (question) => {
             bootbox.confirm(question, (okay) => {

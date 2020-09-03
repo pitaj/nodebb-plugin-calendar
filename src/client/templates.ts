@@ -1,4 +1,6 @@
-const rawTemplate = (event) => {
+import { EventInfo } from '../lib/event';
+
+const rawTemplate = (event: EventInfo): string => {
   const repeats = event.repeats && {
     ...event.repeats,
     endDate: event.repeats.endDate ? event.repeats.endDate.valueOf() : null,

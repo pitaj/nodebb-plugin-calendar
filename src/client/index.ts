@@ -7,26 +7,27 @@ jQuery.fn.size = jQuery.fn.size || function size() { return this.length; };
 
 const calendarLoad = () => {
   if (ajaxify.data.template.calendar) {
-    window.require(['plugins/nodebb-plugin-calendar/bundles/calendar']);
+    // eslint-disable-next-line import/no-dynamic-require, global-require
+    requirejs(['plugins/nodebb-plugin-calendar/bundles/calendar']);
 
     $('#plugin-calendar-cal-event-display').modal({
       backdrop: false,
-      show: window.calendarEventData && !!window.calendarEventData.pid,
+      show: calendarEventData && !!calendarEventData.pid,
     });
   }
 };
 
-$(document).ready(() => {
+$(() => {
   // ensure dependencies are loaded
-  window.requirejs(['translator', 'benchpress'], () => {
+  requirejs(['translator', 'benchpress'], () => {
     import('./clientSideTranslation').then(({ setup: setupTranslation, initialize: initTranslation }) => {
       setupTranslation();
 
-      let eventModal;
+      let eventModal: Promise<typeof import('./eventModal')>;
       $(window).on('action:composer.enhanced', () => {
         eventModal = eventModal || Promise.all([
           initTranslation(),
-          new Promise((resolve, reject) => window.requirejs(['composer/formatting', 'benchpress'], (formatting) => (formatting ? resolve() : reject()))),
+          new Promise((resolve, reject) => requirejs(['composer/formatting', 'benchpress'], formatting => (formatting ? resolve() : reject()))),
         ]).then(() => import('./eventModal'));
 
         eventModal.then(({ prepareFormatting }) => prepareFormatting());

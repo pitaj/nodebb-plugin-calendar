@@ -5,20 +5,20 @@ import 'eonasdan-bootstrap-datetimepicker';
 
 import { momentLang } from './clientSideTranslation';
 import { initialize as initResponses } from './responses';
-import createEventFactory from './createEvent';
+import createEventFactory, { CreateEvent } from './createEvent';
 import setupComposerButton from './setupComposerButton';
 import rawTemplate from './templates';
 import parse, { inPost } from '../lib/parse';
 
-let createEvent;
+let createEvent: CreateEvent;
 
-const initialize = () => {
+const initialize = (): Promise<void> => {
   if (createEvent) {
     return Promise.resolve();
   }
 
   return Benchpress.render('partials/calendar/event-creation-modal', {})
-    .then((template) => translate(template)).then((html) => {
+    .then(template => translate(template)).then((html) => {
       $('body').append(html);
 
       setupComposerButton();
@@ -45,11 +45,11 @@ const initialize = () => {
     });
 };
 
-const prepareFormatting = () => {
+const prepareFormatting = (): void => {
   initialize().then(() => {
     formatting.addButtonDispatch('plugin-calendar-event', (textarea) => {
       const $textarea = $(textarea);
-      const oldVal = $textarea.val();
+      const oldVal = $textarea.val().toString();
       const oldEvent = parse(oldVal.replace(/\[(\/?)event-invalid\]/g, '[$1event]'));
 
       createEvent(oldEvent || {}, (event) => {

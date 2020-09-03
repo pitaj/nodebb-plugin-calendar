@@ -11,15 +11,5 @@
     },
     "env": {
         "browser": true
-    },
-    "rules": {
-        "import/no-unresolved": ["error", {
-            "ignore": [
-                "composer",
-                "composer/formatting",
-                "translator",
-                "benchpress"
-            ]
-        }]
     }
 }

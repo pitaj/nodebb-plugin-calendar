@@ -1,9 +1,15 @@
 import moment from 'moment';
 import 'eonasdan-bootstrap-datetimepicker';
+import { Repeats } from '../lib/repetition';
 
-const factory = ($ul) => {
-  const list = $ul
-    .find('#plugin-calendar-event-editor-repetition-change > ul');
+interface Repetition {
+  getInputs(): JQuery;
+  setRepeat(repeat: Repeats | null): void;
+  getRepeat(): Repeats | null;
+}
+
+const factory = ($ul: JQuery): Repetition => {
+  const list = $ul.find('#plugin-calendar-event-editor-repetition-change > ul');
   list.find('li[data-value=custom] > div').click((e) => {
     e.stopPropagation();
   });
@@ -23,7 +29,7 @@ const factory = ($ul) => {
       horizontal: 'left',
     });
 
-  list.change(() => {
+  list.on('change', () => {
     const elem = list.find('input[name=repetition-select]:checked');
     const value = elem.val();
 
@@ -45,14 +51,16 @@ const factory = ($ul) => {
     changeButton.dropdown('toggle');
   });
 
-  customEnd.change(() => {
+  customEnd.on('change', () => {
     const forever = customEnd
       .find('[name=repetition-end]:checked')
       .val() === 'forever';
     endDate.toggle(!forever);
   });
 
-  const methods = {
+  const keys = ['day', 'week', 'month', 'year'];
+
+  return {
     setRepeat: (repeat) => {
       if (!repeat) {
         const elem = list
@@ -62,8 +70,7 @@ const factory = ($ul) => {
         return;
       }
 
-      const key = ['day', 'week', 'month', 'year']
-        .find((x) => repeat.every[x]);
+      const key = keys.find((x: 'day' | 'week' | 'month' | 'year') => repeat.every[x]);
       custom.toggle(!key);
       if (key) {
         const elem = list
@@ -97,12 +104,13 @@ const factory = ($ul) => {
         }
       }
     },
+    getInputs: () => $(),
     getRepeat: () => {
-      const value = list.find('[name=repetition-select]:checked').val();
+      const value = list.find('[name=repetition-select]:checked').val().toString();
       if (value === 'no-repeat') {
         return null;
       }
-      if (value !== 'custom') {
+      if (keys.includes(value)) {
         return {
           every: {
             [value]: true,
@@ -114,10 +122,11 @@ const factory = ($ul) => {
       const selected = 'weekly';
       if (selected === 'weekly') {
         const days = [...daysOfWeek.find('li > a.active').parent()]
-          .map((elem) => parseInt(elem.dataset.value, 10));
+          .map(elem => parseInt(elem.dataset.value, 10));
         const forever = customEnd
           .find('[name=repetition-end]:checked')
           .val() === 'forever';
+
         if (forever) {
           return {
             every: {
@@ -126,6 +135,7 @@ const factory = ($ul) => {
             endDate: null,
           };
         }
+
         const end = endDate
           .data('DateTimePicker')
           .date()
@@ -138,11 +148,9 @@ const factory = ($ul) => {
         };
       }
 
-      return {};
+      return null;
     },
   };
-
-  return methods;
 };
 
 export default factory;

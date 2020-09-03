@@ -5,7 +5,7 @@ export let momentLang = getLanguage().toLowerCase().replace(/_/g, '-');
 const translator = Translator.create();
 
 let initialized = false;
-const initialize = () => {
+const initialize = (): Promise<void> => {
   if (initialized) {
     return Promise.resolve();
   }
@@ -60,7 +60,7 @@ const translateEvents = () => {
   }
 };
 
-const setup = () => {
+const setup = (): void => {
   $(window).on([
     'action:posts.loaded',
     'action:ajaxify.end',

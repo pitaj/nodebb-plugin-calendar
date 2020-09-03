@@ -1,10 +1,11 @@
 import moment from 'moment';
+import 'eonasdan-bootstrap-datetimepicker';
 import remindersFactory from './reminders';
 import repetitionFactory from './repetition';
+import { EventInfo } from '../lib/event';
 import validateEvent from '../lib/validateEvent';
-import 'eonasdan-bootstrap-datetimepicker';
 
-const defaultEvent = {
+const defaultEvent: EventInfo = {
   name: '',
   allday: false,
   startDate: Date.now(),
@@ -21,7 +22,11 @@ const formats = {
   date: 'L',
 };
 
-const createEventFactory = () => {
+export interface CreateEvent {
+  (data: Partial<EventInfo>, callback: (event: EventInfo) => void): void;
+}
+
+const createEventFactory = (): CreateEvent => {
   const modal = $('#plugin-calendar-event-editor').modal({
     backdrop: false,
     show: false,
@@ -47,7 +52,7 @@ const createEventFactory = () => {
     inputs.endDate.data('DateTimePicker').format(format);
   });
 
-  const setInputs = (event) => {
+  const setInputs = (event: EventInfo) => {
     inputs.name.val(event.name);
     inputs.allday.prop('checked', event.allday);
     inputs.startDate.data('DateTimePicker').date(moment(event.startDate));
@@ -62,16 +67,16 @@ const createEventFactory = () => {
     inputs.startDate.data('DateTimePicker').format(format);
     inputs.endDate.data('DateTimePicker').format(format);
   };
-  const getInputs = () => {
+  const getInputs = (): EventInfo => {
     const event = {
-      name: inputs.name.val().trim(),
+      name: inputs.name.val().toString().trim(),
       allday: inputs.allday.prop('checked'),
       startDate: inputs.startDate.data('DateTimePicker').date().valueOf(),
       endDate: inputs.endDate.data('DateTimePicker').date().valueOf(),
       reminders: reminders.getReminders(),
       repeats: repetition.getRepeat(),
-      location: inputs.location.val().trim(),
-      description: inputs.description.val().trim(),
+      location: inputs.location.val().toString().trim(),
+      description: inputs.description.val().toString().trim(),
       mandatory: inputs.mandatory.prop('checked'),
     };
 
@@ -89,11 +94,11 @@ const createEventFactory = () => {
     return event;
   };
 
-  const alertFailure = (input) => {
+  const alertFailure = (input: JQuery) => {
     input.closest('.form-group').addClass('has-error');
   };
 
-  const createEvent = (data, callback) => {
+  const createEvent: CreateEvent = (data, callback) => {
     const event = { ...defaultEvent, ...data };
     setInputs(event);
     modal.find('.form-group').removeClass('has-error');
@@ -102,13 +107,20 @@ const createEventFactory = () => {
     const submit = modal.find('#plugin-calendar-event-editor-submit');
     const del = modal.find('#plugin-calendar-event-editor-delete');
 
-    const onClick = () => {
-      const newEvent = getInputs();
+    const validate = (newEvent: EventInfo) => {
       modal.find('.form-group').removeClass('has-error');
 
       const [failed, failures] = validateEvent(newEvent);
       if (failed) {
-        failures.map((failure) => inputs[failure]).forEach(alertFailure);
+        failures.map(failure => ((failure === 'repeats') ? repetition.getInputs() : inputs[failure])).forEach(alertFailure);
+      }
+
+      return failed;
+    };
+
+    const onClick = () => {
+      const newEvent = getInputs();
+      if (validate(newEvent)) {
         return;
       }
 
@@ -127,12 +139,7 @@ const createEventFactory = () => {
 
     const onChange = () => {
       const newEvent = getInputs();
-      modal.find('.form-group').removeClass('has-error');
-
-      const [failed, failures] = validateEvent(newEvent);
-      if (failed) {
-        failures.map((failure) => inputs[failure]).forEach(alertFailure);
-      }
+      validate(newEvent);
     };
     modal.on('change dp.change', onChange);
   };
