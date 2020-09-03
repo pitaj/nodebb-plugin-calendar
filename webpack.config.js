@@ -60,19 +60,6 @@ module.exports = (env, argv) => {
         },
         {
           test: /\.js$/,
-          exclude: /node_modules/,
-          use: {
-            loader: 'babel-loader',
-            options: {
-              plugins: [
-                '@babel/plugin-proposal-object-rest-spread',
-                '@babel/plugin-syntax-dynamic-import',
-              ],
-            },
-          },
-        },
-        {
-          test: /\.js$/,
           include: /node_modules/,
           use: './loaders/removeAMD',
         },
