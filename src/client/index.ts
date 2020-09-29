@@ -27,7 +27,7 @@ $(() => {
       $(window).on('action:composer.enhanced', () => {
         eventModal = eventModal || Promise.all([
           initTranslation(),
-          new Promise((resolve, reject) => requirejs(['composer/formatting', 'benchpress'], formatting => (formatting ? resolve() : reject()))),
+          new Promise((resolve, reject) => requirejs(['composer/formatting'], formatting => (formatting ? resolve() : reject()))),
         ]).then(() => import('./eventModal'));
 
         eventModal.then(({ prepareFormatting }) => prepareFormatting());

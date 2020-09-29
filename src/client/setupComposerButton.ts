@@ -1,6 +1,5 @@
 import composer from 'composer';
 import { translate } from 'translator';
-
 import { inPost } from '../lib/parse';
 
 export default (): void => {
@@ -8,7 +7,7 @@ export default (): void => {
     const data = composer.posts[composer.active];
     socket.emit('plugins.calendar.canPostEvent', data, (e, { canPost, canPostMandatory }) => {
       if (canPost) {
-        $(`.composer[data-uuid=${composer.active}]`)
+        $(`[component="composer"][data-uuid=${composer.active}]`)
           .find('.plugin-calendar-composer-edit-event')
           .parent()
           .css('display', 'inline-block');
@@ -21,13 +20,12 @@ export default (): void => {
   };
 
   const alterSubmit = () => {
-    const uuid = composer.active;
-    const comp = $(`#cmp-uuid-${uuid}`);
+    const comp = $(`[component="composer"][data-uuid="${composer.active}"]`);
     const write = comp.find('.write-container textarea.write');
     const eventExisted = inPost.test(write.val().toString());
 
     if (eventExisted) {
-      const button = comp.find('.composer-submit:visible');
+      const button = comp.find('.composer-submit').filter(':visible');
 
       const orig = $._data(button[0], 'events').click.map(x => x.handler); // eslint-disable-line
       const trigger = (self: HTMLElement, e: JQuery.Event) => {
@@ -52,9 +50,11 @@ export default (): void => {
     }
   };
 
-  $(window).on('action:composer.post.new' +
-    ' action:composer.post.edit' +
-    ' action:composer.topic.new', () => {
+  $(window).on([
+    'action:composer.post.new',
+    'action:composer.post.edit',
+    'action:composer.topic.new',
+  ].join(' '), () => {
     setTimeout(() => {
       onChange();
       alterSubmit();
