@@ -87,14 +87,17 @@ export type filter__teasers_get = FilterHook<filter__teasers_get_Data>;
 interface filter__post_save_Data {
   post: {
     content: string,
-    pid: number,
-    tid: number,
-    uid: number,
+    pid?: string,
+    tid?: string,
+    uid?: number,
+    editor?: number,
     isMain?: boolean,
   },
   data: {
     isMain?: boolean,
-  }
+    pid?: string,
+  },
+  uid?: number
 }
 export type filter__post_save = FilterHook<filter__post_save_Data>;
 

@@ -16,29 +16,34 @@ import { filter__post_save } from './hooks';
 
 const { fireHook } = require.main.require('./src/plugins');
 const { getTopicField } = require.main.require('./src/topics');
+const { getPostField } = require.main.require('./src/posts');
 const winston = require.main.require('winston');
 
-const isMainPost = async ({ pid, tid }: { pid: number, tid: number }) => {
+const isMainPost = async (pid: number, tid: number) => {
   const mainPid = await getTopicField(tid, 'mainPid');
-  return parseInt(mainPid, 10) === parseInt(pid.toString(), 10);
+  return mainPid === pid;
 };
 
 const postSave: filter__post_save = async (data) => {
   const { post } = data;
   const eventInfo = parse(post.content);
 
+  const uid = post.uid || post.editor || data.uid;
+  const pid = parseInt(post.pid || data.data.pid, 10);
+  const tid = parseInt(post.tid || await getPostField(pid, 'tid'), 10);
+
   // delete event if no longer in post
   if (!post.content.match(inPost)) {
-    const existed = await eventExists(post.pid);
+    const existed = await eventExists(pid);
     if (existed) {
-      const existingEvent = await getEvent(post.pid);
+      const existingEvent = await getEvent(pid);
       await notify({
         event: existingEvent,
         message: `[[calendar:event_deleted, ${existingEvent.name}]]`,
       });
 
-      await deleteEvent({ post: { pid: post.pid } });
-      winston.verbose(`[plugin-calendar] Event (pid:${post.pid}) deleted`);
+      await deleteEvent({ post: { pid } });
+      winston.verbose(`[plugin-calendar] Event (pid:${pid}) deleted`);
     }
 
     return data;
@@ -59,20 +64,20 @@ const postSave: filter__post_save = async (data) => {
       ...val,
       [failure]: failure === 'repeatEndDate' ? eventInfo.repeats.endDate : eventInfo[failure],
     }), {});
-    winston.verbose(`[plugin-calendar] Event (pid:${post.pid}) validation failed: `, obj);
+    winston.verbose(`[plugin-calendar] Event (pid:${pid}) validation failed: `, obj);
     return invalid();
   }
 
-  const main = post.isMain || data.data.isMain || await isMainPost(post);
+  const main = post.isMain || data.data.isMain || await isMainPost(pid, tid);
   if (!main && await getSetting('mainPostOnly')) {
     return invalid();
   }
 
-  if (!await canPostEvent(post.tid, post.uid)) {
+  if (!await canPostEvent(tid, uid)) {
     return invalid();
   }
 
-  if (eventInfo.mandatory && !await canPostMandatoryEvent(post.tid, post.uid)) {
+  if (eventInfo.mandatory && !await canPostMandatoryEvent(tid, uid)) {
     return invalid();
   }
 
@@ -81,8 +86,8 @@ const postSave: filter__post_save = async (data) => {
     name: validator.escape(eventInfo.name),
     location: eventInfo.location.trim(),
     description: eventInfo.description.trim(),
-    pid: post.pid,
-    uid: post.uid,
+    uid,
+    pid,
   };
 
   event = await fireHook('filter:plugin-calendar.event.post', event);
