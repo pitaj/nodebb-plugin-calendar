@@ -2,10 +2,10 @@
   "name": "nodebb-plugin-calendar",
   "version": "1.0.0-alpha.55",
   "description": "Calendar and events for NodeBB",
-  "main": "library.js",
+  "main": "build/lib",
   "scripts": {
-    "lint": "eslint ./src",
-    "test": "npm run lint",
+    "check": "eslint ./src && tsc -p src/lib --noEmit && tsc -p src/client --noEmit && tsc -p src/calendar --noEmit",
+    "test": "npm run check",
     "compile": "tsc -p src/lib",
     "build": "npm run compile && webpack --progress --mode=development && node ../nodebb/nodebb build -d",
     "build-production": "npm run compile && webpack --progress --mode=production",

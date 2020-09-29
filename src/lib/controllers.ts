@@ -16,6 +16,7 @@ function shadeColor2(color: string, percent: number) {
 }
 /* eslint-enable */
 
+// eslint-disable-next-line
 const controllers = (router: Router, middleware: any): void => {
   const renderAdmin: RequestHandler = (req, res, next) => {
     getSettings().then((settings) => {
