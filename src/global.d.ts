@@ -14,3 +14,9 @@ declare module 'translator' {
   export const getLanguage: () => string;
   export const translate: NodebbTranslatorInstance['translate'];
 }
+
+declare namespace moment {
+  interface Locale {
+    relativeTime(n: '', withoutSuffix: boolean, key: RelativeTimeKey, isFuture: boolean): string;
+  }
+}

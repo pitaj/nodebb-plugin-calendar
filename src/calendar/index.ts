@@ -11,8 +11,21 @@ __webpack_public_path__ = `${config.relative_path}/plugins/nodebb-plugin-calenda
 
 const queryRegExp = /calendar\/?(?:\/*event\/+([0-9]+))?/;
 
+interface JQueryStaticFullCalendar {
+  locales: {
+    [key: string]: {
+      buttonText?: {
+        day?: string,
+        week?: string,
+        month?: string,
+        year?: string,
+      }
+    }
+  }
+}
+
 const begin = (momentLang: string) => {
-  const locale = $.fullCalendar.locales[momentLang];
+  const locale = ($.fullCalendar as JQueryStaticFullCalendar).locales[momentLang];
   const buttonText = (locale && locale.buttonText) || {};
 
   const calendarOptions: OptionsInput = {
@@ -133,12 +146,12 @@ if (momentLang === 'en-us') {
 } else {
   import(`fullcalendar/dist/locale/${momentLang}`).catch((err) => {
     // eslint-disable-next-line no-console
-    console.info(`could not load locale data (${momentLang}) for moment`, err);
+    console.info(`[calendar] could not load locale data (${momentLang}) for moment`, err);
     [momentLang] = momentLang.split('-');
     return import(`fullcalendar/dist/locale/${momentLang}`);
   }).catch((err) => {
     // eslint-disable-next-line no-console
-    console.info(`could not load locale data (${momentLang}) for moment`, err);
+    console.info(`[calendar] could not load locale data (${momentLang}) for moment`, err);
     momentLang = 'en-us';
   }).then(() => begin(momentLang));
 }

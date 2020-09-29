@@ -4,19 +4,6 @@ interface JQueryStatic {
   _data(element: HTMLElement, prop: string): {
     click: { handler(event: JQuery.Event): boolean }[]
   }
-
-  fullCalendar: {
-    locales: {
-      [key: string]: {
-        buttonText?: {
-          day?: string,
-          week?: string,
-          month?: string,
-          year?: string,
-        }
-      },
-    }
-  }
 }
 
 interface JQuery {

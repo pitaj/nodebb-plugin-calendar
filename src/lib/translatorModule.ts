@@ -1,4 +1,4 @@
-import moment, { Locale } from 'moment';
+import moment, { RelativeTimeKey } from 'moment';
 import { NodebbTranslator } from 'translator';
 
 const justDate = 'dddd, LL';
@@ -77,44 +77,33 @@ const initialize = (Translator: NodebbTranslator): void => {
       return '';
     };
 
-    function hasOwnProperty<T>(obj: T, key: string | number | symbol): key is keyof T {
-      return Object.prototype.hasOwnProperty.call(obj, key);
-    }
-
     const data = zero.localeData();
-    const localeData = (key: string, [n, ...a]: string[]) => {
-      let member: Locale[keyof Locale];
-      const loN = `_${n}`;
-      if (hasOwnProperty(data, n)) {
-        member = data[n];
-      } else if (hasOwnProperty(data, loN)) {
-        member = data[loN];
-      } else {
-        return '';
-      }
+    const localeData = (key: string, [method, a, b, c, d]: string[]) => {
+      switch (method) {
+        case 'months':
+        case 'monthsShort':
+        case 'weekdays':
+        case 'weekdaysShort':
+        case 'weekdaysMin': {
+          const i = parseInt(a, 10);
+          return data[method]()[i];
+        }
 
-      if (typeof member === 'function') {
-        const args = a.map((x) => {
-          if (x === 'true') {
-            return true;
-          }
-          if (x === 'false') {
-            return false;
-          }
-          if (/^[0-9]+$/.test(x)) {
-            return parseInt(x, 10);
-          }
-          return x;
-        });
-        return (member as (...args: (string | number | boolean)[]) => string)(...args);
-      }
+        case 'relativeTime': {
+          const isFuture = d === 'true';
+          const withoutSuffix = b === 'true';
+          const num = parseInt(a, 10);
+          const unit = c.slice(0, (num === 1) ? 1 : 2) as RelativeTimeKey;
 
-      const [index] = a;
-      if (member && hasOwnProperty(member, index)) {
-        return member[index];
-      }
+          if (a.trim() === '') {
+            return data.relativeTime('', withoutSuffix, unit, isFuture).trim();
+          }
+          return data.relativeTime(num, withoutSuffix, unit, isFuture);
+        }
 
-      return '';
+        default:
+          return '';
+      }
     };
 
     return (key, args) => {

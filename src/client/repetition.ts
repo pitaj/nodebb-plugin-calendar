@@ -62,11 +62,24 @@ const factory = ($ul: JQuery): Repetition => {
 
   return {
     setRepeat: (repeat) => {
+      daysOfWeek
+        .find('li > a')
+        .removeClass('active');
+
       if (!repeat) {
         const elem = list
           .find('[name="repetition-select"][value="no-repeat"]')
           .prop('checked', true);
         changeButtonText.html(elem.siblings('span').html());
+
+        custom.hide();
+
+        customEnd
+          .find('[name=repetition-end][value=forever]')
+          .prop('checked', true);
+        endDate.hide();
+        endDate.data('DateTimePicker').date(moment().add(7, 'day'));
+
         return;
       }
 
@@ -86,9 +99,6 @@ const factory = ($ul: JQuery): Repetition => {
       changeButtonText.html(elem.siblings('span').html());
 
       if (repeat.every.daysOfWeek) {
-        daysOfWeek
-          .find('li > a')
-          .removeClass('active');
         repeat.every.daysOfWeek.forEach((day) => {
           daysOfWeek
             .find(`li[data-value=${day}] > a`)
@@ -101,6 +111,8 @@ const factory = ($ul: JQuery): Repetition => {
         endDate.toggle(!forever);
         if (!forever) {
           endDate.data('DateTimePicker').date(moment(repeat.endDate));
+        } else {
+          endDate.data('DateTimePicker').date(moment().add(7, 'day'));
         }
       }
     },
