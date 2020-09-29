@@ -82,9 +82,13 @@ export default function getOccurencesOfRepetition(
   }
 
   const duration = event.endDate - event.startDate;
-  let dates: number[] = [];
+  const dates: Set<number> = new Set();
+  // add the original event, if it's within the range
+  if (moment(event.startDate).isBetween(start, end)) {
+    dates.add(event.startDate);
+  }
   if (every.numOfDays) {
-    dates = Array.prototype.concat.apply([], every.numOfDays.map((num) => {
+    every.numOfDays.forEach((num) => {
       const current = moment(event.startDate);
 
       // increase by `num` days until we're within the target range
@@ -94,17 +98,15 @@ export default function getOccurencesOfRepetition(
       // now `current` is first occurence within range
 
       // add repetitions until reaching the end of the target range
-      const out = [];
       // need to use direct comparison as `moment#isBefore(Infinity) === false`
       while (current.valueOf() < end && current.valueOf() < endDate) {
-        out.push(current.valueOf());
+        dates.add(current.valueOf());
         // increase by `num` days for next repetition
         current.add(num, 'days');
       }
-      return out;
-    }));
+    });
   } else if (every.daysOfWeek) {
-    dates = Array.prototype.concat.apply([], every.daysOfWeek.map((day) => {
+    every.daysOfWeek.forEach((day) => {
       const current = moment(event.startDate);
       // set day of week
       current.set('day', day);
@@ -116,17 +118,15 @@ export default function getOccurencesOfRepetition(
       // now `current` is first occurence within range
 
       // add repetitions until reaching the end of the target range
-      const out = [];
       // need to use direct comparison as `moment#isBefore(Infinity) === false`
       while (current.valueOf() < end && current.valueOf() < endDate) {
-        out.push(current.valueOf());
+        dates.add(current.valueOf());
         // increase by 1 week for next repetition
         current.add(1, 'week');
       }
-      return out;
-    }));
+    });
   } else if (every.daysOfMonth) {
-    dates = Array.prototype.concat.apply([], every.daysOfMonth.map((date) => {
+    every.daysOfMonth.map((date) => {
       const current = moment(event.startDate);
       // set day of month
       current.set('date', date);
@@ -138,15 +138,13 @@ export default function getOccurencesOfRepetition(
       // now `current` is first occurence within range
 
       // add repetitions until reaching the end of the target range
-      const out = [];
       // need to use direct comparison as `moment#isBefore(Infinity) === false`
       while (current.valueOf() < end && current.valueOf() < endDate) {
-        out.push(current.valueOf());
+        dates.add(current.valueOf());
         // increase by 1 week for next repetition
         current.add(1, 'month');
       }
-      return out;
-    }));
+    });
   } else if (every.year) {
     const current = moment(event.startDate);
 
@@ -157,17 +155,15 @@ export default function getOccurencesOfRepetition(
     // now `current` is first occurence within range
 
     // add repetitions until reaching the end of the target range
-    const out = [];
     // need to use direct comparison as `moment#isBefore(Infinity) === false`
     while (current.valueOf() < end && current.valueOf() < endDate) {
-      out.push(current.valueOf());
+      dates.add(current.valueOf());
       // increase by 1 year for next repetition
       current.add(1, 'years');
     }
-    dates = out;
   }
 
-  const occurences = dates.map(date => ({
+  const occurences = [...dates].map(date => ({
     ...event,
     startDate: date,
     endDate: date + duration,
