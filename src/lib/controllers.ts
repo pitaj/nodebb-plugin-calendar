@@ -68,7 +68,12 @@ const controllers = (router: Router, middleware: any): void => {
     const raw = await getEvent(pid);
     const [event, userResponse] = await Promise.all([
       escapeEvent(raw),
-      getUserResponse({ pid, day, uid }),
+      getUserResponse({ pid, day, uid }).catch((err): 'unable' => {
+        if (err.message === '[[error:no-privileges]]') {
+          return 'unable';
+        }
+        throw err;
+      }),
     ]);
     event.day = day || null;
 
@@ -85,16 +90,17 @@ const controllers = (router: Router, middleware: any): void => {
       event.endDate = event.startDate + (endDate - startDate);
     }
 
-    event.responses = {
-      [uid]: userResponse,
-    };
+    event.responses = {};
+    if (userResponse !== 'unable') {
+      event.responses[uid] = userResponse;
+    }
 
     return {
       calendarEventsStyle: style.join('\n'),
       title: '[[calendar:calendar]]',
       eventData: event,
       eventJSON: JSON.stringify(event),
-      eventHTML: await eventTemplate({ event, uid }),
+      eventHTML: await eventTemplate({ event, uid, canRespond: userResponse !== 'unable' }),
       calendarViews,
     };
   };

@@ -10,7 +10,7 @@
     </div>
     {{{ end }}}
     
-    <div class="plugin-calendar-event-responses-user btn-group">
+    <div class="plugin-calendar-event-responses-user btn-group" {{{ if !canRespond }}} style="display: none" {{{ end }}}>
       <button data-value="no" type="button" class="btn btn-sm btn-danger {active.no}">
         [[calendar:response_no]]
       </button>

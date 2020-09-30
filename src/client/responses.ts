@@ -88,7 +88,6 @@ const setupPost = ({ pid, e }: { pid: number, e?: JQuery.Event }, cb = noop): vo
   }
 
   if (!app.user.uid) {
-    buttonCont.remove();
     cb();
     return;
   }
@@ -98,6 +97,8 @@ const setupPost = ({ pid, e }: { pid: number, e?: JQuery.Event }, cb = noop): vo
       cb();
       return;
     }
+
+    buttonCont.show();
 
     if (err) {
       app.alertError(err);

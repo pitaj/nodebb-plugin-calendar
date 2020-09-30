@@ -1,9 +1,17 @@
 import { EventInfo } from './event';
 import render from './render';
 
-export default async function eventTemplate(
-  { event, isEmail, uid }: { event: EventInfo, isEmail?: boolean, uid?: number }
-): Promise<string> {
+export default async function eventTemplate({
+  event,
+  isEmail,
+  uid,
+  canRespond,
+}: {
+  event: EventInfo,
+  isEmail?: boolean,
+  uid?: number,
+  canRespond?: boolean,
+}): Promise<string> {
   const response = (uid && event.responses && event.responses[uid]) ? event.responses[uid] : 'no';
   const active = {
     no: '',
@@ -24,5 +32,6 @@ export default async function eventTemplate(
     repeatsEveryUnit,
     repeatsEndDateFinite,
     reminders,
+    canRespond,
   });
 }

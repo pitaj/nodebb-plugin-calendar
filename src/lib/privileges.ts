@@ -19,7 +19,7 @@ const privilegeNames = {
   canMandatoryPost: 'plugin_calendar:event:mandatory',
 };
 
-const canViewPost = (pid: number, uid: number): Promise<boolean> => privilegesPostCan('read', pid, uid);
+const canViewPost = (pid: number, uid: number): Promise<boolean> => privilegesPostCan('topics:read', pid, uid);
 const canPostEvent = (tid: number, uid: number): Promise<boolean> => privilegesTopicCan(
   privilegeNames.canPost,
   tid,
@@ -40,9 +40,9 @@ const canRespond = (pid: number, uid: number): Promise<boolean> => getSetting('r
   });
 
 const filterUidsByPid = (uids: number[], pid: number): Promise<number[]> => getCidByPid(pid)
-  .then((cid: number) => filterUidsByCid('read', cid, uids));
+  .then((cid: number) => filterUidsByCid('topics:read', cid, uids));
 
-const filterByPid = (events: Event[], uid: number): Promise<Event[]> => filterPids('read', events.map(e => e.pid), uid)
+const filterByPid = (events: Event[], uid: number): Promise<Event[]> => filterPids('topics:read', events.map(e => e.pid), uid)
   .then((filtered: number[]) => {
     const filteredSet = new Set(filtered);
     return events.filter(e => filteredSet.has(e.pid));
