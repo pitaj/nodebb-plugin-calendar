@@ -107,7 +107,7 @@ const begin = (momentLang) => {
         if (event) {
           displayEvent(event);
         } else {
-          window.history.replaceState({}, '', `${RELATIVE_PATH}/calendar`);
+          window.history.replaceState({}, '', `${config.relative_path}/calendar`);
         }
       } else {
         import('../client/responses')

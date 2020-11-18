@@ -14,7 +14,7 @@ const displayEvent = (event, cb) => {
       .append(div);
     $display
       .find('.modal-footer a.btn-primary')
-      .attr('href', `${RELATIVE_PATH}/post/${pid}`);
+      .attr('href', `${config.relative_path}/post/${pid}`);
     $display
       .find('.modal-body')
       .attr('data-pid', pid);

@@ -5,7 +5,6 @@
         "app": true,
         "socket": true,
         "config": true,
-        "RELATIVE_PATH": true,
         "ajaxify": true,
         "bootbox": true
     },
