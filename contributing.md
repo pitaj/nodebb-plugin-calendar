@@ -17,6 +17,8 @@ Create two categories (`A` and `B`) and four users (`admin`, `aaaa`, `bbbb`, `cc
   + A: Find category, Access category
   + B: Find category, Access category, Access topics
 
+Change user `aaaa` Language setting to en-GB. (#139)
+
 Set Calendar Plugin settings.
 
 - Only allow events in the main post of a topic: Checked

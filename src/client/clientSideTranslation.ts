@@ -10,7 +10,11 @@ const initialize = (): Promise<void> => {
     import('moment'),
     import('../lib/translatorModule'),
     import('./responses'),
-  ]).then(([moment, { initialize: initTranslatorModule }, { initialize: initResponses }]) => {
+  ]).then(([
+    { default: moment },
+    { initialize: initTranslatorModule },
+    { initialize: initResponses },
+  ]) => {
     if (momentLang === 'en-us') {
       initTranslatorModule(Translator);
       initResponses();
