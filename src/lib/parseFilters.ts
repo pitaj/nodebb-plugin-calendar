@@ -12,6 +12,8 @@ import {
 const eventRX = new RegExp(tagTemplate('event', '[\\s\\S]*'));
 const invalidRX = new RegExp(`(${tagTemplate('event-invalid', '[\\s\\S]*')})`);
 
+const reescape = (str: string) => validator.escape(validator.unescape(str));
+
 const parseRaw: filter__parse_raw = async (content) => {
   const input = content.replace(
     /\[description\]([\s\S]*)\[\/description\]/,
@@ -21,7 +23,7 @@ const parseRaw: filter__parse_raw = async (content) => {
   if (!event) {
     return input.replace(invalidRX, '<div class="hide">$1</div>');
   }
-  event.name = validator.escape(event.name);
+  event.name = reescape(event.name);
 
   const eventText = await eventTemplate({ event });
   // must use function to avoid `$` being treated specially
@@ -35,8 +37,6 @@ const parsePost: filter__parse_post = async (data) => {
 
   return data;
 };
-
-const reescape = (str: string) => validator.escape(validator.unescape(str));
 
 const rawPattern = /\[event\]\s*\[name\](.*)\[\/name\][\s\S]*\[\/event\]/;
 const wrapperPattern = /(?:<span class="hidden">)?plugin-calendar-event-wrapper:start \|\|\|(.*?)\|\|\|(<\/span>)?[\s\S]*(?:<span class="hidden">)?plugin-calendar-event-wrapper:end(<\/span>)?/;

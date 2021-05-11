@@ -58,6 +58,8 @@ interface JsonEvent {
   repeats: null | string,
 }
 
+const reescape = (str: string) => validator.escape(validator.unescape(str));
+
 const saveEvent = async (event: Event): Promise<void> => {
   const objectKey = `${listKey}:pid:${event.pid}`;
   const endDate = event.repeats ? event.repeats.endDate || 9999999999999 : event.endDate;
@@ -215,7 +217,7 @@ const escapeEvent = async <T extends Event>(event: T): Promise<T> => {
 
   return {
     ...event,
-    name: validator.escape(event.name),
+    name: reescape(event.name),
     location,
     description,
   };
