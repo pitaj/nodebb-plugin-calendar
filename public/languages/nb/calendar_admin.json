@@ -1,0 +1,21 @@
+{
+  "title": "Tilgangsstyring for kalender",
+  "intro": "Denne siden tillater administratoren å konfigurere hvilke grupper som kan redigere, opprette og administrere hendelser.",
+  "explanation_header": "Forklaring",
+  "explanation_creation_rights": "Brukere i gruppen med opprettelsesrettigheter kan opprette og redigere sine egne hendelser men ikke andres.",
+  "explanation_edit_rights": "Kalenderredaktører kan opprette og redigere sine egne og andres hendelser men ikke slette andres hendelser.",
+  "explanation_admin_rights": "Kalenderadministratorer kan opprette, redigere og slette sine egne og andres hendelser. Nettstedsadministatorer får også disse rettighetene, så det er ikke nødvendig å legge de til her.",
+  "explanation_hierarchy": "Høyere nivåer får alle rettigheter på lavere nivåer (administratorer> redaktører> opprettelsesrettigheter)",
+  "explanation_one_group": "Skriv inn en gruppe i hver av følgende inputfeltene",
+  "explanation_global_note": "Når du fyller ut følgende skjemaer må du huske at dette er globale rettigheter for alle hendelser. Disse kan ikke begrenses av hendelsesspesifikke begrensninger.",
+  "explanation_individual_rights": "Hvis du ønsker å konfigurere redigerings- og visningsrettigheter for individuelle hendelser, gjør du det i selve kalendergrensesnittet.",
+  "creation_rights": "Opprettelsesrettigheter",
+  "creation_placeholder": "Gruppe som kan opprette hendelser",
+  "edit_rights": "Redaktører",
+  "edit_placeholder": "Gruppe som kan redigere hendelser",
+  "admin_rights": "Administratorer",
+  "admin_placeholder": "Gruppe som kan administrere hendelser",
+  "category_label": "Kategorien der innlegg for hendelser vil bli opprettet og kommentarene til disse hendelsene vil høre til",
+  "category_placeholder": "Skriv inn et kategorinummer",
+  "use_whoisin_label": "Bruk whoisin-pluginen i stedet for det innebygde responssystemet?"
+}
