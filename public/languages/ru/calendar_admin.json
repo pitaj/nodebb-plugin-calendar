@@ -8,7 +8,6 @@
   "explanation_hierarchy": "Группа уровня выше получает все права грппы ниже уровнем (администраторы > редакторы > права на создание)",
   "explanation_one_group": "Введите название одной группы в каждое из следующих полей",
   "explanation_global_note": "Заполняя формы - помните, что это глобальные права и они не могут быть ограничены для конкретного события.",
-  "explanation_individual_rights": "If you want to configure editing and viewing rights for individual events, do that in the Calendar interface itself.",
   "explanation_individual_rights": "Если вы хотите указать права на просмотр и редактирование для каждого события отдельно, воспользуйтесь интерфейсом Календаря.",
   "creation_rights": "Право создания",
   "creation_placeholder": "Группа, с правом создания",
@@ -16,7 +15,6 @@
   "edit_placeholder": "Группа с правом редактирования",
   "admin_rights": "Право администрирования",
   "admin_placeholder": "Группа администраторов",
-  "category_label": "The category where event posts will be created, and the comments of those events will be",
   "category_label": "Категория в которой будут создаваться события и коментарии к ним",
   "category_placeholder": "Введите идентификатор категории",
   "use_whoisin_label": "Использовать плагин 'whoisin' вместо встроенной системы ответов?"
