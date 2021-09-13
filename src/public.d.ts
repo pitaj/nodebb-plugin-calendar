@@ -80,7 +80,7 @@ declare const app: {
   }
 };
 
-interface Socket extends SocketIOClient.Socket {
+interface Socket {
   emit<K extends import('./lib/sockets').SocketNamespaces>(
     namespace: K,
     data: import('./lib/sockets').SocketReqRes[K]['Request'],

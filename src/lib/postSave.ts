@@ -14,7 +14,7 @@ import { notify } from './reminders';
 import { getSetting } from './settings';
 import { filter__post_save } from './hooks';
 
-const { fireHook } = require.main?.require('./src/plugins');
+const { hooks } = require.main?.require('./src/plugins');
 const { getTopicField } = require.main?.require('./src/topics');
 const { getPostField } = require.main?.require('./src/posts');
 const winston = require.main?.require('winston');
@@ -88,7 +88,7 @@ const postSave: filter__post_save = async (data) => {
     pid,
   };
 
-  event = await fireHook('filter:plugin-calendar.event.post', event);
+  event = await hooks.fire('filter:plugin-calendar.event.post', event);
 
   if (event) {
     await saveEvent(event);

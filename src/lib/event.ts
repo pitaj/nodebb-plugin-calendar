@@ -13,7 +13,7 @@ const {
   exists,
   delete: deleteKey,
 } = require.main?.require('./src/database');
-const { fireHook } = require.main?.require('./src/plugins');
+const { hooks } = require.main?.require('./src/plugins');
 const { getCidsByPids, getCidByPid } = require.main?.require('./src/posts');
 
 const listKey = 'plugins:calendar:events';
@@ -211,8 +211,8 @@ const eventExists = (pid: number): Promise<boolean> => exists(`${listKey}:pid:${
 
 const escapeEvent = async <T extends Event>(event: T): Promise<T> => {
   const [location, description] = await Promise.all([
-    fireHook('filter:parse.raw', event.location || ''),
-    fireHook('filter:parse.raw', event.description || ''),
+    hooks.fire('filter:parse.raw', event.location || ''),
+    hooks.fire('filter:parse.raw', event.description || ''),
   ]);
 
   return {
