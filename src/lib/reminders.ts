@@ -10,17 +10,17 @@ import { getSetting } from './settings';
 const {
   create: createNotif,
   push: pushNotif,
-} = require.main?.require('./src/notifications');
-const { getPostFields } = require.main?.require('./src/posts');
+} = (require.main as NodeJS.Module).require('./src/notifications');
+const { getPostFields } = (require.main as NodeJS.Module).require('./src/posts');
 const meta = require.main?.require('./src/meta');
 const {
   getUidsFromSet,
   getUserFields,
   getSettings: getUserSettings,
-} = require.main?.require('./src/user');
-const { send: sendEmail } = require.main?.require('./src/emailer');
-const nconf = require.main?.require('nconf');
-const winston = require.main?.require('winston');
+} = (require.main as NodeJS.Module).require('./src/user');
+const { send: sendEmail } = (require.main as NodeJS.Module).require('./src/emailer');
+const nconf = (require.main as NodeJS.Module).require('nconf');
+const winston = (require.main as NodeJS.Module).require('winston');
 
 const emailNotification = async (
   { uid, event, message }:

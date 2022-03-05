@@ -8,7 +8,7 @@ import { initialize as initResponses } from './responses';
 import createEventFactory, { CreateEvent } from './createEvent';
 import setupComposerButton from './setupComposerButton';
 import rawTemplate from './templates';
-import parse, { inPost } from '../lib/parse';
+import { parse, inPost } from '../lib/parse';
 
 let initialized: Promise<CreateEvent>;
 

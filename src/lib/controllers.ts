@@ -6,8 +6,8 @@ import eventTemplate from './templates';
 import { getUserResponse } from './responses';
 import { getSetting, getSettings, setSettings } from './settings';
 
-const { filterCids } = require.main?.require('./src/privileges').categories;
-const { getAllCategoryFields } = require.main?.require('./src/categories');
+const { filterCids } = (require.main as NodeJS.Module).require('./src/privileges').categories;
+const { getAllCategoryFields } = (require.main as NodeJS.Module).require('./src/categories');
 
 /* eslint-disable */
 function shadeColor2(color: string, percent: number) {

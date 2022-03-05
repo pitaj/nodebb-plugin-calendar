@@ -24,9 +24,7 @@ const regExps: {
   optional,
 }));
 
-const inPost = new RegExp(
-  '(\\[event(?:\\-invalid)?\\][\\s\\S]+\\[\\/event(?:\\-invalid)?\\])'
-);
+const inPost = /(\[event(?:-invalid)?\][\s\S]+\[\/event(?:-invalid)?\])/;
 
 const full = regExps.map(r => (r.optional ? `(?:${r.pattern})?` : r.pattern)).join('\\s*');
 const eventRegExp = tagTemplate('event', full);
@@ -66,7 +64,7 @@ const templates = {
 };
 
 export {
-  parse as default,
+  parse,
   tagTemplate,
   templates,
   inPost,

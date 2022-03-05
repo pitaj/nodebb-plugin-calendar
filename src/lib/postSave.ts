@@ -1,6 +1,6 @@
 import validator from 'validator';
 
-import parse, { inPost } from './parse';
+import { parse, inPost } from './parse';
 import { canPostEvent, canPostMandatoryEvent } from './privileges';
 import {
   deleteEvent,
@@ -14,10 +14,10 @@ import { notify } from './reminders';
 import { getSetting } from './settings';
 import { filter__post_save } from './hooks';
 
-const { hooks } = require.main?.require('./src/plugins');
-const { getTopicField } = require.main?.require('./src/topics');
-const { getPostField } = require.main?.require('./src/posts');
-const winston = require.main?.require('winston');
+const { hooks } = (require.main as NodeJS.Module).require('./src/plugins');
+const { getTopicField } = (require.main as NodeJS.Module).require('./src/topics');
+const { getPostField } = (require.main as NodeJS.Module).require('./src/posts');
+const winston = (require.main as NodeJS.Module).require('winston');
 
 const isMainPost = async (pid: number, tid: number) => {
   const mainPid = await getTopicField(tid, 'mainPid');

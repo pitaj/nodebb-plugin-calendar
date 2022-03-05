@@ -12,9 +12,9 @@ const {
   getObjects,
   exists,
   delete: deleteKey,
-} = require.main?.require('./src/database');
-const { hooks } = require.main?.require('./src/plugins');
-const { getCidsByPids, getCidByPid } = require.main?.require('./src/posts');
+} = (require.main as NodeJS.Module).require('./src/database');
+const { hooks } = (require.main as NodeJS.Module).require('./src/plugins');
+const { getCidsByPids, getCidByPid } = (require.main as NodeJS.Module).require('./src/posts');
 
 const listKey = 'plugins:calendar:events';
 const listByEndKey = `${listKey}:byEnd`;

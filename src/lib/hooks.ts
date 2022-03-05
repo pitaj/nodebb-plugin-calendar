@@ -108,7 +108,11 @@ interface action__post_Data {
 }
 export type action__post_delete = ActionHook<action__post_Data>;
 export type action__post_restore = ActionHook<action__post_Data>;
-export type action__post_purge = ActionHook<action__post_Data>;
+
+interface action__posts_purge_Data {
+  posts: [{ pid: number }],
+}
+export type action__posts_purge = ActionHook<action__posts_purge_Data>;
 
 interface static__app_load_Params {
   router: Router,

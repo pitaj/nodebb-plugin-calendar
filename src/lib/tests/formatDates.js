@@ -92,7 +92,9 @@ const lang = 'en-us';
     const start = new Date(s);
     const end = new Date(e);
 
-    assert(`${start.toLocaleDateString(lang)} - ${end.toLocaleDateString(lang)}`,
-      formatDates(s, e, true, lang));
+    assert(
+      `${start.toLocaleDateString(lang)} - ${end.toLocaleDateString(lang)}`,
+      formatDates(s, e, true, lang)
+    );
   },
 ].forEach(x => x());

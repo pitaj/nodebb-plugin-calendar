@@ -6,8 +6,8 @@ import {
 } from './hooks';
 import { getSetting } from './settings';
 
-const privileges = require.main?.require('./src/privileges');
-const { getCidByPid } = require.main?.require('./src/posts');
+const privileges = (require.main as NodeJS.Module).require('./src/privileges');
+const { getCidByPid } = (require.main as NodeJS.Module).require('./src/posts');
 
 const privilegesPostCan = privileges.posts.can;
 const privilegesTopicCan = privileges.topics.can;

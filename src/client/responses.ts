@@ -1,5 +1,6 @@
 import { translate } from 'translator';
 import Benchpress from 'benchpress';
+import alerts from 'alerts';
 import moment from 'moment';
 import 'eonasdan-bootstrap-datetimepicker';
 
@@ -14,7 +15,7 @@ const addResponsesToPost = (pid: number, cb: () => void) => {
   socket.emit('plugins.calendar.getResponses', { pid, day }, (err, responses) => {
     if (err) {
       if (err.message) {
-        app.alertError(err);
+        alerts.error(err);
       }
       throw err;
     }
@@ -101,7 +102,7 @@ const setupPost = ({ pid, e }: { pid: number, e?: JQuery.Event }, cb = noop): vo
     buttonCont.show();
 
     if (err) {
-      app.alertError(err);
+      alerts.error(err);
       throw err;
     }
 
@@ -130,11 +131,11 @@ const initialize = (): void => {
     socket.emit('plugins.calendar.submitResponse', { pid, value, day }, (err) => {
       if (err) {
         if (err.message) {
-          app.alertError(err);
+          alerts.error(err);
         }
         throw err;
       }
-      app.alertSuccess();
+      alerts.success();
       button.siblings().removeClass('active');
       button.addClass('active');
     });

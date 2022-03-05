@@ -2,7 +2,7 @@ const {
   getObject,
   getObjectField,
   setObject,
-} = require.main?.require('./src/database');
+} = (require.main as NodeJS.Module).require('./src/database');
 
 export interface Settings {
   // reminder checking interval [ms]

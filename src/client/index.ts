@@ -1,14 +1,13 @@
 import './locationHistory';
 
 // eslint-disable-next-line camelcase, no-undef
-__webpack_public_path__ = `${config.relative_path}/plugins/nodebb-plugin-calendar/bundles/`;
+__webpack_public_path__ = `${config.relative_path}/assets/plugins/nodebb-plugin-calendar/bundles/`;
 
 jQuery.fn.size = jQuery.fn.size || function size(this: JQuery) { return this.length; };
 
 const calendarLoad = () => {
   if (ajaxify.data.template.calendar) {
-    // eslint-disable-next-line import/no-dynamic-require, global-require
-    requirejs(['plugins/nodebb-plugin-calendar/bundles/calendar']);
+    import('../calendar');
 
     $('#plugin-calendar-cal-event-display').modal({
       backdrop: false,
@@ -19,22 +18,26 @@ const calendarLoad = () => {
 
 $(() => {
   // ensure dependencies are loaded
-  requirejs(['translator', 'benchpress'], () => {
-    import('./clientSideTranslation').then(({ setup: setupTranslation, initialize: initTranslation }) => {
-      setupTranslation();
-
-      let eventModal: Promise<typeof import('./eventModal')>;
-      $(window).on('action:composer.enhanced', () => {
-        eventModal = eventModal || Promise.all([
-          initTranslation(),
-          new Promise((resolve, reject) => requirejs(['composer/formatting'], formatting => (formatting ? resolve(formatting) : reject()))),
-        ]).then(() => import('./eventModal'));
-
-        eventModal.then(({ prepareFormatting }) => prepareFormatting());
-      });
-    });
-
+  Promise.all([
+    import('translator'),
+    import('benchpress'),
+    import('alerts'),
+  ]).then(() => {
     calendarLoad();
     $(window).on('action:ajaxify.end', calendarLoad);
+
+    return import('./clientSideTranslation');
+  }).then(({ setup: setupTranslation, initialize: initTranslation }) => {
+    setupTranslation();
+
+    let eventModal: Promise<typeof import('./eventModal')>;
+    $(window).on('action:composer.enhanced', () => {
+      eventModal = eventModal || Promise.all([
+        initTranslation(),
+        import('composer/formatting'),
+      ]).then(() => import('./eventModal'));
+
+      eventModal.then(({ prepareFormatting }) => prepareFormatting());
+    });
   });
 });

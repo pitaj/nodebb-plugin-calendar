@@ -1,7 +1,7 @@
 import validator from 'validator';
 
 import eventTemplate from './templates';
-import parse, { tagTemplate } from './parse';
+import { parse, tagTemplate } from './parse';
 import {
   filter__parse_post,
   filter__parse_raw,

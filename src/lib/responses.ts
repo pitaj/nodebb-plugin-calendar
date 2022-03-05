@@ -7,8 +7,8 @@ const {
   deleteAll,
   getSetsMembers,
   isSetMember,
-} = require.main?.require('./src/database');
-const { getUsersFields } = require.main?.require('./src/user');
+} = (require.main as NodeJS.Module).require('./src/database');
+const { getUsersFields } = (require.main as NodeJS.Module).require('./src/user');
 
 export type Response = 'yes' | 'maybe' | 'no';
 const values: Response[] = ['yes', 'maybe', 'no'];

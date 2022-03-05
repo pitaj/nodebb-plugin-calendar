@@ -9,7 +9,7 @@ import './sockets';
 import { initialize as initTranslatorModule } from './translatorModule';
 import {
   action__post_delete,
-  action__post_purge,
+  action__posts_purge,
   action__post_restore,
   filter__admin_header_build,
   filter__composer_formatting,
@@ -17,7 +17,7 @@ import {
   filter__sanitize_config,
 } from './hooks';
 
-const { Translator } = require.main?.require('./public/src/modules/translator');
+const { Translator } = (require.main as NodeJS.Module).require('./src/translator');
 initTranslatorModule(Translator);
 
 const addNavigation: filter__navigation_available = async (navs) => {
@@ -63,7 +63,9 @@ const sanitizeConfig: filter__sanitize_config = async (config) => {
 
 const postDelete: action__post_delete = (data) => { deleteEvent(data); };
 const postRestore: action__post_restore = (data) => { restoreEvent(data); };
-const postPurge: action__post_purge = (data) => { purgeEvent(data); };
+const postsPurge: action__posts_purge = ({ posts }) => {
+  posts.forEach(post => purgeEvent({ post }));
+};
 
 export {
   init,
@@ -82,5 +84,5 @@ export {
   sanitizeConfig,
   postDelete,
   postRestore,
-  postPurge,
+  postsPurge,
 };

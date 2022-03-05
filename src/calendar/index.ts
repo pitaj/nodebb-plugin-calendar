@@ -1,4 +1,5 @@
 import { getLanguage } from 'translator';
+import alerts from 'alerts';
 import 'fullcalendar';
 import { OptionsInput } from 'fullcalendar/src/types/input-types';
 
@@ -7,7 +8,7 @@ import displayEvent from './displayEvent';
 import locationHistory from '../client/locationHistory';
 
 // eslint-disable-next-line camelcase, no-undef
-__webpack_public_path__ = `${config.relative_path}/plugins/nodebb-plugin-calendar/bundles/`;
+__webpack_public_path__ = `${config.relative_path}/assets/plugins/nodebb-plugin-calendar/bundles/`;
 
 const queryRegExp = /calendar(?:\/event\/+([0-9]+)(?:\/(\d{4}-\d{2}-\d{2}))?)?\/*$/;
 
@@ -44,7 +45,6 @@ const begin = (momentLang: string) => {
       center: 'title',
       right: ajaxify.data.calendarViews,
     },
-    // lang: momentLang,
     events: (start, end, timezone, callback) => {
       socket.emit('plugins.calendar.getEventsByDate', {
         startDate: start.valueOf(),
@@ -52,7 +52,7 @@ const begin = (momentLang: string) => {
       }, (err, events) => {
         if (err) {
           if (err.message) {
-            app.alertError(err);
+            alerts.error(err);
           }
           throw err;
         }

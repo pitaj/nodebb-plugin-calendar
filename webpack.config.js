@@ -12,11 +12,12 @@ module.exports = (env, argv) => {
 
   del.sync(`${dtpDir}/../../node_modules/**`);
 
-  const requirejsModules = new Set([
+  const nodebbModules = new Set([
     'composer',
     'composer/formatting',
     'translator',
     'benchpress',
+    'alerts',
   ]);
 
   return {
@@ -25,7 +26,6 @@ module.exports = (env, argv) => {
     devtool: prod ? 'source-map' : 'inline-source-map',
     entry: {
       client: './src/client/index',
-      calendar: './src/calendar/index',
     },
     output: {
       path: path.join(__dirname, './build/bundles'),
@@ -37,8 +37,8 @@ module.exports = (env, argv) => {
         jquery: 'jQuery',
         utils: 'utils',
       },
-      (context, request, callback) => {
-        if (requirejsModules.has(request)) {
+      ({ request }, callback) => {
+        if (nodebbModules.has(request)) {
           callback(null, `commonjs ${request}`);
           return;
         }
@@ -77,7 +77,10 @@ module.exports = (env, argv) => {
       ],
     },
     plugins: [
-      new webpack.IgnorePlugin(/(locale|lang)/, /(moment|fullcalendar)/),
+      new webpack.IgnorePlugin({
+        resourceRegExp: /^\.\/locale$/,
+        contextRegExp: /moment$/,
+      }),
     ],
   };
 };

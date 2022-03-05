@@ -14,8 +14,6 @@ declare const bootbox: {
   confirm(question: string, callback: (okay: boolean) => void): void;
 };
 
-declare const requirejs: (modules: string[], callback?: (...imports: unknown[]) => void) => void;
-
 declare module 'utils' {
   export const decodeHTMLEntities: (encoded: string) => string;
 }
@@ -73,12 +71,15 @@ declare const ajaxify: {
 declare const calendarEventData: import('./lib/event').Event | null;
 
 declare const app: {
-  alertError(err?: Error | string): void,
-  alertSuccess(message?: string): void,
   user: {
     uid: number
   }
 };
+
+declare module 'alerts' {
+  export const error: (err?: Error | string) => void;
+  export const success: (message?: string) => void;
+}
 
 interface Socket {
   emit<K extends import('./lib/sockets').SocketNamespaces>(
