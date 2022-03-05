@@ -33,7 +33,7 @@
   "scripts": [
     "build/bundles/client.js"
   ],
-  "acpScripts": [
-    "public/admin.js"
-  ]
+  "modules": {
+    "../admin/plugins/calendar.js": "public/admin.js"
+  }
 }

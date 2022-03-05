@@ -1,7 +1,7 @@
 /* global $, app, define */
 /* eslint no-var: 0, prefer-arrow-callback: 0, func-names: 0 */
 
-define('admin/plugins/calendar', [], function () {
+define('admin/plugins/calendar', ['alerts'], function (alerts) {
   $('#save').on('click', function () {
     var settings = {
       checkingInterval: parseInt($('#checkingInterval').val(), 10),
@@ -10,7 +10,7 @@ define('admin/plugins/calendar', [], function () {
       calendarViews: $('#calendarViews').val(),
     };
     $.get('/api/admin/plugins/calendar/save', { settings: JSON.stringify(settings) }, function () {
-      app.alertSuccess();
+      alerts.success();
     });
   });
 });
