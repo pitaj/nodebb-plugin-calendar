@@ -52,6 +52,7 @@
   "you_responded": "Du bestätigst mit <b>%1</b>",
 
   "confirm_delete_event": "Bist du dir sicher das Event in diesem Beitrag zu löschen? Dies kann nicht Rückgänig gemacht werden.",
+  "event_deleted": "Das Event %1 wurde erfolgreich gelöscht",
 
   "name_too_short": "Eventtitel muss mehr als 5 Zeichen beinhalten",
   "invalid_date": "Ausgewähltes Datum ist ungültig",
