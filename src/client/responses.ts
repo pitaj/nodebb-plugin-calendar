@@ -4,7 +4,7 @@ import alerts from 'alerts';
 import moment from 'moment';
 import 'eonasdan-bootstrap-datetimepicker';
 
-const addResponsesToPost = (pid: number, cb?: () => void) => {
+const addResponsesToPost = (pid: number, cb: () => void) => {
   const $responses = $(`[data-pid=${pid}] .plugin-calendar-event-responses-lists`);
   const day = $(`[data-pid=${pid}] [data-day]`).attr('data-day');
 
@@ -27,11 +27,8 @@ const addResponsesToPost = (pid: number, cb?: () => void) => {
     }
 
     const yess = $responses.find('.plugin-calendar-event-responses-list-yes');
-    const yessCount = $responses.find('.plugin-calendar-event-responses-list-yes-count');
     const maybes = $responses.find('.plugin-calendar-event-responses-list-maybe');
-    const maybesCount = $responses.find('.plugin-calendar-event-responses-list-maybe-count');
     const nos = $responses.find('.plugin-calendar-event-responses-list-no');
-    const nosCount = $responses.find('.plugin-calendar-event-responses-list-no-count');
 
     Promise.all(
       [
@@ -41,15 +38,10 @@ const addResponsesToPost = (pid: number, cb?: () => void) => {
       ].map(data => Benchpress.render('partials/calendar/event/response-list', data).then(html => translate(html)))
     ).then(([yes, maybe, no]) => {
       yess.empty().append(yes);
-      yessCount.text(responses.yes.length);
       maybes.empty().append(maybe);
-      maybesCount.text(responses.maybe.length);
       nos.empty().append(no);
-      nosCount.text(responses.no.length);
 
-      if (cb) {
-        cb();
-      }
+      cb();
     });
   });
 };
@@ -129,28 +121,6 @@ const initialize = (): void => {
   if (initialized) {
     return;
   }
-
-  $(() => {
-    $('.plugin-calendar-event-responses').each((_, target) => {
-      const pid = parseInt($(target).closest('[data-pid]').attr('data-pid') || '', 10);
-
-      addResponsesToPost(pid);
-      $(target)
-        .closest('.plugin-calendar-event-responses-lists')
-        .attr('data-loaded', 'true');
-    });
-  });
-
-  $(document.body).on('show.bs.modal', '#plugin-calendar-cal-event-display', () => {
-    const target = $('#plugin-calendar-cal-event-display .plugin-calendar-event');
-
-    const pid = parseInt(target.closest('[data-pid]').attr('data-pid') || '', 10);
-
-    addResponsesToPost(pid);
-    target
-      .closest('.plugin-calendar-event-responses-lists')
-      .attr('data-loaded', 'true');
-  });
 
   $(document.body).on('click', '.plugin-calendar-event-responses-user .btn', (e) => {
     const button = $(e.target);
