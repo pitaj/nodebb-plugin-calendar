@@ -63,7 +63,8 @@ export type filter__privileges_list_human = FilterHook<filter__privileges_list_h
 
 interface filter__parse_post_Data {
   postData: {
-    content: string
+    content: string,
+    pid: number,
   }
 }
 export type filter__parse_post = FilterHook<filter__parse_post_Data>;

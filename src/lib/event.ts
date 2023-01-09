@@ -1,5 +1,5 @@
 import validator from 'validator';
-import { removeAll as removeAllResponses } from './responses';
+import { getResponsesCount, removeAll as removeAllResponses, ResponsesCount } from './responses';
 import { Repeats } from './repetition';
 
 const {
@@ -37,6 +37,7 @@ export interface EventInfo {
   repeats: null | Repeats,
   day?: string,
   responses?: Responses,
+  responsesCount?: ResponsesCount,
 }
 
 export interface Event extends EventInfo {
@@ -177,10 +178,11 @@ const getEventsByDate = async (startDate: number, endDate: number): Promise<Even
   const events: JsonEvent[] = (await getObjects(keys)).filter(Boolean);
   const cids = await getCidsByPids(events.map(event => event.pid));
 
-  return events.map(fixEvent).map((event, i) => ({
+  return Promise.all(events.map(fixEvent).map(async (event, i) => ({
     ...event,
+    responsesCount: await getResponsesCount({ pid: +event.pid }),
     cid: cids[i],
-  }));
+  })));
 };
 
 const getAllEvents = async (): Promise<Event> => {
@@ -193,18 +195,23 @@ const getAllEvents = async (): Promise<Event> => {
 const getEvent = async (pid: number): Promise<EventWithCid> => {
   const event = await getObject(`${listKey}:pid:${pid}`);
   const cid = await getCidByPid(event.pid);
+  const fixedEvent = fixEvent(event);
 
   return {
-    ...fixEvent(event),
+    ...fixedEvent,
+    responsesCount: await getResponsesCount({ pid: +event.pid }),
     cid,
   };
 };
 
 const getEventsEndingAfter = async (endDate: number): Promise<Event[]> => {
   const keys = await getSortedSetRangeByScore(listByEndKey, 0, -1, endDate, +Infinity);
-  const events = (await getObjects(keys)).filter(Boolean);
+  const events: JsonEvent[] = (await getObjects(keys)).filter(Boolean);
 
-  return events.map(fixEvent);
+  return Promise.all(events.map(fixEvent).map(async event => ({
+    ...event,
+    responsesCount: await getResponsesCount({ pid: +event.pid }),
+  })));
 };
 
 const eventExists = (pid: number): Promise<boolean> => exists(`${listKey}:pid:${pid}`);

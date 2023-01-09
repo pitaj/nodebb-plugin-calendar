@@ -7,11 +7,16 @@ const {
   deleteAll,
   getSetsMembers,
   isSetMember,
+  setsCount,
 } = (require.main as NodeJS.Module).require('./src/database');
 const { getUsersFields } = (require.main as NodeJS.Module).require('./src/user');
 
 export type Response = 'yes' | 'maybe' | 'no';
 const values: Response[] = ['yes', 'maybe', 'no'];
+
+export type ResponsesCount = {
+  [R in Response]: number
+};
 
 const submitResponse = async (
   { pid, uid, value, day }:
@@ -116,4 +121,24 @@ const getUserResponse = async (
   return values[arr.findIndex(val => !!val)];
 };
 
-export { submitResponse, removeAll, getAll, getUserResponse };
+const getResponsesCount = async (
+  { pid }:
+  { pid: number }
+): Promise<ResponsesCount> => {
+  const keys = values.map(val => `${listKey}:pid:${pid}:responses:${val}`);
+
+  const counts = await setsCount(keys);
+  return {
+    yes: counts[0],
+    maybe: counts[1],
+    no: counts[2],
+  };
+};
+
+export {
+  submitResponse,
+  removeAll,
+  getAll,
+  getUserResponse,
+  getResponsesCount,
+};

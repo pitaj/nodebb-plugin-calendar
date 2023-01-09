@@ -8,13 +8,14 @@ import {
   filter__post_getPostSummaryByPids,
   filter__teasers_get,
 } from './hooks';
+import { getResponsesCount } from './responses';
 
 const eventRX = new RegExp(tagTemplate('event', '[\\s\\S]*'));
 const invalidRX = new RegExp(`(${tagTemplate('event-invalid', '[\\s\\S]*')})`);
 
 const reescape = (str: string) => validator.escape(validator.unescape(str));
 
-const parseRaw: filter__parse_raw = async (content) => {
+const parseRawWithPid = async (content: string, pid?: number) => {
   const input = content.replace(
     /\[description\]([\s\S]*)\[\/description\]/,
     '[description]<p>$1</p>[/description]'
@@ -24,6 +25,9 @@ const parseRaw: filter__parse_raw = async (content) => {
     return input.replace(invalidRX, '<div class="hide">$1</div>');
   }
   event.name = reescape(event.name);
+  if (pid) {
+    event.responsesCount = await getResponsesCount({ pid });
+  }
 
   const eventText = await eventTemplate({ event });
   // must use function to avoid `$` being treated specially
@@ -31,9 +35,11 @@ const parseRaw: filter__parse_raw = async (content) => {
   return text;
 };
 
+const parseRaw: filter__parse_raw = async content => parseRawWithPid(content);
+
 const parsePost: filter__parse_post = async (data) => {
   const { postData } = data;
-  postData.content = await parseRaw(postData.content);
+  postData.content = await parseRawWithPid(postData.content, +postData.pid);
 
   return data;
 };

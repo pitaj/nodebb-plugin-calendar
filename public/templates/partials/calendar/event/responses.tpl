@@ -9,7 +9,7 @@
       </span>
     </div>
     {{{ end }}}
-    
+
     <div class="plugin-calendar-event-responses-user btn-group" {{{ if !canRespond }}} style="display: none" {{{ end }}}>
       <button data-value="no" type="button" class="btn btn-sm btn-danger {active.no}">
         [[calendar:response_no]]
@@ -29,6 +29,9 @@
           class="btn btn-sm btn-info" aria-expanded="true">
             <i class="fa fa-chevron-down pull-right"></i>
             [[calendar:response_yes]]
+            {{{ if !event.repeats }}}
+            <span class="plugin-calendar-event-responses-list-yes-count">{event.responsesCount.yes}</span>
+            {{{ end }}}
           </a>
         </div>
         <div class="panel-collapse">
@@ -45,6 +48,9 @@
           class="btn btn-sm btn-link" aria-expanded="true">
             <i class="fa fa-chevron-down pull-right"></i>
             [[calendar:response_maybe]]
+            {{{ if !event.repeats }}}
+            <span class="plugin-calendar-event-responses-list-maybe-count">{event.responsesCount.maybe}</span>
+            {{{ end }}}
           </a>
         </div>
         <div class="panel-collapse">
@@ -61,6 +67,9 @@
           class="btn btn-sm btn-warning" aria-expanded="true">
             <i class="fa fa-chevron-down pull-right"></i>
             [[calendar:response_no]]
+            {{{ if !event.repeats }}}
+            <span class="plugin-calendar-event-responses-list-no-count">{event.responsesCount.no}</span>
+            {{{ end }}}
           </a>
         </div>
         <div class="panel-collapse">
