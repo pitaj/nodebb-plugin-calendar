@@ -190,6 +190,7 @@ const getEventsByDate = async (startDate: number, endDate: number): Promise<Even
   }));
 };
 
+// heads up, this method does not provide `responsesCount` to minimize db calls
 const getAllEvents = async (): Promise<Event> => {
   const keys = await getSortedSetRange(listKey, 0, -1);
   const events = (await getObjects(keys)).filter(Boolean);
@@ -209,17 +210,12 @@ const getEvent = async (pid: number): Promise<EventWithCid> => {
   };
 };
 
+// heads up, this method does not provide `responsesCount` to minimize db calls
 const getEventsEndingAfter = async (endDate: number): Promise<Event[]> => {
   const keys = await getSortedSetRangeByScore(listByEndKey, 0, -1, endDate, +Infinity);
-  const events: JsonEvent[] = (await getObjects(keys)).filter(Boolean);
-  const fixedEvents = events.map(fixEvent);
-  const pids = fixedEvents.map(event => event.pid);
-  const responsesCount = await getResponsesCount(pids);
+  const events = (await getObjects(keys)).filter(Boolean);
 
-  return fixedEvents.map((event, i) => ({
-    ...event,
-    responsesCount: responsesCount[i],
-  }));
+  return events.map(fixEvent);
 };
 
 const eventExists = (pid: number): Promise<boolean> => exists(`${listKey}:pid:${pid}`);
