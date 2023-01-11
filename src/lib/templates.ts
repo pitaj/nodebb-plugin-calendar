@@ -25,7 +25,6 @@ export default async function eventTemplate({
   const repeatsEveryUnit = event.repeats && units.find(x => event.repeats?.every[x]);
   const repeatsEndDateFinite = Number.isFinite(event.repeats && event.repeats.endDate);
   const reminders = event.reminders.sort((a, b) => a - b);
-  const responsesCount = event.responsesCount;
 
   return await render('partials/calendar/event/post', {
     event,
@@ -37,6 +36,5 @@ export default async function eventTemplate({
     repeatsEndDateFinite,
     reminders,
     canRespond,
-    responsesCount,
   });
 }
