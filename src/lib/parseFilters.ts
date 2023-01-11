@@ -15,7 +15,7 @@ const invalidRX = new RegExp(`(${tagTemplate('event-invalid', '[\\s\\S]*')})`);
 
 const reescape = (str: string) => validator.escape(validator.unescape(str));
 
-const parseRawWithPid = async (content: string, pid?: number) => {
+const parseContent = async (content: string, pid?: number) => {
   const input = content.replace(
     /\[description\]([\s\S]*)\[\/description\]/,
     '[description]<p>$1</p>[/description]'
@@ -35,11 +35,11 @@ const parseRawWithPid = async (content: string, pid?: number) => {
   return text;
 };
 
-const parseRaw: filter__parse_raw = async content => parseRawWithPid(content);
+const parseRaw: filter__parse_raw = async content => parseContent(content);
 
 const parsePost: filter__parse_post = async (data) => {
   const { postData } = data;
-  postData.content = await parseRawWithPid(postData.content, +postData.pid);
+  postData.content = await parseContent(postData.content, +postData.pid);
 
   return data;
 };
