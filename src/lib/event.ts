@@ -176,11 +176,14 @@ const getEventsByDate = async (startDate: number, endDate: number): Promise<Even
   const keys = byStart.filter(x => byEndSet.has(x));
 
   const events: JsonEvent[] = (await getObjects(keys)).filter(Boolean);
-  const pids = events.map(event => +event.pid);
-  const cids = await getCidsByPids(pids);
-  const responsesCount = await getResponsesCount(pids);
+  const fixedEvents = events.map(fixEvent);
+  const pids = fixedEvents.map(event => event.pid);
+  const [cids, responsesCount] = await Promise.all([
+    getCidsByPids(pids),
+    getResponsesCount(pids),
+  ]);
 
-  return events.map(fixEvent).map((event, i) => ({
+  return fixedEvents.map((event, i) => ({
     ...event,
     responsesCount: responsesCount[i],
     cid: cids[i],
@@ -201,7 +204,7 @@ const getEvent = async (pid: number): Promise<EventWithCid> => {
 
   return {
     ...fixedEvent,
-    responsesCount: await getResponsesCount(+event.pid),
+    responsesCount: await getResponsesCount(fixedEvent.pid),
     cid,
   };
 };
@@ -209,9 +212,9 @@ const getEvent = async (pid: number): Promise<EventWithCid> => {
 const getEventsEndingAfter = async (endDate: number): Promise<Event[]> => {
   const keys = await getSortedSetRangeByScore(listByEndKey, 0, -1, endDate, +Infinity);
   const events: JsonEvent[] = (await getObjects(keys)).filter(Boolean);
-  const pids = events.map(event => +event.pid);
-  const responsesCount = await getResponsesCount(pids);
   const fixedEvents = events.map(fixEvent);
+  const pids = fixedEvents.map(event => event.pid);
+  const responsesCount = await getResponsesCount(pids);
 
   return fixedEvents.map((event, i) => ({
     ...event,
