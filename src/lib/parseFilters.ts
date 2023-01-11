@@ -39,7 +39,7 @@ const parseRaw: filter__parse_raw = async content => parseContent(content);
 
 const parsePost: filter__parse_post = async (data) => {
   const { postData } = data;
-  postData.content = await parseContent(postData.content, +postData.pid);
+  postData.content = await parseContent(postData.content, postData.pid);
 
   return data;
 };
