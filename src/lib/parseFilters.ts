@@ -26,7 +26,7 @@ const parseRawWithPid = async (content: string, pid?: number) => {
   }
   event.name = reescape(event.name);
   if (pid) {
-    event.responsesCount = await getResponsesCount({ pid });
+    event.responsesCount = await getResponsesCount(pid);
   }
 
   const eventText = await eventTemplate({ event });

@@ -121,19 +121,26 @@ const getUserResponse = async (
   return values[arr.findIndex(val => !!val)];
 };
 
-const getResponsesCount = async (
-  { pid }:
-  { pid: number }
-): Promise<ResponsesCount> => {
-  const keys = values.map(val => `${listKey}:pid:${pid}:responses:${val}`);
+async function getResponsesCount(pidOrArray: number): Promise<ResponsesCount>;
+async function getResponsesCount(pidOrArray: number[]): Promise<ResponsesCount[]>;
+async function getResponsesCount(pidOrArray: number | number[]): Promise<ResponsesCount[] | ResponsesCount> {
+  // iterate over response values and post IDs to create the database keys
+  const pids = Array.isArray(pidOrArray) ? pidOrArray : [pidOrArray];
+  const keys = pids.flatMap(pid => values.map(val => `${listKey}:pid:${pid}:responses:${val}`));
 
   const counts = await setsCount(keys);
-  return {
-    yes: counts[0],
-    maybe: counts[1],
-    no: counts[2],
-  };
-};
+  const responsesCount = pids.map((pid, index) => ({
+    yes: counts[(index * 3) + 0],
+    maybe: counts[(index * 3) + 1],
+    no: counts[(index * 3) + 2],
+  }));
+
+  if (Array.isArray(pidOrArray)) {
+    return responsesCount;
+  }
+
+  return responsesCount[0];
+}
 
 export {
   submitResponse,
