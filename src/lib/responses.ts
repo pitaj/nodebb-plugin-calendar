@@ -123,7 +123,9 @@ const getUserResponse = async (
 
 async function getResponsesCount(pidOrArray: number): Promise<ResponsesCount>;
 async function getResponsesCount(pidOrArray: number[]): Promise<ResponsesCount[]>;
-async function getResponsesCount(pidOrArray: number | number[]): Promise<ResponsesCount[] | ResponsesCount> {
+async function getResponsesCount(
+  pidOrArray: number | number[]
+): Promise<ResponsesCount[] | ResponsesCount> {
   // iterate over response values and post IDs to create the database keys
   const pids = Array.isArray(pidOrArray) ? pidOrArray : [pidOrArray];
   const keys = pids.flatMap(pid => values.map(val => `${listKey}:pid:${pid}:responses:${val}`));
