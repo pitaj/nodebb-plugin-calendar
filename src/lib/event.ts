@@ -1,5 +1,5 @@
 import validator from 'validator';
-import { removeAll as removeAllResponses } from './responses';
+import { getResponsesCount, removeAll as removeAllResponses, ResponsesCount } from './responses';
 import { Repeats } from './repetition';
 
 const {
@@ -37,6 +37,7 @@ export interface EventInfo {
   repeats: null | Repeats,
   day?: string,
   responses?: Responses,
+  responsesCount?: ResponsesCount,
 }
 
 export interface Event extends EventInfo {
@@ -175,14 +176,21 @@ const getEventsByDate = async (startDate: number, endDate: number): Promise<Even
   const keys = byStart.filter(x => byEndSet.has(x));
 
   const events: JsonEvent[] = (await getObjects(keys)).filter(Boolean);
-  const cids = await getCidsByPids(events.map(event => event.pid));
+  const fixedEvents = events.map(fixEvent);
+  const pids = fixedEvents.map(event => event.pid);
+  const [cids, responsesCount] = await Promise.all([
+    getCidsByPids(pids),
+    getResponsesCount(pids),
+  ]);
 
-  return events.map(fixEvent).map((event, i) => ({
+  return fixedEvents.map((event, i) => ({
     ...event,
+    responsesCount: responsesCount[i],
     cid: cids[i],
   }));
 };
 
+// heads up, this method does not provide `responsesCount` to minimize db calls
 const getAllEvents = async (): Promise<Event> => {
   const keys = await getSortedSetRange(listKey, 0, -1);
   const events = (await getObjects(keys)).filter(Boolean);
@@ -193,13 +201,16 @@ const getAllEvents = async (): Promise<Event> => {
 const getEvent = async (pid: number): Promise<EventWithCid> => {
   const event = await getObject(`${listKey}:pid:${pid}`);
   const cid = await getCidByPid(event.pid);
+  const fixedEvent = fixEvent(event);
 
   return {
-    ...fixEvent(event),
+    ...fixedEvent,
+    responsesCount: await getResponsesCount(fixedEvent.pid),
     cid,
   };
 };
 
+// heads up, this method does not provide `responsesCount` to minimize db calls
 const getEventsEndingAfter = async (endDate: number): Promise<Event[]> => {
   const keys = await getSortedSetRangeByScore(listByEndKey, 0, -1, endDate, +Infinity);
   const events = (await getObjects(keys)).filter(Boolean);

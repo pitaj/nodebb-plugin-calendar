@@ -7,11 +7,16 @@ const {
   deleteAll,
   getSetsMembers,
   isSetMember,
+  setsCount,
 } = (require.main as NodeJS.Module).require('./src/database');
 const { getUsersFields } = (require.main as NodeJS.Module).require('./src/user');
 
 export type Response = 'yes' | 'maybe' | 'no';
 const values: Response[] = ['yes', 'maybe', 'no'];
+
+export type ResponsesCount = {
+  [R in Response]: number
+};
 
 const submitResponse = async (
   { pid, uid, value, day }:
@@ -116,4 +121,33 @@ const getUserResponse = async (
   return values[arr.findIndex(val => !!val)];
 };
 
-export { submitResponse, removeAll, getAll, getUserResponse };
+async function getResponsesCount(pidOrArray: number): Promise<ResponsesCount>;
+async function getResponsesCount(pidOrArray: number[]): Promise<ResponsesCount[]>;
+async function getResponsesCount(
+  pidOrArray: number | number[]
+): Promise<ResponsesCount[] | ResponsesCount> {
+  // iterate over response values and post IDs to create the database keys
+  const pids = Array.isArray(pidOrArray) ? pidOrArray : [pidOrArray];
+  const keys = pids.flatMap(pid => values.map(val => `${listKey}:pid:${pid}:responses:${val}`));
+
+  const counts = await setsCount(keys);
+  const responsesCount = pids.map((pid, index) => ({
+    yes: counts[(index * 3) + 0],
+    maybe: counts[(index * 3) + 1],
+    no: counts[(index * 3) + 2],
+  }));
+
+  if (Array.isArray(pidOrArray)) {
+    return responsesCount;
+  }
+
+  return responsesCount[0];
+}
+
+export {
+  submitResponse,
+  removeAll,
+  getAll,
+  getUserResponse,
+  getResponsesCount,
+};
