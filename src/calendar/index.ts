@@ -31,6 +31,7 @@ const begin = (momentLang: string) => {
 
   const calendarOptions: OptionsInput = {
     defaultView: ajaxify.data.calendarViews.split(',', 1)[0],
+    themeSystem: 'bootstrap4',
 
     views: {
       listDay: { buttonText: buttonText.day },

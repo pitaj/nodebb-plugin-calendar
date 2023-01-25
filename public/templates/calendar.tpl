@@ -1,4 +1,4 @@
-<button type="button" id="plugin-calendar-cal-only-yes" title="[[calendar:only_yes_long]]">[[calendar:only_yes]]</button>
+<button type="button" class="btn btn-default" id="plugin-calendar-cal-only-yes" title="[[calendar:only_yes_long]]">[[calendar:only_yes]]</button>
 <div id="calendar"></div>
 
 <style type="text/css" class="plugin-calendar-cal-styles">{{calendarEventsStyle}}</style>
