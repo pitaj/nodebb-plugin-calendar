@@ -11,7 +11,6 @@
     "types": [
       "jquery",
       "bootstrap",
-      "socket.io-client",
       "eonasdan-bootstrap-datetimepicker"
     ],
     "moduleResolution": "node",

@@ -12,9 +12,7 @@
     "esModuleInterop": true,
     "strict": true,
     "sourceMap": true,
-    "types": [
-      "socket.io"
-    ]
+    "types": []
   },
   "typeAcquisition": {
     "enable": false
